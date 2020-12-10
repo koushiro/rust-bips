@@ -243,8 +243,8 @@ mod tests {
 
         for &(lang, sha256sum) in &checksums {
             let mut digest = Sha256::new();
-            for word in lang.word_list() {
-                assert!(unicode_normalization::is_nfkd(&word));
+            for &word in lang.word_list() {
+                assert!(unicode_normalization::is_nfkd(word));
                 digest.update(format!("{}\n", word));
             }
             assert_eq!(hex::encode(digest.finalize()), sha256sum);
