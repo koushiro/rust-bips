@@ -4,7 +4,7 @@
 
 [ga-svg]: https://github.com/koushiro/bip0039/workflows/build/badge.svg
 [ga-url]: https://github.com/koushiro/bip0039/actions
-[crates-svg]: https://img.shields.io/crates/v/bip0039?style=flat-square
+[crates-svg]: https://img.shields.io/crates/v/bip0039
 [crates-url]: https://crates.io/crates/bip0039
 [docs-svg]: https://docs.rs/bip0039/badge.svg
 [docs-url]: https://docs.rs/bip0039
