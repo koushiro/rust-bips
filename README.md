@@ -10,8 +10,8 @@
 [docs-url]: https://docs.rs/bip0039
 [deps-svg]: https://deps.rs/repo/github/koushiro/bip0039/status.svg
 [deps-url]: https://deps.rs/repo/github/koushiro/bip0039
-[msrv-svg]: https://img.shields.io/badge/rustc-1.36+-blue.svg
-[msrv-url]: https://blog.rust-lang.org/2019/07/04/Rust-1.36.0.html
+[msrv-svg]: https://img.shields.io/badge/rustc-1.41+-blue.svg
+[msrv-url]: https://blog.rust-lang.org/2020/01/30/Rust-1.41.0.html
 
 Another Rust implementation of [BIP-0039](https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki).
 
