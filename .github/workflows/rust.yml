@@ -46,6 +46,10 @@ jobs:
           args: --all-features
 
       - name: Build Without Std
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --no-default-features
 
   msrv-build:
     name: MSRV Build
