@@ -46,6 +46,10 @@ jobs:
           args: --all-features
 
       - name: Build Without Std
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --no-default-features
 
   msrv-build:
     name: MSRV Build
@@ -59,7 +63,7 @@ jobs:
         uses: actions-rs/toolchain@v1
         with:
           profile: minimal
-          toolchain: 1.36.0
+          toolchain: 1.41.0
           override: true
 
       - name: Test
@@ -67,6 +71,12 @@ jobs:
         with:
           command: test
           args: --all-features
+
+      - name: Build Without Std
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --no-default-features
 
   coverage:
     name: Code Coverage
