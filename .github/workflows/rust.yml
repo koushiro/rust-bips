@@ -38,7 +38,7 @@ jobs:
         with:
           command: clippy
           args: --all-features --all-targets -- -D warnings
-      
+
       - name: Test
         uses: actions-rs/cargo@v1
         with:
@@ -84,6 +84,6 @@ jobs:
 
       - name: Generate Code Coverage
         uses: actions-rs/tarpaulin@v0.1 
-  
+
       - name: Upload Code Coverage
         uses: codecov/codecov-action@v1
