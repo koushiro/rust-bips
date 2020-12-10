@@ -55,5 +55,5 @@ fn test_mnemonic(
     assert_eq!(mnemonic.phrase(), expected_phrase.nfkd().to_string());
 
     let seed = mnemonic.to_seed(passphrase);
-    assert_eq!(hex::encode(seed), expected_seed_hex);
+    assert_eq!(hex::encode(&seed[..]), expected_seed_hex);
 }
