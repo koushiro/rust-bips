@@ -111,6 +111,7 @@ impl Language {
         }
     }
 
+    /*
     /// Returns true if all words in the list are guaranteed to
     /// only be in this list and not in any other.
     #[inline]
@@ -135,6 +136,7 @@ impl Language {
             Language::Spanish => true,
         }
     }
+    */
 
     /// Get words from the word list that start with the given prefix.
     pub fn words_by_prefix(self, prefix: &str) -> &[&'static str] {
@@ -154,11 +156,13 @@ impl Language {
         &self.word_list()[first..first + count]
     }
 
+    /*
     /// Get the index of the word in the word list.
     #[inline]
     pub(crate) fn find_word(self, word: &str) -> Option<usize> {
         self.word_list().iter().position(|w| *w == word)
     }
+    */
 }
 
 #[cfg(test)]
@@ -247,6 +251,7 @@ mod tests {
         }
     }
 
+    /*
     #[cfg(feature = "all-languages")]
     #[test]
     fn words_overlaps() {
@@ -274,4 +279,5 @@ mod tests {
         }
         assert!(ok);
     }
+    */
 }

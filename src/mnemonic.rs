@@ -207,7 +207,7 @@ impl Mnemonic {
     /// assert_eq!(mnemonic.to_entropy(), vec![0x1a, 0x48, 0x6a, 0x5f, 0xbe, 0x53, 0x63, 0x99, 0x84, 0xcb, 0x64, 0xb0, 0x70, 0x75, 0x5f, 0x7b]);
     /// */
     /// ```
-    pub fn from_phrase<P: AsRef<str>>(phrase: P) -> Result<Self, Error> {
+    pub fn from_phrase<P: AsRef<str>>(_phrase: P) -> Result<Self, Error> {
         todo!()
     }
 
