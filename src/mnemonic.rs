@@ -393,6 +393,37 @@ impl Mnemonic {
         Ok(())
     }
 
+    /// Converts the mnemonic phrase back to the original entropy.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use bip0039::{Language, Mnemonic};
+    ///
+    /// let entropy = [0x1a, 0x48, 0x6a, 0x5f, 0xbe, 0x53, 0x63, 0x99, 0x84, 0xcb, 0x64, 0xb0, 0x70, 0x75, 0x5f, 0x7b];
+    /// let mnemonic = Mnemonic::from_entropy(entropy).unwrap();
+    /// assert_eq!(mnemonic.phrase(), "bottom drive obey lake curtain smoke basket hold race lonely fit walk");
+    /// assert_eq!(mnemonic.to_entropy(), entropy);
+    /// ```
+    pub fn to_entropy(&self) -> Vec<u8> {
+        let word_count = MnemonicWordCount::from_phrase(&self.phrase).expect("");
+
+        let mut bits = vec![false; word_count.total_bits()];
+        for (i, word) in self.phrase.split_whitespace().enumerate() {
+            let index = self.lang.find_word(word).expect("");
+            index_to_bits(index, &mut bits[i * BITS_PER_WORD..], BITS_PER_WORD);
+        }
+
+        let mut entropy = vec![0u8; word_count.entropy_bits() / BITS_PER_BYTE];
+        entropy.iter_mut().enumerate().for_each(|(i, byte)| {
+            *byte = bits_to_uint(
+                &bits[i * BITS_PER_BYTE..(i + 1) * BITS_PER_BYTE],
+                BITS_PER_BYTE,
+            ) as u8;
+        });
+        entropy
+    }
+
     /// Generates the seed from the [`Mnemonic`] and the passphrase.
     ///
     /// If a passphrase is not present, an empty string `""` is used instead.
