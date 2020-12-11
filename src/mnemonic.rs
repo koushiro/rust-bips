@@ -478,15 +478,15 @@ impl Mnemonic {
 // Some helper functions
 ///////////////////////////////////////////////////////////////////////////////
 
-/// Extract the first `bits` from the `source` byte
+/// Extract the first `bits` from the `source` byte.
+/// Can operate on 8-bit integers only.
 const fn checksum(source: u8, bits: u8) -> u8 {
-    // debug_assert!(bits <= 8, "Can operate on 8-bit integers only");
     source >> (BITS_PER_BYTE as u8 - bits)
 }
 
 /// Extract the left `index` bit from the `source` byte.
+/// Can operate on 0-7 integers only.
 const fn left_index_bit(source: u8, index: usize) -> bool {
-    // debug_assert!(index < 8, "Can operate on 8-bit integers only");
     let mask = 1 << (BITS_PER_BYTE - 1 - index);
     source & mask > 0
 }
