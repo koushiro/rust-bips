@@ -24,29 +24,29 @@ mod spanish;
 pub enum Language {
     /// The English language.
     English,
-    #[cfg(feature = "chinese-simplified")]
     /// The Simplified Chinese language.
+    #[cfg(feature = "chinese-simplified")]
     SimplifiedChinese,
-    #[cfg(feature = "chinese-traditional")]
     /// The Traditional Chinese language.
+    #[cfg(feature = "chinese-traditional")]
     TraditionalChinese,
-    #[cfg(feature = "czech")]
     /// The Czech language.
+    #[cfg(feature = "czech")]
     Czech,
-    #[cfg(feature = "french")]
     /// The French language.
+    #[cfg(feature = "french")]
     French,
-    #[cfg(feature = "italian")]
     /// The Italian language.
+    #[cfg(feature = "italian")]
     Italian,
-    #[cfg(feature = "japanese")]
     /// The Japanese language.
+    #[cfg(feature = "japanese")]
     Japanese,
-    #[cfg(feature = "korean")]
     /// The Korean language.
+    #[cfg(feature = "korean")]
     Korean,
-    #[cfg(feature = "spanish")]
     /// The Spanish language.
+    #[cfg(feature = "spanish")]
     Spanish,
 }
 
@@ -111,33 +111,6 @@ impl Language {
         }
     }
 
-    /*
-    /// Returns true if all words in the list are guaranteed to
-    /// only be in this list and not in any other.
-    #[inline]
-    pub(crate) fn unique_words(self) -> bool {
-        match self {
-            Language::English => false,
-            #[cfg(feature = "chinese-simplified")]
-            Language::SimplifiedChinese => false,
-            #[cfg(feature = "chinese-traditional")]
-            Language::TraditionalChinese => false,
-            #[cfg(feature = "czech")]
-            Language::Czech => true,
-            #[cfg(feature = "french")]
-            Language::French => false,
-            #[cfg(feature = "italian")]
-            Language::Italian => true,
-            #[cfg(feature = "japanese")]
-            Language::Japanese => true,
-            #[cfg(feature = "korean")]
-            Language::Korean => true,
-            #[cfg(feature = "spanish")]
-            Language::Spanish => true,
-        }
-    }
-    */
-
     /// Get words from the word list that start with the given prefix.
     pub fn words_by_prefix(self, prefix: &str) -> &[&'static str] {
         // The words in the word list are ordered lexicographically.
@@ -156,13 +129,11 @@ impl Language {
         &self.word_list()[first..first + count]
     }
 
-    /*
     /// Get the index of the word in the word list.
     #[inline]
     pub(crate) fn find_word(self, word: &str) -> Option<usize> {
         self.word_list().iter().position(|w| *w == word)
     }
-    */
 }
 
 #[cfg(test)]
@@ -250,34 +221,4 @@ mod tests {
             assert_eq!(hex::encode(digest.finalize()), sha256sum);
         }
     }
-
-    /*
-    #[cfg(feature = "all-languages")]
-    #[test]
-    fn words_overlaps() {
-        use std::collections::HashMap;
-
-        // We keep a map of all words and the languages they occur in.
-        // Afterwards, we make sure that no word maps to multiple languages
-        // if either of those is guaranteed to have unique words.
-        let mut words: HashMap<&str, Vec<Language>> = HashMap::new();
-        for lang in Language::all() {
-            for word in lang.word_list() {
-                words.entry(word).or_insert(Vec::new()).push(*lang);
-            }
-        }
-
-        let mut ok = true;
-        for (word, langs) in words {
-            if langs.len() == 1 {
-                continue;
-            }
-            if langs.iter().any(|l| l.unique_words()) {
-                println!("Word {} is not unique: {:?}", word, langs);
-                ok = false;
-            }
-        }
-        assert!(ok);
-    }
-    */
 }

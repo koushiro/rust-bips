@@ -7,16 +7,12 @@ use core::fmt;
 pub enum Error {
     /// Mnemonic only support 12/15/18/21/24 words.
     BadWordCount(usize),
-    /// Mnemonic contains an unknown word.
-    UnknownWord(String),
     /// Entropy was not a multiple of 32 bits or between 128-256n bits in length.
     BadEntropyBitCount(usize),
+    /// Mnemonic contains an unknown word.
+    UnknownWord(String),
     /// The mnemonic has an invalid checksum.
     InvalidChecksum,
-    /*
-    /// The word list can be interpreted as multiple languages.
-    AmbiguousWordList(Vec<Language>),
-    */
 }
 
 impl fmt::Display for Error {
@@ -27,23 +23,18 @@ impl fmt::Display for Error {
                 "BIP-0039 mnemonic only supports 12/15/18/21/24 words: {}",
                 c
             ),
-            Error::UnknownWord(w) => write!(
-                f,
-                "mnemonic contains an unknown word: {} ({})",
-                w,
-                hex::encode(w)
-            ),
             Error::BadEntropyBitCount(c) => write!(
                 f,
                 "entropy was not between 128-256 bits or not a multiple of 32 bits: {} bits",
                 c
             ),
+            Error::UnknownWord(w) => write!(
+                f,
+                "mnemonic contains an unknown word: {} (0x{})",
+                w,
+                hex::encode(w)
+            ),
             Error::InvalidChecksum => write!(f, "mnemonic has an invalid checksum"),
-            /*
-            Error::AmbiguousWordList(languages) => {
-                write!(f, "ambiguous word list: {:?}", languages)
-            }
-            */
         }
     }
 }

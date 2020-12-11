@@ -11,7 +11,6 @@ extern crate alloc;
 mod error;
 mod language;
 mod mnemonic;
-mod util;
 
 pub use self::error::Error;
 pub use self::language::Language;
