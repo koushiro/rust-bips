@@ -427,6 +427,19 @@ impl Mnemonic {
     /// Generates the seed from the [`Mnemonic`] and the passphrase.
     ///
     /// If a passphrase is not present, an empty string `""` is used instead.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use bip0039::{Error, Mnemonic, Language};
+    ///
+    /// let phrase = "bottom drive obey lake curtain smoke basket hold race lonely fit walk";
+    /// let mnemonic = Mnemonic::from_phrase(phrase).unwrap();
+    /// assert_eq!(
+    ///     &mnemonic.to_seed("")[..],
+    ///     hex::decode("02d5cd1db85b4d1397d78978062a1160e76e94cc5aaad3089644846865bb18fc68ddf383059d3fe82902a203d60790a8c8ab488de5013d10a8a8bded8d9174b9").unwrap()
+    /// );
+    /// ```
     pub fn to_seed<P: AsRef<str>>(&self, passphrase: P) -> [u8; 64] {
         // use the PBKDF2 function with a mnemonic sentence (in UTF-8 NFKD) used as the password
         // and the string "mnemonic" + passphrase (again in UTF-8 NFKD) used as the salt.
