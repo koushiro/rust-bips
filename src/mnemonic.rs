@@ -288,7 +288,7 @@ impl Mnemonic {
     /// # Example
     ///
     /// ```
-    /// use bip0039::{Error, Mnemonic, Language};
+    /// use bip0039::{Mnemonic, Language};
     ///
     /// let phrase = "bottom drive obey lake curtain smoke basket hold race lonely fit walk";
     /// let mnemonic = Mnemonic::from_phrase(phrase).unwrap();
@@ -326,7 +326,7 @@ impl Mnemonic {
     /// # Example
     ///
     /// ```
-    /// use bip0039::{Mnemonic, Error};
+    /// use bip0039::Mnemonic;
     ///
     /// let result = Mnemonic::validate("bottom drive obey lake curtain smoke basket hold race lonely fit walk");
     /// assert!(result.is_ok());
@@ -406,11 +406,12 @@ impl Mnemonic {
     /// assert_eq!(mnemonic.to_entropy(), entropy);
     /// ```
     pub fn to_entropy(&self) -> Vec<u8> {
-        let word_count = MnemonicWordCount::from_phrase(&self.phrase).expect("");
+        let word_count = MnemonicWordCount::from_phrase(&self.phrase)
+            .expect("the word count of generated phrase must be valid");
 
         let mut bits = vec![false; word_count.total_bits()];
         for (i, word) in self.phrase.split_whitespace().enumerate() {
-            let index = self.lang.find_word(word).expect("");
+            let index = self.lang.find_word(word).expect("the word must exist");
             index_to_bits(index, &mut bits[i * BITS_PER_WORD..], BITS_PER_WORD);
         }
 
@@ -431,12 +432,12 @@ impl Mnemonic {
     /// # Example
     ///
     /// ```
-    /// use bip0039::{Error, Mnemonic, Language};
+    /// use bip0039::{Mnemonic, Language};
     ///
     /// let phrase = "bottom drive obey lake curtain smoke basket hold race lonely fit walk";
     /// let mnemonic = Mnemonic::from_phrase(phrase).unwrap();
     /// assert_eq!(
-    ///     &mnemonic.to_seed("")[..],
+    ///     mnemonic.to_seed("").to_vec(),
     ///     hex::decode("02d5cd1db85b4d1397d78978062a1160e76e94cc5aaad3089644846865bb18fc68ddf383059d3fe82902a203d60790a8c8ab488de5013d10a8a8bded8d9174b9").unwrap()
     /// );
     /// ```
