@@ -441,7 +441,7 @@ const fn checksum(source: u8, bits: u8) -> u8 {
 
 /// Extract the left `index` bit from the `source` byte.
 const fn left_index_bit(source: u8, index: usize) -> bool {
-    // debug_assert!(index <= 8, "Can operate on 8-bit integers only");
+    // debug_assert!(index < 8, "Can operate on 8-bit integers only");
     let mask = 1 << (BITS_PER_BYTE - 1 - index);
     source & mask > 0
 }
@@ -469,7 +469,7 @@ fn index_to_bits(index: usize, bits: &mut [bool], chunk_size: usize) {
 fn test_left_index_bit() {
     assert_eq!(left_index_bit(0b1111_1111, 0), true);
     assert_eq!(left_index_bit(0b1111_1111, 3), true);
-    assert_eq!(left_index_bit(0b1111_1111, 8), true);
+    assert_eq!(left_index_bit(0b1111_1111, 7), true);
     assert_eq!(left_index_bit(0b1111_0111, 0), true);
     assert_eq!(left_index_bit(0b1111_0111, 4), false);
     assert_eq!(left_index_bit(0b0100_0000, 0), false);
