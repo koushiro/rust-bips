@@ -160,6 +160,7 @@ impl MnemonicWordCount {
 pub struct Mnemonic {
     lang: Language,
     phrase: String,
+    entropy: Vec<u8>,
 }
 
 impl fmt::Display for Mnemonic {
@@ -233,11 +234,11 @@ impl Mnemonic {
     /// ```
     /// use bip0039::Mnemonic;
     ///
-    /// let entropy = [0x1a, 0x48, 0x6a, 0x5f, 0xbe, 0x53, 0x63, 0x99, 0x84, 0xcb, 0x64, 0xb0, 0x70, 0x75, 0x5f, 0x7b];
+    /// let entropy = vec![0x1a, 0x48, 0x6a, 0x5f, 0xbe, 0x53, 0x63, 0x99, 0x84, 0xcb, 0x64, 0xb0, 0x70, 0x75, 0x5f, 0x7b];
     /// let mnemonic = Mnemonic::from_entropy(entropy).unwrap();
     /// assert_eq!(mnemonic.phrase(), "bottom drive obey lake curtain smoke basket hold race lonely fit walk");
     /// ```
-    pub fn from_entropy<E: AsRef<[u8]>>(entropy: E) -> Result<Self, Error> {
+    pub fn from_entropy<E: Into<Vec<u8>>>(entropy: E) -> Result<Self, Error> {
         Self::from_entropy_in(Language::English, entropy)
     }
 
@@ -248,12 +249,12 @@ impl Mnemonic {
     /// ```
     /// use bip0039::{Language, Mnemonic};
     ///
-    /// let entropy = [0x1a, 0x48, 0x6a, 0x5f, 0xbe, 0x53, 0x63, 0x99, 0x84, 0xcb, 0x64, 0xb0, 0x70, 0x75, 0x5f, 0x7b];
+    /// let entropy = vec![0x1a, 0x48, 0x6a, 0x5f, 0xbe, 0x53, 0x63, 0x99, 0x84, 0xcb, 0x64, 0xb0, 0x70, 0x75, 0x5f, 0x7b];
     /// let mnemonic = Mnemonic::from_entropy_in(Language::English, entropy).unwrap();
     /// assert_eq!(mnemonic.phrase(), "bottom drive obey lake curtain smoke basket hold race lonely fit walk");
     /// ```
-    pub fn from_entropy_in<E: AsRef<[u8]>>(lang: Language, entropy: E) -> Result<Self, Error> {
-        let entropy = entropy.as_ref();
+    pub fn from_entropy_in<E: Into<Vec<u8>>>(lang: Language, entropy: E) -> Result<Self, Error> {
+        let entropy = entropy.into();
         let word_count = MnemonicWordCount::from_key_size(entropy.len() * BITS_PER_BYTE)?;
 
         // An initial entropy of ENT bits is given.
@@ -280,7 +281,11 @@ impl Mnemonic {
         }
         let phrase = words.join(" ");
 
-        Ok(Self { lang, phrase })
+        Ok(Self {
+            lang,
+            phrase,
+            entropy,
+        })
     }
 
     /// Creates a [`Mnemonic`] from an existing mnemonic phrase.
@@ -314,14 +319,15 @@ impl Mnemonic {
     /// assert_eq!(mnemonic.unwrap_err(), Error::UnknownWord("shit".into()));
     /// ```
     pub fn from_phrase_in<P: AsRef<str>>(lang: Language, phrase: P) -> Result<Self, Error> {
-        Self::validate_in(lang, &phrase)?;
+        let entropy = Self::validate_in(lang, &phrase)?;
         Ok(Mnemonic {
             lang,
             phrase: phrase.as_ref().to_string(),
+            entropy,
         })
     }
 
-    /// Validates the word count and checksum of an English mnemonic phrase.\
+    /// Validates the word count and checksum of an English mnemonic phrase.
     ///
     /// # Example
     ///
@@ -331,7 +337,7 @@ impl Mnemonic {
     /// let result = Mnemonic::validate("bottom drive obey lake curtain smoke basket hold race lonely fit walk");
     /// assert!(result.is_ok());
     /// ```
-    pub fn validate<P: AsRef<str>>(phrase: P) -> Result<(), Error> {
+    pub fn validate<P: AsRef<str>>(phrase: P) -> Result<Vec<u8>, Error> {
         Self::validate_in(Language::English, phrase)
     }
 
@@ -357,7 +363,7 @@ impl Mnemonic {
     /// let result = Mnemonic::validate_in(Language::Japanese, phrase);
     /// assert_eq!(result.unwrap_err(), Error::UnknownWord("ばか".nfkd().to_string()));
     /// ```
-    pub fn validate_in<P: AsRef<str>>(lang: Language, phrase: P) -> Result<(), Error> {
+    pub fn validate_in<P: AsRef<str>>(lang: Language, phrase: P) -> Result<Vec<u8>, Error> {
         let phrase = phrase.as_ref().nfkd().to_string();
         let word_count = MnemonicWordCount::from_phrase(&phrase)?;
 
@@ -390,39 +396,7 @@ impl Mnemonic {
             return Err(Error::InvalidChecksum);
         }
 
-        Ok(())
-    }
-
-    /// Converts the mnemonic phrase back to the original entropy.
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// use bip0039::{Language, Mnemonic};
-    ///
-    /// let entropy = [0x1a, 0x48, 0x6a, 0x5f, 0xbe, 0x53, 0x63, 0x99, 0x84, 0xcb, 0x64, 0xb0, 0x70, 0x75, 0x5f, 0x7b];
-    /// let mnemonic = Mnemonic::from_entropy(entropy).unwrap();
-    /// assert_eq!(mnemonic.phrase(), "bottom drive obey lake curtain smoke basket hold race lonely fit walk");
-    /// assert_eq!(mnemonic.to_entropy(), entropy);
-    /// ```
-    pub fn to_entropy(&self) -> Vec<u8> {
-        let word_count = MnemonicWordCount::from_phrase(&self.phrase)
-            .expect("the word count of generated phrase must be valid");
-
-        let mut bits = vec![false; word_count.total_bits()];
-        for (i, word) in self.phrase.split_whitespace().enumerate() {
-            let index = self.lang.find_word(word).expect("the word must exist");
-            index_to_bits(index, &mut bits[i * BITS_PER_WORD..], BITS_PER_WORD);
-        }
-
-        let mut entropy = vec![0u8; word_count.entropy_bits() / BITS_PER_BYTE];
-        entropy.iter_mut().enumerate().for_each(|(i, byte)| {
-            *byte = bits_to_uint(
-                &bits[i * BITS_PER_BYTE..(i + 1) * BITS_PER_BYTE],
-                BITS_PER_BYTE,
-            ) as u8;
-        });
-        entropy
+        Ok(entropy)
     }
 
     /// Generates the seed from the [`Mnemonic`] and the passphrase.
@@ -471,6 +445,30 @@ impl Mnemonic {
     /// Returns the mnemonic phrase as a string slice.
     pub fn phrase(&self) -> &str {
         &self.phrase
+    }
+
+    /// Returns the original entropy of the mnemonic phrase.
+    pub fn entropy(&self) -> &[u8] {
+        &self.entropy
+        /*
+        let word_count = MnemonicWordCount::from_phrase(&self.phrase)
+            .expect("the word count of generated phrase must be valid");
+
+        let mut bits = vec![false; word_count.total_bits()];
+        for (i, word) in self.phrase.split_whitespace().enumerate() {
+            let index = self.lang.find_word(word).expect("the word must exist");
+            index_to_bits(index, &mut bits[i * BITS_PER_WORD..], BITS_PER_WORD);
+        }
+
+        let mut entropy = vec![0u8; word_count.entropy_bits() / BITS_PER_BYTE];
+        entropy.iter_mut().enumerate().for_each(|(i, byte)| {
+            *byte = bits_to_uint(
+                &bits[i * BITS_PER_BYTE..(i + 1) * BITS_PER_BYTE],
+                BITS_PER_BYTE,
+            ) as u8;
+        });
+        entropy
+        */
     }
 }
 
