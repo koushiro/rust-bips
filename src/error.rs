@@ -18,22 +18,17 @@ pub enum Error {
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Error::BadWordCount(c) => write!(
+            Error::BadWordCount(count) => write!(
                 f,
                 "BIP-0039 mnemonic only supports 12/15/18/21/24 words: {}",
-                c
+                count
             ),
-            Error::BadEntropyBitCount(c) => write!(
+            Error::BadEntropyBitCount(count) => write!(
                 f,
                 "entropy was not between 128-256 bits or not a multiple of 32 bits: {} bits",
-                c
+                count
             ),
-            Error::UnknownWord(w) => write!(
-                f,
-                "mnemonic contains an unknown word: {} (0x{})",
-                w,
-                hex::encode(w)
-            ),
+            Error::UnknownWord(word) => write!(f, "mnemonic contains an unknown word: {}", word),
             Error::InvalidChecksum => write!(f, "mnemonic has an invalid checksum"),
         }
     }
