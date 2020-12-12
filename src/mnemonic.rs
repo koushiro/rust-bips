@@ -327,7 +327,7 @@ impl Mnemonic {
         })
     }
 
-    /// Validates the word count and checksum of an English mnemonic phrase.\
+    /// Validates the word count and checksum of an English mnemonic phrase.
     ///
     /// # Example
     ///
@@ -447,18 +447,7 @@ impl Mnemonic {
         &self.phrase
     }
 
-    /// Converts the mnemonic phrase back to the original entropy.
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// use bip0039::{Language, Mnemonic};
-    ///
-    /// let entropy = [0x1a, 0x48, 0x6a, 0x5f, 0xbe, 0x53, 0x63, 0x99, 0x84, 0xcb, 0x64, 0xb0, 0x70, 0x75, 0x5f, 0x7b];
-    /// let mnemonic = Mnemonic::from_entropy(entropy).unwrap();
-    /// assert_eq!(mnemonic.phrase(), "bottom drive obey lake curtain smoke basket hold race lonely fit walk");
-    /// assert_eq!(mnemonic.entropy(), entropy);
-    /// ```
+    /// Returns the original entropy of the mnemonic phrase.
     pub fn entropy(&self) -> &[u8] {
         &self.entropy
         /*
