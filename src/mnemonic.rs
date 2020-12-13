@@ -74,7 +74,7 @@ impl convert::TryFrom<usize> for Count {
 }
 
 impl Count {
-    /// Creates a [`MnemonicWordCount`] for a mnemonic phrase with the given word count.
+    /// Creates a [`Count`] for a mnemonic phrase with the given word count.
     // TODO: #![feature(const_if_match)] has been stabilized in 1.46+.
     fn from_word_count(count: usize) -> Result<Self, Error> {
         Ok(match count {
@@ -86,7 +86,8 @@ impl Count {
             others => return Err(Error::BadWordCount(others)),
         })
     }
-    /// Creates a [`MnemonicWordCount`] for a mnemonic phrase with the given entropy bits size.
+
+    /// Creates a [`Count`] for a mnemonic phrase with the given entropy bits size.
     // TODO: #![feature(const_if_match)] has been stabilized in 1.46+.
     fn from_key_size(size: usize) -> Result<Self, Error> {
         Ok(match size {
@@ -98,7 +99,8 @@ impl Count {
             others => return Err(Error::BadEntropyBitCount(others)),
         })
     }
-    /// Creates a [`MnemonicWordCount`] for an existing mnemonic phrase.
+
+    /// Creates a [`Count`] for an existing mnemonic phrase.
     fn from_phrase<P: AsRef<str>>(phrase: P) -> Result<Self, Error> {
         let word_count = phrase.as_ref().split_whitespace().count();
         Self::from_word_count(word_count)
@@ -108,14 +110,17 @@ impl Count {
     pub const fn word_count(&self) -> usize {
         self.total_bits() / BITS_PER_WORD
     }
+
     /// Returns the number of entropy+checksum bits.
     pub const fn total_bits(&self) -> usize {
         self.entropy_bits() + self.checksum_bits()
     }
+
     /// Returns the number of entropy bits.
     pub const fn entropy_bits(&self) -> usize {
         (*self as usize) >> ENTROPY_OFFSET
     }
+
     /// Returns the number of checksum bits.
     pub const fn checksum_bits(&self) -> usize {
         (*self as usize) as u8 as usize
@@ -124,9 +129,11 @@ impl Count {
     const fn total(&self) -> Range<usize> {
         0..self.total_bits()
     }
+
     const fn entropy(&self) -> Range<usize> {
         0..self.entropy_bits()
     }
+
     const fn checksum(&self) -> Range<usize> {
         self.entropy_bits()..self.total_bits()
     }
@@ -279,7 +286,7 @@ impl Mnemonic {
         let mut words = Vec::with_capacity(word_count.word_count());
         for chunk in bits[word_count.total()].chunks(BITS_PER_WORD) {
             let index = bits_to_uint(chunk, BITS_PER_WORD);
-            words.push(lang.word_list()[index]);
+            words.push(lang.word_of(index));
         }
         let phrase = words.join(" ");
 
@@ -371,7 +378,7 @@ impl Mnemonic {
 
         let mut bits = vec![false; word_count.total_bits()];
         for (i, word) in phrase.split_whitespace().enumerate() {
-            if let Some(index) = lang.find_word(word) {
+            if let Some(index) = lang.index_of(word) {
                 index_to_bits(index, &mut bits[i * BITS_PER_WORD..], BITS_PER_WORD);
             } else {
                 return Err(Error::UnknownWord(word.to_string()));
@@ -451,25 +458,6 @@ impl Mnemonic {
     /// Returns the original entropy of the mnemonic phrase.
     pub fn entropy(&self) -> &[u8] {
         &self.entropy
-        /*
-        let word_count = MnemonicWordCount::from_phrase(&self.phrase)
-            .expect("the word count of generated phrase must be valid");
-
-        let mut bits = vec![false; word_count.total_bits()];
-        for (i, word) in self.phrase.split_whitespace().enumerate() {
-            let index = self.lang.find_word(word).expect("the word must exist");
-            index_to_bits(index, &mut bits[i * BITS_PER_WORD..], BITS_PER_WORD);
-        }
-
-        let mut entropy = vec![0u8; word_count.entropy_bits() / BITS_PER_BYTE];
-        entropy.iter_mut().enumerate().for_each(|(i, byte)| {
-            *byte = bits_to_uint(
-                &bits[i * BITS_PER_BYTE..(i + 1) * BITS_PER_BYTE],
-                BITS_PER_BYTE,
-            ) as u8;
-        });
-        entropy
-        */
     }
 }
 

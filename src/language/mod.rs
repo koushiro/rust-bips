@@ -1,20 +1,86 @@
+#[cfg(not(feature = "std"))]
+use alloc::vec::Vec;
+
+use hashbrown::HashMap;
+use once_cell::sync::Lazy;
+
+pub struct WordList(Vec<&'static str>);
+impl WordList {
+    fn gen(words: &'static str) -> Self {
+        let list = words.split_whitespace().collect::<Vec<_>>();
+        debug_assert!(list.len() == 2048, "Invalid wordlist length");
+        Self(list)
+    }
+}
+pub struct WordMap(HashMap<&'static str, usize>);
+impl WordMap {
+    fn gen(words: &'static str) -> Self {
+        let map = words
+            .split_whitespace()
+            .enumerate()
+            .map(|(index, word)| (word, index))
+            .collect();
+        Self(map)
+    }
+}
+
 #[cfg(feature = "chinese-simplified")]
-mod chinese_simplified;
+mod chinese_simplified {
+    use super::*;
+    pub static WORDMAP: Lazy<WordMap> =
+        Lazy::new(|| WordMap::gen(include_str!("chinese_simplified.txt")));
+    pub static WORDLIST: Lazy<WordList> =
+        Lazy::new(|| WordList::gen(include_str!("chinese_simplified.txt")));
+}
 #[cfg(feature = "chinese-traditional")]
-mod chinese_traditional;
+mod chinese_traditional {
+    use super::*;
+    pub static WORDMAP: Lazy<WordMap> =
+        Lazy::new(|| WordMap::gen(include_str!("chinese_traditional.txt")));
+    pub static WORDLIST: Lazy<WordList> =
+        Lazy::new(|| WordList::gen(include_str!("chinese_traditional.txt")));
+}
 #[cfg(feature = "czech")]
-mod czech;
-mod english;
+mod czech {
+    use super::*;
+    pub static WORDMAP: Lazy<WordMap> = Lazy::new(|| WordMap::gen(include_str!("czech.txt")));
+    pub static WORDLIST: Lazy<WordList> = Lazy::new(|| WordList::gen(include_str!("czech.txt")));
+}
+mod english {
+    use super::*;
+    pub static WORDMAP: Lazy<WordMap> = Lazy::new(|| WordMap::gen(include_str!("english.txt")));
+    pub static WORDLIST: Lazy<WordList> = Lazy::new(|| WordList::gen(include_str!("english.txt")));
+}
 #[cfg(feature = "french")]
-mod french;
+mod french {
+    use super::*;
+    pub static WORDMAP: Lazy<WordMap> = Lazy::new(|| WordMap::gen(include_str!("french.txt")));
+    pub static WORDLIST: Lazy<WordList> = Lazy::new(|| WordList::gen(include_str!("french.txt")));
+}
 #[cfg(feature = "italian")]
-mod italian;
+mod italian {
+    use super::*;
+    pub static WORDMAP: Lazy<WordMap> = Lazy::new(|| WordMap::gen(include_str!("italian.txt")));
+    pub static WORDLIST: Lazy<WordList> = Lazy::new(|| WordList::gen(include_str!("italian.txt")));
+}
 #[cfg(feature = "japanese")]
-mod japanese;
+mod japanese {
+    use super::*;
+    pub static WORDMAP: Lazy<WordMap> = Lazy::new(|| WordMap::gen(include_str!("japanese.txt")));
+    pub static WORDLIST: Lazy<WordList> = Lazy::new(|| WordList::gen(include_str!("japanese.txt")));
+}
 #[cfg(feature = "korean")]
-mod korean;
+mod korean {
+    use super::*;
+    pub static WORDMAP: Lazy<WordMap> = Lazy::new(|| WordMap::gen(include_str!("korean.txt")));
+    pub static WORDLIST: Lazy<WordList> = Lazy::new(|| WordList::gen(include_str!("korean.txt")));
+}
 #[cfg(feature = "spanish")]
-mod spanish;
+mod spanish {
+    use super::*;
+    pub static WORDMAP: Lazy<WordMap> = Lazy::new(|| WordMap::gen(include_str!("spanish.txt")));
+    pub static WORDLIST: Lazy<WordList> = Lazy::new(|| WordList::gen(include_str!("spanish.txt")));
+}
 
 /// Language to be used for the mnemonic phrase.
 ///
@@ -89,50 +155,85 @@ impl Language {
 
     /// The word list for this language.
     #[inline]
-    pub(crate) fn word_list(self) -> &'static [&'static str; 2048] {
+    pub(crate) fn word_list(self) -> &'static WordList {
         match self {
-            Language::English => &english::WORDS,
+            Language::English => &english::WORDLIST,
             #[cfg(feature = "chinese-simplified")]
-            Language::SimplifiedChinese => &chinese_simplified::WORDS,
+            Language::SimplifiedChinese => &chinese_simplified::WORDLIST,
             #[cfg(feature = "chinese-traditional")]
-            Language::TraditionalChinese => &chinese_traditional::WORDS,
+            Language::TraditionalChinese => &chinese_traditional::WORDLIST,
             #[cfg(feature = "czech")]
-            Language::Czech => &czech::WORDS,
+            Language::Czech => &czech::WORDLIST,
             #[cfg(feature = "french")]
-            Language::French => &french::WORDS,
+            Language::French => &french::WORDLIST,
             #[cfg(feature = "italian")]
-            Language::Italian => &italian::WORDS,
+            Language::Italian => &italian::WORDLIST,
             #[cfg(feature = "japanese")]
-            Language::Japanese => &japanese::WORDS,
+            Language::Japanese => &japanese::WORDLIST,
             #[cfg(feature = "korean")]
-            Language::Korean => &korean::WORDS,
+            Language::Korean => &korean::WORDLIST,
             #[cfg(feature = "spanish")]
-            Language::Spanish => &spanish::WORDS,
+            Language::Spanish => &spanish::WORDLIST,
         }
     }
 
-    /// Get words from the word list that start with the given prefix.
+    /// Returns the word of `index` in the word list.
+    #[inline]
+    pub(crate) fn word_of(self, index: usize) -> &'static str {
+        self.word_list().0[index]
+    }
+
+    /// Returns a word map that allows word -> index lookups in the word list.
+    #[inline]
+    pub(crate) fn word_map(self) -> &'static WordMap {
+        match self {
+            Language::English => &english::WORDMAP,
+            #[cfg(feature = "chinese-simplified")]
+            Language::SimplifiedChinese => &chinese_simplified::WORDMAP,
+            #[cfg(feature = "chinese-traditional")]
+            Language::TraditionalChinese => &chinese_traditional::WORDMAP,
+            #[cfg(feature = "czech")]
+            Language::Czech => &czech::WORDMAP,
+            #[cfg(feature = "french")]
+            Language::French => &french::WORDMAP,
+            #[cfg(feature = "italian")]
+            Language::Italian => &italian::WORDMAP,
+            #[cfg(feature = "japanese")]
+            Language::Japanese => &japanese::WORDMAP,
+            #[cfg(feature = "korean")]
+            Language::Korean => &korean::WORDMAP,
+            #[cfg(feature = "spanish")]
+            Language::Spanish => &spanish::WORDMAP,
+        }
+    }
+
+    /// Returns the index of the word in the word list.
+    #[inline]
+    pub(crate) fn index_of(self, word: &str) -> Option<usize> {
+        self.word_map().0.get(word).cloned()
+    }
+
+    /// Returns words from the word list that start with the given prefix.
     pub fn words_by_prefix(self, prefix: &str) -> &[&'static str] {
         // The words in the word list are ordered lexicographically.
         // This means that we cannot use `binary_search` to find words more efficiently,
         // because the Rust ordering is based on the byte values.
         // However, it does mean that words that share a prefix will follow each other.
 
-        let first = match self.word_list().iter().position(|w| w.starts_with(prefix)) {
+        let first = match self
+            .word_list()
+            .0
+            .iter()
+            .position(|w| w.starts_with(prefix))
+        {
             Some(i) => i,
             None => return &[],
         };
-        let count = self.word_list()[first..]
+        let count = self.word_list().0[first..]
             .iter()
             .take_while(|w| w.starts_with(prefix))
             .count();
-        &self.word_list()[first..first + count]
-    }
-
-    /// Get the index of the word in the word list.
-    #[inline]
-    pub(crate) fn find_word(self, word: &str) -> Option<usize> {
-        self.word_list().iter().position(|w| *w == word)
+        &self.word_list().0[first..first + count]
     }
 }
 
@@ -214,7 +315,7 @@ mod tests {
 
         for &(lang, sha256sum) in &checksums {
             let mut digest = Sha256::new();
-            for &word in lang.word_list().iter() {
+            for &word in lang.word_list().0.as_slice() {
                 assert!(unicode_normalization::is_nfkd(word));
                 digest.update(format!("{}\n", word));
             }

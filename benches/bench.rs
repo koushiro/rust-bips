@@ -50,7 +50,6 @@ fn bench_from_phrase(c: &mut Criterion) {
     });
 }
 
-/*
 fn bench_to_seed(c: &mut Criterion) {
     c.bench_function("tiny-bip39::to_seed", |b| {
         use tiny_bip39::{Language, Mnemonic, MnemonicType, Seed};
@@ -60,20 +59,19 @@ fn bench_to_seed(c: &mut Criterion) {
         })
     });
     c.bench_function("bip0039::to_seed", |b| {
-        use bip0039::{Language, Mnemonic, MnemonicWordCount};
-        let mnemonic = Mnemonic::generate_in(Language::English, MnemonicWordCount::Words12);
+        use bip0039::{Count, Language, Mnemonic};
+        let mnemonic = Mnemonic::generate_in(Language::English, Count::Words12);
         b.iter(|| {
             let _seed = black_box(mnemonic.to_seed(""));
         })
     });
 }
-*/
 
 criterion_group!(
     benches,
     bench_generate,
     bench_from_entropy,
     bench_from_phrase,
-    // bench_to_seed
+    bench_to_seed
 );
 criterion_main!(benches);
