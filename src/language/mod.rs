@@ -19,7 +19,8 @@ impl WordMap {
             .split_whitespace()
             .enumerate()
             .map(|(index, word)| (word, index))
-            .collect();
+            .collect::<HashMap<_, _>>();
+        debug_assert!(map.len() == 2048, "Invalid wordmap length");
         Self(map)
     }
 }
@@ -180,6 +181,7 @@ impl Language {
     /// Returns the word of `index` in the word list.
     #[inline]
     pub(crate) fn word_of(self, index: usize) -> &'static str {
+        debug_assert!(index < 2048, "Invalid wordlist index");
         self.word_list().0[index]
     }
 

@@ -208,7 +208,7 @@ impl Mnemonic {
     /// # Example
     ///
     /// ```
-    /// use bip0039::{Mnemonic, Count};
+    /// use bip0039::{Count, Mnemonic};
     ///
     /// let mnemonic = Mnemonic::generate(Count::Words12);
     /// let phrase = mnemonic.phrase();
@@ -223,7 +223,7 @@ impl Mnemonic {
     /// # Example
     ///
     /// ```
-    /// use bip0039::{Language, Mnemonic, Count};
+    /// use bip0039::{Count, Language, Mnemonic};
     ///
     /// let mnemonic = Mnemonic::generate_in(Language::SimplifiedChinese, Count::Words24);
     /// let phrase = mnemonic.phrase();
@@ -302,7 +302,7 @@ impl Mnemonic {
     /// # Example
     ///
     /// ```
-    /// use bip0039::{Mnemonic, Language};
+    /// use bip0039::Mnemonic;
     ///
     /// let phrase = "bottom drive obey lake curtain smoke basket hold race lonely fit walk";
     /// let mnemonic = Mnemonic::from_phrase(phrase).unwrap();
@@ -320,11 +320,11 @@ impl Mnemonic {
     /// use bip0039::{Error, Mnemonic, Language};
     ///
     /// let phrase = "bottom drive obey lake curtain smoke basket hold race lonely fit walk";
-    /// let mnemonic = Mnemonic::from_phrase(phrase).unwrap();
+    /// let mnemonic = Mnemonic::from_phrase_in(Language::English, phrase).unwrap();
     /// assert_eq!(mnemonic.phrase(), phrase);
     ///
     /// let phrase = "bottom drive obey lake curtain smoke basket hold race lonely fit shit";
-    /// let mnemonic = Mnemonic::from_phrase(phrase);
+    /// let mnemonic = Mnemonic::from_phrase_in(Language::English, phrase);
     /// assert_eq!(mnemonic.unwrap_err(), Error::UnknownWord("shit".into()));
     /// ```
     pub fn from_phrase_in<P: AsRef<str>>(lang: Language, phrase: P) -> Result<Self, Error> {
@@ -355,7 +355,7 @@ impl Mnemonic {
     /// # Example
     ///
     /// ```
-    /// use bip0039::{Mnemonic, Error, Language};
+    /// use bip0039::{Error, Language, Mnemonic};
     /// use unicode_normalization::UnicodeNormalization;
     ///
     /// let phrase = "bottom drive obey lake curtain smoke basket hold race lonely fit walk";
@@ -414,7 +414,7 @@ impl Mnemonic {
     /// # Example
     ///
     /// ```
-    /// use bip0039::{Mnemonic, Language};
+    /// use bip0039::Mnemonic;
     ///
     /// let phrase = "bottom drive obey lake curtain smoke basket hold race lonely fit walk";
     /// let mnemonic = Mnemonic::from_phrase(phrase).unwrap();
@@ -481,7 +481,7 @@ const fn left_index_bit(source: u8, index: usize) -> bool {
 /// Converts `chunk_size` bits to the integer.
 #[inline]
 fn bits_to_uint(bits: &[bool], chunk_size: usize) -> usize {
-    assert_eq!(bits.len(), chunk_size);
+    debug_assert_eq!(bits.len(), chunk_size);
     bits.iter()
         .take(chunk_size)
         .enumerate()
@@ -492,7 +492,7 @@ fn bits_to_uint(bits: &[bool], chunk_size: usize) -> usize {
 /// Converts a index to bits.
 #[inline]
 fn index_to_bits(index: usize, bits: &mut [bool], chunk_size: usize) {
-    assert!(index < (2 << chunk_size));
+    debug_assert!(index < (2 << chunk_size));
     bits.iter_mut()
         .take(chunk_size)
         .enumerate()
