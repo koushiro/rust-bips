@@ -13,4 +13,4 @@ mod mnemonic;
 
 pub use self::error::Error;
 pub use self::language::Language;
-pub use self::mnemonic::{Mnemonic, MnemonicWordCount};
+pub use self::mnemonic::{Count, Mnemonic};
