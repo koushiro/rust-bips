@@ -75,7 +75,8 @@ impl convert::TryFrom<usize> for Count {
 
 impl Count {
     /// Creates a [`MnemonicWordCount`] for a mnemonic phrase with the given word count.
-    const fn from_word_count(count: usize) -> Result<Self, Error> {
+    // TODO: #![feature(const_if_match)] has been stabilized in 1.46+.
+    fn from_word_count(count: usize) -> Result<Self, Error> {
         Ok(match count {
             12 => Self::Words12,
             15 => Self::Words15,
@@ -86,7 +87,8 @@ impl Count {
         })
     }
     /// Creates a [`MnemonicWordCount`] for a mnemonic phrase with the given entropy bits size.
-    const fn from_key_size(size: usize) -> Result<Self, Error> {
+    // TODO: #![feature(const_if_match)] has been stabilized in 1.46+.
+    fn from_key_size(size: usize) -> Result<Self, Error> {
         Ok(match size {
             128 => Self::Words12,
             160 => Self::Words15,
