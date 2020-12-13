@@ -131,7 +131,7 @@ impl core::fmt::Display for Language {
 
 impl Language {
     /// The list of supported languages.
-    /// Language support is managed by compile features.
+    /// Language support is managed by the compile features.
     pub fn all() -> &'static [Language] {
         &[
             Language::English,
