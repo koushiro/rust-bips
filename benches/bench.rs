@@ -8,12 +8,9 @@ fn bench_generate(c: &mut Criterion) {
         })
     });
     c.bench_function("bip0039::generate", |b| {
-        use bip0039::{Language, Mnemonic, MnemonicWordCount};
+        use bip0039::{Count, Language, Mnemonic};
         b.iter(|| {
-            let _mnemonic = black_box(Mnemonic::generate_in(
-                Language::English,
-                MnemonicWordCount::Words12,
-            ));
+            let _mnemonic = black_box(Mnemonic::generate_in(Language::English, Count::Words12));
         })
     });
 }
@@ -29,11 +26,9 @@ fn bench_from_entropy(c: &mut Criterion) {
     c.bench_function("bip0039::from_entropy", |b| {
         use bip0039::{Language, Mnemonic};
         let entropy = hex::decode("1a486a5fbe53639984cb64b070755f7b").unwrap();
+        let entropy = entropy.as_slice();
         b.iter(|| {
-            let _mnemonic = black_box(Mnemonic::from_entropy_in(
-                Language::English,
-                entropy.as_slice(),
-            ));
+            let _mnemonic = black_box(Mnemonic::from_entropy_in(Language::English, entropy));
         })
     });
 }
@@ -64,8 +59,8 @@ fn bench_to_seed(c: &mut Criterion) {
         })
     });
     c.bench_function("bip0039::to_seed", |b| {
-        use bip0039::{Language, Mnemonic, MnemonicWordCount};
-        let mnemonic = Mnemonic::generate_in(Language::English, MnemonicWordCount::Words12);
+        use bip0039::{Count, Language, Mnemonic};
+        let mnemonic = Mnemonic::generate_in(Language::English, Count::Words12);
         b.iter(|| {
             let _seed = black_box(mnemonic.to_seed(""));
         })
