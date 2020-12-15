@@ -2,7 +2,7 @@
 use alloc::vec::Vec;
 
 use hashbrown::HashMap;
-use once_cell::sync::Lazy;
+use lazy_static::lazy_static;
 
 pub struct WordList(Vec<&'static str>);
 impl WordList {
@@ -28,59 +28,73 @@ impl WordMap {
 #[cfg(feature = "chinese-simplified")]
 mod chinese_simplified {
     use super::*;
-    pub static WORDMAP: Lazy<WordMap> =
-        Lazy::new(|| WordMap::gen(include_str!("chinese_simplified.txt")));
-    pub static WORDLIST: Lazy<WordList> =
-        Lazy::new(|| WordList::gen(include_str!("chinese_simplified.txt")));
+    lazy_static! {
+        pub static ref WORDLIST: WordList = WordList::gen(include_str!("chinese_simplified.txt"));
+        pub static ref WORDMAP: WordMap = WordMap::gen(include_str!("chinese_simplified.txt"));
+    }
 }
 #[cfg(feature = "chinese-traditional")]
 mod chinese_traditional {
     use super::*;
-    pub static WORDMAP: Lazy<WordMap> =
-        Lazy::new(|| WordMap::gen(include_str!("chinese_traditional.txt")));
-    pub static WORDLIST: Lazy<WordList> =
-        Lazy::new(|| WordList::gen(include_str!("chinese_traditional.txt")));
+    lazy_static! {
+        pub static ref WORDLIST: WordList = WordList::gen(include_str!("chinese_traditional.txt"));
+        pub static ref WORDMAP: WordMap = WordMap::gen(include_str!("chinese_traditional.txt"));
+    }
 }
 #[cfg(feature = "czech")]
 mod czech {
     use super::*;
-    pub static WORDMAP: Lazy<WordMap> = Lazy::new(|| WordMap::gen(include_str!("czech.txt")));
-    pub static WORDLIST: Lazy<WordList> = Lazy::new(|| WordList::gen(include_str!("czech.txt")));
+    lazy_static! {
+        pub static ref WORDLIST: WordList = WordList::gen(include_str!("czech.txt"));
+        pub static ref WORDMAP: WordMap = WordMap::gen(include_str!("czech.txt"));
+    }
 }
 mod english {
     use super::*;
-    pub static WORDMAP: Lazy<WordMap> = Lazy::new(|| WordMap::gen(include_str!("english.txt")));
-    pub static WORDLIST: Lazy<WordList> = Lazy::new(|| WordList::gen(include_str!("english.txt")));
+    lazy_static! {
+        pub static ref WORDLIST: WordList = WordList::gen(include_str!("english.txt"));
+        pub static ref WORDMAP: WordMap = WordMap::gen(include_str!("english.txt"));
+    }
 }
 #[cfg(feature = "french")]
 mod french {
     use super::*;
-    pub static WORDMAP: Lazy<WordMap> = Lazy::new(|| WordMap::gen(include_str!("french.txt")));
-    pub static WORDLIST: Lazy<WordList> = Lazy::new(|| WordList::gen(include_str!("french.txt")));
+    lazy_static! {
+        pub static ref WORDLIST: WordList = WordList::gen(include_str!("french.txt"));
+        pub static ref WORDMAP: WordMap = WordMap::gen(include_str!("french.txt"));
+    }
 }
 #[cfg(feature = "italian")]
 mod italian {
     use super::*;
-    pub static WORDMAP: Lazy<WordMap> = Lazy::new(|| WordMap::gen(include_str!("italian.txt")));
-    pub static WORDLIST: Lazy<WordList> = Lazy::new(|| WordList::gen(include_str!("italian.txt")));
+    lazy_static! {
+        pub static ref WORDLIST: WordList = WordList::gen(include_str!("italian.txt"));
+        pub static ref WORDMAP: WordMap = WordMap::gen(include_str!("italian.txt"));
+    }
 }
 #[cfg(feature = "japanese")]
 mod japanese {
     use super::*;
-    pub static WORDMAP: Lazy<WordMap> = Lazy::new(|| WordMap::gen(include_str!("japanese.txt")));
-    pub static WORDLIST: Lazy<WordList> = Lazy::new(|| WordList::gen(include_str!("japanese.txt")));
+    lazy_static! {
+        pub static ref WORDLIST: WordList = WordList::gen(include_str!("japanese.txt"));
+        pub static ref WORDMAP: WordMap = WordMap::gen(include_str!("japanese.txt"));
+    }
 }
 #[cfg(feature = "korean")]
 mod korean {
     use super::*;
-    pub static WORDMAP: Lazy<WordMap> = Lazy::new(|| WordMap::gen(include_str!("korean.txt")));
-    pub static WORDLIST: Lazy<WordList> = Lazy::new(|| WordList::gen(include_str!("korean.txt")));
+    lazy_static! {
+        pub static ref WORDLIST: WordList = WordList::gen(include_str!("korean.txt"));
+        pub static ref WORDMAP: WordMap = WordMap::gen(include_str!("korean.txt"));
+    }
 }
 #[cfg(feature = "spanish")]
 mod spanish {
     use super::*;
-    pub static WORDMAP: Lazy<WordMap> = Lazy::new(|| WordMap::gen(include_str!("spanish.txt")));
-    pub static WORDLIST: Lazy<WordList> = Lazy::new(|| WordList::gen(include_str!("spanish.txt")));
+    lazy_static! {
+        pub static ref WORDLIST: WordList = WordList::gen(include_str!("spanish.txt"));
+        pub static ref WORDMAP: WordMap = WordMap::gen(include_str!("spanish.txt"));
+    }
 }
 
 /// Language to be used for the mnemonic phrase.
