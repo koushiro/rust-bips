@@ -49,7 +49,7 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: build
-          args: --no-default-features
+          args: --no-default-features --features all-languages,spin_no_std
 
   msrv-build:
     name: MSRV Build
