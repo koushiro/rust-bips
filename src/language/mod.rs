@@ -273,4 +273,18 @@ mod tests {
             assert_eq!(is_sorted(lang.word_list()), lang.is_sorted());
         }
     }
+
+    #[cfg(feature = "all-languages")]
+    #[test]
+    fn word_list_is_normalized() {
+        for lang in Language::all() {
+            for &word in lang.word_list() {
+                assert!(
+                    unicode_normalization::is_nfkd(word),
+                    "word '{}' is not normalized",
+                    word
+                )
+            }
+        }
+    }
 }

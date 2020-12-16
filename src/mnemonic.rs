@@ -1,15 +1,18 @@
 #[cfg(not(feature = "std"))]
 use alloc::{
+    borrow::Cow,
     format,
     string::{String, ToString},
     vec,
     vec::Vec,
 };
 use core::{convert, fmt, ops::Range, str};
+#[cfg(feature = "std")]
+use std::borrow::Cow;
 
 use hmac::Hmac;
 use sha2::{Digest, Sha256, Sha512};
-use unicode_normalization::UnicodeNormalization;
+use zeroize::Zeroize;
 
 use crate::error::Error;
 use crate::language::Language;
@@ -17,8 +20,6 @@ use crate::language::Language;
 const BITS_PER_WORD: usize = 11;
 const BITS_PER_BYTE: usize = 8;
 const ENTROPY_OFFSET: usize = 8;
-const MAX_TOTAL_BITS: usize = Count::Words24.total_bits();
-const MAX_ENTROPY_BITS: usize = Count::Words24.entropy_bits();
 
 /// Determines the words count that will be present in a [`Mnemonic`] phrase.
 #[derive(Copy, Clone, Debug, Ord, PartialOrd, Eq, PartialEq, Hash)]
@@ -169,11 +170,17 @@ impl Count {
 /// For example, a 12 word mnemonic phrase is essentially a friendly representation of
 /// a 128-bit key, while a 24 word mnemonic phrase is essentially a 256-bit key.
 ///
-#[derive(Clone, Debug, Ord, PartialOrd, Eq, PartialEq, Hash)]
+#[derive(Clone, Ord, PartialOrd, Eq, PartialEq, Hash)]
 pub struct Mnemonic {
     lang: Language,
     phrase: String,
     entropy: Vec<u8>,
+}
+
+impl fmt::Debug for Mnemonic {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str(self.phrase())
+    }
 }
 
 impl fmt::Display for Mnemonic {
@@ -196,9 +203,16 @@ impl AsRef<str> for Mnemonic {
     }
 }
 
-impl From<Mnemonic> for String {
-    fn from(mnemonic: Mnemonic) -> Self {
-        mnemonic.phrase
+impl Zeroize for Mnemonic {
+    fn zeroize(&mut self) {
+        self.phrase.zeroize();
+        self.entropy.zeroize();
+    }
+}
+
+impl Drop for Mnemonic {
+    fn drop(&mut self) {
+        self.zeroize();
     }
 }
 
@@ -231,6 +245,7 @@ impl Mnemonic {
     #[cfg(feature = "rand")]
     pub fn generate_in(lang: Language, word_count: Count) -> Self {
         use rand::RngCore;
+        const MAX_ENTROPY_BITS: usize = Count::Words24.entropy_bits();
 
         let mut rng = rand::thread_rng();
         let mut entropy = [0u8; MAX_ENTROPY_BITS / BITS_PER_BYTE];
@@ -268,6 +283,8 @@ impl Mnemonic {
     /// assert_eq!(mnemonic.phrase(), "bottom drive obey lake curtain smoke basket hold race lonely fit walk");
     /// ```
     pub fn from_entropy_in<E: Into<Vec<u8>>>(lang: Language, entropy: E) -> Result<Self, Error> {
+        const MAX_TOTAL_BITS: usize = Count::Words24.total_bits();
+
         let entropy = entropy.into();
         let word_count = Count::from_key_size(entropy.len() * BITS_PER_BYTE)?;
 
@@ -308,7 +325,7 @@ impl Mnemonic {
     /// let mnemonic = Mnemonic::from_phrase(phrase).unwrap();
     /// assert_eq!(mnemonic.phrase(), phrase);
     /// ```
-    pub fn from_phrase<P: AsRef<str>>(phrase: P) -> Result<Self, Error> {
+    pub fn from_phrase<'a, P: Into<Cow<'a, str>>>(phrase: P) -> Result<Self, Error> {
         Self::from_phrase_in(Language::English, phrase)
     }
 
@@ -327,11 +344,15 @@ impl Mnemonic {
     /// let mnemonic = Mnemonic::from_phrase_in(Language::English, phrase);
     /// assert_eq!(mnemonic.unwrap_err(), Error::UnknownWord("shit".into()));
     /// ```
-    pub fn from_phrase_in<P: AsRef<str>>(lang: Language, phrase: P) -> Result<Self, Error> {
-        let entropy = Self::validate_in(lang, &phrase)?;
+    pub fn from_phrase_in<'a, P: Into<Cow<'a, str>>>(
+        lang: Language,
+        phrase: P,
+    ) -> Result<Self, Error> {
+        let phrase = phrase.into();
+        let entropy = Self::phrase_to_entropy(lang, phrase.as_ref())?;
         Ok(Mnemonic {
             lang,
-            phrase: phrase.as_ref().to_string(),
+            phrase: phrase.into_owned(),
             entropy,
         })
     }
@@ -346,7 +367,7 @@ impl Mnemonic {
     /// let result = Mnemonic::validate("bottom drive obey lake curtain smoke basket hold race lonely fit walk");
     /// assert!(result.is_ok());
     /// ```
-    pub fn validate<P: AsRef<str>>(phrase: P) -> Result<Vec<u8>, Error> {
+    pub fn validate<'a, P: Into<Cow<'a, str>>>(phrase: P) -> Result<(), Error> {
         Self::validate_in(Language::English, phrase)
     }
 
@@ -372,9 +393,18 @@ impl Mnemonic {
     /// let result = Mnemonic::validate_in(Language::Japanese, phrase);
     /// assert_eq!(result.unwrap_err(), Error::UnknownWord("ばか".nfkd().to_string()));
     /// ```
-    pub fn validate_in<P: AsRef<str>>(lang: Language, phrase: P) -> Result<Vec<u8>, Error> {
-        let phrase = phrase.as_ref().nfkd().to_string();
-        let word_count = Count::from_phrase(&phrase)?;
+    pub fn validate_in<'a, P: Into<Cow<'a, str>>>(lang: Language, phrase: P) -> Result<(), Error> {
+        let _entropy = Self::phrase_to_entropy(lang, phrase)?;
+        Ok(())
+    }
+
+    fn phrase_to_entropy<'a, P: Into<Cow<'a, str>>>(
+        lang: Language,
+        phrase: P,
+    ) -> Result<Vec<u8>, Error> {
+        let mut phrase = phrase.into();
+        normalize_utf8(&mut phrase);
+        let word_count = Count::from_phrase(phrase.as_ref())?;
 
         let mut bits = vec![false; word_count.total_bits()];
         for (i, word) in phrase.split_whitespace().enumerate() {
@@ -431,9 +461,13 @@ impl Mnemonic {
         const PBKDF2_ROUNDS: u32 = 2048;
         const PBKDF2_BYTES: usize = 64;
 
+        // the phrase must be normalized
         let normalized_password = self.phrase();
-        let salt = format!("mnemonic{}", passphrase.as_ref());
-        let normalized_salt = salt.nfkd().to_string();
+        let normalized_salt = {
+            let mut salt = Cow::Owned(format!("mnemonic{}", passphrase.as_ref()));
+            normalize_utf8(&mut salt);
+            salt
+        };
 
         let mut seed = [0u8; PBKDF2_BYTES];
         pbkdf2::pbkdf2::<Hmac<Sha512>>(
@@ -455,15 +489,43 @@ impl Mnemonic {
         &self.phrase
     }
 
+    /*
+    /// Consume the `Mnemonic` and return the phrase as a `String`.
+    pub fn into_phrase(mut self) -> String {
+        // Create an empty string and swap values with the mnemonic's phrase.
+        // This allows `Mnemonic` to implement `Drop`, while still returning the phrase.
+        mem::replace(&mut self.phrase, String::new())
+    }
+    */
+
     /// Returns the original entropy of the mnemonic phrase.
     pub fn entropy(&self) -> &[u8] {
         &self.entropy
     }
+
+    /*
+    /// Consume the `Mnemonic` and return the entropy as a `Vec<u8>`.
+    pub fn into_entropy(mut self) -> Vec<u8> {
+        // Create an empty bytes and swap values with the mnemonic's entropy.
+        // This allows `Mnemonic` to implement `Drop`, while still returning the entropy.
+        mem::replace(&mut self.entropy, Vec::new())
+    }
+    */
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // Some helper functions
 ///////////////////////////////////////////////////////////////////////////////
+
+/// Ensure the content of the `s` is normalized UTF8.
+/// Avoid allocation for normalization when there are no special UTF8 characters in the string.
+#[inline]
+fn normalize_utf8(s: &mut Cow<'_, str>) {
+    use unicode_normalization::{is_nfkd_quick, IsNormalized, UnicodeNormalization};
+    if is_nfkd_quick(s.as_ref().chars()) != IsNormalized::Yes {
+        *s = Cow::Owned(s.as_ref().nfkd().to_string())
+    }
+}
 
 /// Extract the first `bits` from the `source` byte.
 /// Can operate on 8-bit integers only.
@@ -586,3 +648,61 @@ fn test_mnemonic_word_count() {
     assert_eq!(mnemonic.entropy_bits(), 256);
     assert_eq!(mnemonic.checksum_bits(), 8);
 }
+
+#[test]
+fn test_mnemonic_zeroize_when_drop() {
+    let p: *const String;
+    let e: *const Vec<u8>;
+    {
+        // phrase = "absurd amount doctor acoustic avoid letter advice cage absurd amount doctor adjust"
+        // entropy = [1u8; 16]
+        let m = Mnemonic::from_entropy([1u8; 16]).unwrap();
+        p = &m.phrase;
+        e = &m.entropy;
+        unsafe {
+            println!("*p: {}", (*p));
+            println!("*e: {:?}", (*e));
+        }
+    }
+
+    unsafe {
+        assert_ne!(
+            (*p),
+            "absurd amount doctor acoustic avoid letter advice cage absurd amount doctor adjust"
+        );
+        println!("*p: {}", (*p));
+        assert_ne!((*e), [1u8; 16]);
+        println!("*e: {:?}", (*e));
+    }
+}
+
+/*
+#[test]
+fn test_mnemonic_consume() {
+    {
+        let m = Mnemonic::from_entropy([1u8; 16]).unwrap();
+        let p: *const String = &m.phrase;
+        unsafe {
+            println!("*p: {} ({:p})", (*p), p);
+        }
+        let phrase = m.into_phrase();
+        println!("phrase: {} ({:p})", phrase, &phrase);
+        unsafe {
+            println!("*p: {} ({:p})", (*p), p);
+        }
+    }
+
+    {
+        let m = Mnemonic::from_entropy([1u8; 16]).unwrap();
+        let e: *const Vec<u8> = &m.entropy;
+        unsafe {
+            println!("*e: {:?} ({:p})", (*e), e);
+        }
+        let entropy = m.into_entropy();
+        println!("entropy: {:?} ({:p})", entropy, &entropy);
+        unsafe {
+            println!("*e: {:?} ({:p})", (*e), e);
+        }
+    }
+}
+*/
