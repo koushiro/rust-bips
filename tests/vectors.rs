@@ -53,6 +53,7 @@ fn test_mnemonic(
     let entropy = hex::decode(entropy_hex).unwrap();
     let mnemonic = Mnemonic::from_entropy_in(lang, entropy).unwrap();
     assert_eq!(mnemonic.phrase(), expected_phrase.nfkd().to_string());
+    assert!(Mnemonic::from_phrase_in(lang, expected_phrase).is_ok());
 
     let seed = mnemonic.to_seed(passphrase);
     assert_eq!(hex::encode(&seed[..]), expected_seed_hex);
