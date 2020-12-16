@@ -13,8 +13,8 @@
 [crates-url]: https://crates.io/crates/bip0039
 [docs-svg]: https://docs.rs/bip0039/badge.svg
 [docs-url]: https://docs.rs/bip0039
-[msrv-svg]: https://img.shields.io/badge/rustc-1.41+-blue.svg
-[msrv-url]: https://blog.rust-lang.org/2020/01/30/Rust-1.41.0.html
+[msrv-svg]: https://img.shields.io/badge/rustc-1.44+-blue.svg
+[msrv-url]: https://blog.rust-lang.org/2020/06/04/Rust-1.44.0.html
 [codecov-svg]: https://img.shields.io/codecov/c/github/koushiro/bip0039-rs
 [codecov-url]: https://codecov.io/gh/koushiro/bip0039-rs
 [deps-svg]: https://deps.rs/repo/github/koushiro/bip0039-rs/status.svg
