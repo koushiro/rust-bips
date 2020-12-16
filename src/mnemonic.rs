@@ -461,7 +461,7 @@ impl Mnemonic {
         const PBKDF2_ROUNDS: u32 = 2048;
         const PBKDF2_BYTES: usize = 64;
 
-        // the phrase must be normalized
+        // the phrase has been normalized
         let normalized_password = self.phrase();
         let normalized_salt = {
             let mut salt = Cow::Owned(format!("mnemonic{}", passphrase.as_ref()));
