@@ -16,17 +16,18 @@ fn bench_generate(c: &mut Criterion) {
 }
 
 fn bench_from_entropy(c: &mut Criterion) {
+    let entropy = [
+        0x1a, 0x48, 0x6a, 0x5f, 0xbe, 0x53, 0x63, 0x99, 0x84, 0xcb, 0x64, 0xb0, 0x70, 0x75, 0x5f,
+        0x7b,
+    ];
     c.bench_function("tiny-bip39::from_entropy", |b| {
         use tiny_bip39::{Language, Mnemonic};
-        let entropy = hex::decode("1a486a5fbe53639984cb64b070755f7b").unwrap();
         b.iter(|| {
             let _mnemonic = black_box(Mnemonic::from_entropy(&entropy, Language::English));
         })
     });
     c.bench_function("bip0039::from_entropy", |b| {
         use bip0039::{Language, Mnemonic};
-        let entropy = hex::decode("1a486a5fbe53639984cb64b070755f7b").unwrap();
-        let entropy = entropy.as_slice();
         b.iter(|| {
             let _mnemonic = black_box(Mnemonic::from_entropy_in(Language::English, entropy));
         })
@@ -34,16 +35,15 @@ fn bench_from_entropy(c: &mut Criterion) {
 }
 
 fn bench_from_phrase(c: &mut Criterion) {
+    let phrase = "bottom drive obey lake curtain smoke basket hold race lonely fit walk";
     c.bench_function("tiny-bip39::from_phrase", |b| {
         use tiny_bip39::{Language, Mnemonic};
-        let phrase = "bottom drive obey lake curtain smoke basket hold race lonely fit walk";
         b.iter(|| {
             let _mnemonic = black_box(Mnemonic::from_phrase(phrase, Language::English));
         })
     });
     c.bench_function("bip0039::from_phrase", |b| {
         use bip0039::{Language, Mnemonic};
-        let phrase = "bottom drive obey lake curtain smoke basket hold race lonely fit walk";
         b.iter(|| {
             let _mnemonic = black_box(Mnemonic::from_phrase_in(Language::English, phrase));
         })
