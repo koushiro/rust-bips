@@ -19,8 +19,6 @@ std = [
   "sha2/std",
   "unicode-normalization/std",
 ]
-# Must enable the feature in the `no_std` env.
-spin_no_std = ["lazy_static/spin_no_std"]
 # Support all languages
 # Note: English is the standard so always included
 all-languages = [
@@ -43,8 +41,6 @@ korean = []
 spanish = []
 
 [dependencies]
-lazy_static = "1.4.0"
-hashbrown = "0.9.1"
 hmac = { version = "0.10.1", default-features = false }
 pbkdf2 = { version = "0.6.0", default-features = false }
 rand = { version = "0.7.3", optional = true }
