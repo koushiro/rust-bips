@@ -6,7 +6,7 @@ use alloc::{
     vec,
     vec::Vec,
 };
-use core::{convert, fmt, ops::Range, str};
+use core::{convert, fmt, mem, ops::Range, str};
 #[cfg(feature = "std")]
 use std::borrow::Cow;
 
@@ -489,28 +489,24 @@ impl Mnemonic {
         &self.phrase
     }
 
-    /*
     /// Consume the `Mnemonic` and return the phrase as a `String`.
     pub fn into_phrase(mut self) -> String {
         // Create an empty string and swap values with the mnemonic's phrase.
         // This allows `Mnemonic` to implement `Drop`, while still returning the phrase.
         mem::replace(&mut self.phrase, String::new())
     }
-    */
 
     /// Returns the original entropy of the mnemonic phrase.
     pub fn entropy(&self) -> &[u8] {
         &self.entropy
     }
 
-    /*
     /// Consume the `Mnemonic` and return the entropy as a `Vec<u8>`.
     pub fn into_entropy(mut self) -> Vec<u8> {
         // Create an empty bytes and swap values with the mnemonic's entropy.
         // This allows `Mnemonic` to implement `Drop`, while still returning the entropy.
         mem::replace(&mut self.entropy, Vec::new())
     }
-    */
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -676,33 +672,37 @@ fn test_mnemonic_zeroize_when_drop() {
     }
 }
 
-/*
 #[test]
 fn test_mnemonic_consume() {
+    let p: *const String;
     {
         let m = Mnemonic::from_entropy([1u8; 16]).unwrap();
-        let p: *const String = &m.phrase;
+        p = &m.phrase;
         unsafe {
             println!("*p: {} ({:p})", (*p), p);
         }
         let phrase = m.into_phrase();
+        assert_ne!(p, &phrase);
         println!("phrase: {} ({:p})", phrase, &phrase);
-        unsafe {
-            println!("*p: {} ({:p})", (*p), p);
-        }
     }
+    // error
+    // unsafe {
+    //     println!("*p: {} ({:p})", (*p), p);
+    // }
 
+    let e: *const Vec<u8>;
     {
         let m = Mnemonic::from_entropy([1u8; 16]).unwrap();
-        let e: *const Vec<u8> = &m.entropy;
+        e = &m.entropy;
         unsafe {
             println!("*e: {:?} ({:p})", (*e), e);
         }
         let entropy = m.into_entropy();
+        assert_ne!(e, &entropy);
         println!("entropy: {:?} ({:p})", entropy, &entropy);
-        unsafe {
-            println!("*e: {:?} ({:p})", (*e), e);
-        }
     }
+    // error
+    // unsafe {
+    //     println!("*e: {:?} ({:p})", (*e), e);
+    // }
 }
-*/
