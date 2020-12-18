@@ -35,8 +35,12 @@ Another Rust implementation of [BIP-0039](https://github.com/bitcoin/bips/blob/m
   ```rust
   use bip0039::{Count, Mnemonic};
 
+  /// Generates an English mnemonic with 12 words randomly
   let mnemonic = Mnemonic::generate(Count::Words12);
+  /// Gets the phrase
   let phrase = mnemonic.phrase();
+  /// Generates the HD wallet seed from the mnemonic and the passphrase.
+  let seed = mnemonic.to_seed("");
   ```
 
 ## Documentation

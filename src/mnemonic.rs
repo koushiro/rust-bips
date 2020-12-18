@@ -217,7 +217,7 @@ impl Drop for Mnemonic {
 }
 
 impl Mnemonic {
-    /// Generate a new English [`Mnemonic`] in the specified word count.
+    /// Generate a new English [`Mnemonic`] randomly in the specified word count.
     ///
     /// # Example
     ///
@@ -232,7 +232,7 @@ impl Mnemonic {
         Self::generate_in(Language::English, word_count)
     }
 
-    /// Generate a new [`Mnemonic`] in the specified language and word count.
+    /// Generate a new [`Mnemonic`] randomly in the specified language and word count.
     ///
     /// # Example
     ///
