@@ -217,7 +217,7 @@ impl Drop for Mnemonic {
 }
 
 impl Mnemonic {
-    /// Generate a new English [`Mnemonic`] randomly in the specified word count.
+    /// Generates a new English [`Mnemonic`] randomly in the specified word count.
     ///
     /// # Example
     ///
@@ -232,7 +232,7 @@ impl Mnemonic {
         Self::generate_in(Language::English, word_count)
     }
 
-    /// Generate a new [`Mnemonic`] randomly in the specified language and word count.
+    /// Generates a new [`Mnemonic`] randomly in the specified language and word count.
     ///
     /// # Example
     ///
@@ -489,7 +489,7 @@ impl Mnemonic {
         &self.phrase
     }
 
-    /// Consume the `Mnemonic` and return the phrase as a `String`.
+    /// Consumes the `Mnemonic` and return the phrase as a `String`.
     pub fn into_phrase(mut self) -> String {
         // Create an empty string and swap values with the mnemonic's phrase.
         // This allows `Mnemonic` to implement `Drop`, while still returning the phrase.
@@ -501,7 +501,7 @@ impl Mnemonic {
         &self.entropy
     }
 
-    /// Consume the `Mnemonic` and return the entropy as a `Vec<u8>`.
+    /// Consumes the `Mnemonic` and return the entropy as a `Vec<u8>`.
     pub fn into_entropy(mut self) -> Vec<u8> {
         // Create an empty bytes and swap values with the mnemonic's entropy.
         // This allows `Mnemonic` to implement `Drop`, while still returning the entropy.
