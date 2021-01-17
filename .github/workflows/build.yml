@@ -1,9 +1,9 @@
+name: build
+
 on:
   push:
     branches: [master]
   pull_request:
-
-name: build
 
 jobs:
   build:
@@ -45,11 +45,27 @@ jobs:
           command: test
           args: --all-features
 
-      - name: Build Without Std
+  build-no-std:
+    name: No-std Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Sources
+        uses: actions/checkout@v2
+
+      - name: Install Rust Toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+          target: wasm32-unknown-unknown
+
+      - name: Build
         uses: actions-rs/cargo@v1
         with:
           command: build
-          args: --no-default-features --features all-languages
+          args: --no-default-features --features all-languages --target wasm32-unknown-unknown
 
   msrv-build:
     name: MSRV Build
@@ -71,12 +87,6 @@ jobs:
         with:
           command: test
           args: --all-features
-
-      - name: Build Without Std
-        uses: actions-rs/cargo@v1
-        with:
-          command: build
-          args: --no-default-features
 
   coverage:
     name: Code Coverage

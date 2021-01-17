@@ -10,6 +10,7 @@ documentation = "https://docs.rs/bip0039"
 repository = "https://github.com/koushiro/bip0039-rs"
 keywords = ["bip39", "bitcoin", "crypto", "mnemonic"]
 categories = ["cryptography"]
+exclude = [".github", "words"]
 
 [features]
 default = ["std", "all-languages", "rand"]
