@@ -13,6 +13,8 @@ mod italian;
 mod japanese;
 #[cfg(feature = "korean")]
 mod korean;
+#[cfg(feature = "portuguese")]
+mod portuguese;
 #[cfg(feature = "spanish")]
 mod spanish;
 
@@ -45,6 +47,9 @@ pub enum Language {
     /// The Korean language.
     #[cfg(feature = "korean")]
     Korean,
+    /// The Portuguese language.
+    #[cfg(feature = "portuguese")]
+    Portuguese,
     /// The Spanish language.
     #[cfg(feature = "spanish")]
     Spanish,
@@ -106,6 +111,8 @@ impl Language {
             Language::Japanese => &japanese::WORDS,
             #[cfg(feature = "korean")]
             Language::Korean => &korean::WORDS,
+            #[cfg(feature = "portuguese")]
+            Language::Portuguese => &portuguese::WORDS,
             #[cfg(feature = "spanish")]
             Language::Spanish => &spanish::WORDS,
         }
@@ -137,6 +144,8 @@ impl Language {
             Language::Japanese => false,
             #[cfg(feature = "korean")]
             Language::Korean => true,
+            #[cfg(feature = "portuguese")]
+            Language::Portuguese => true,
             #[cfg(feature = "spanish")]
             Language::Spanish => false,
         }
@@ -205,6 +214,7 @@ mod tests {
         //   italian.txt             : d392c49fdb700a24cd1fceb237c1f65dcc128f6b34a8aacb58b59384b5c648c2
         //   japanese.txt            : 2eed0aef492291e061633d7ad8117f1a2b03eb80a29d0e4e3117ac2528d05ffd
         //   korean.txt              : 9e95f86c167de88f450f0aaf89e87f6624a57f973c67b516e338e8e8b8897f60
+        //   portuguese.txt          : 2685e9c194c82ae67e10ba59d9ea5345a23dc093e92276fc5361f6667d79cd3f
         //   spanish.txt             : 46846a5a0139d1e3cb77293e521c2865f7bcdb82c44e8d0a06a2cd0ecba48c0b
 
         use sha2::{Digest, Sha256};
@@ -241,6 +251,10 @@ mod tests {
             (
                 Language::Korean,
                 "9e95f86c167de88f450f0aaf89e87f6624a57f973c67b516e338e8e8b8897f60",
+            ),
+            (
+                Language::Portuguese,
+                "2685e9c194c82ae67e10ba59d9ea5345a23dc093e92276fc5361f6667d79cd3f",
             ),
             (
                 Language::Spanish,
