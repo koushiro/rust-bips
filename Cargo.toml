@@ -30,6 +30,7 @@ all-languages = [
   "italian",
   "japanese",
   "korean",
+  "portuguese",
   "spanish"
 ]
 chinese-simplified = []
