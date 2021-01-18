@@ -28,7 +28,7 @@ Another Rust implementation of [BIP-0039](https://github.com/bitcoin/bips/blob/m
 
   ```toml
   [dependencies]
-  bip0039 = "0.7.1"
+  bip0039 = "0.7.2"
   ```
 
 - Generate a random BIP-0039 mnemonic in English.

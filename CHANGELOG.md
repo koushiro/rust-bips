@@ -1,4 +1,4 @@
-# Version 0.7.2 [unreleased]
+# Version 0.7.2 [2021-01-18]
 
 - Add Portuguese language ([#16](https://github.com/koushiro/bip0039-rs/pull/16))
 
