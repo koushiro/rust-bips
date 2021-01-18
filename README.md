@@ -51,14 +51,15 @@ See documentation and examples at https://docs.rs/bip0039.
 
 - [x] Support all languages in the [BIP-0039 Word Lists](https://github.com/bitcoin/bips/blob/master/bip-0039/bip-0039-wordlists.md)
   - [x] English
-  - [x] Chinese (Simplified)
-  - [x] Chinese (Traditional)
-  - [x] Czech
-  - [x] French
-  - [x] Italian
   - [x] Japanese
   - [x] Korean
-  - [x] Spanish  
+  - [x] Spanish
+  - [x] Chinese (Simplified)
+  - [x] Chinese (Traditional)
+  - [x] French
+  - [x] Italian
+  - [x] Czech
+  - [x] Portuguese
 - [x] Support `no_std` environment
 
 ## Alternatives
