@@ -10,7 +10,11 @@ documentation = "https://docs.rs/bip0039"
 repository = "https://github.com/koushiro/bip0039-rs"
 keywords = ["bip39", "bitcoin", "crypto", "mnemonic"]
 categories = ["cryptography"]
-exclude = [".github", "words"]
+exclude = [
+  ".github",
+  "words",
+  "benchmark",
+]
 
 [features]
 default = ["std", "all-languages", "rand"]
@@ -52,13 +56,6 @@ unicode-normalization = { version = "0.1", default-features = false }
 zeroize = "1.2"
 
 [dev-dependencies]
-tiny-bip39 = { package = "tiny-bip39", version = "0.8" }
-criterion = "0.3"
 hex = "0.4"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-
-[[bench]]
-name = "bench"
-path = "benches/bench.rs"
-harness = false
