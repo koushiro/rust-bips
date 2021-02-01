@@ -1,11 +1,11 @@
 [package]
 name = "bip0039"
-version = "0.7.2"
+version = "0.7.3"
 authors = ["koushiro <koushiro.cqx@gmail.com>"]
 edition = "2018"
 description = "Another Rust implementation of BIP-0039 standard"
 readme = "README.md"
-license = "MIT OR Apache-2.0"
+license = "MIT/Apache-2.0"
 documentation = "https://docs.rs/bip0039"
 repository = "https://github.com/koushiro/bip0039-rs"
 keywords = ["bip39", "bitcoin", "crypto", "mnemonic"]

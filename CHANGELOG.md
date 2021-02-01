@@ -1,3 +1,8 @@
+# Version 0.7.3 [2021-02-01]
+
+- Split benchmark into separate crate ([#18](https://github.com/koushiro/bip0039-rs/pull/18)) 
+- Update `pbkdf2` to 0.7 ([#19](https://github.com/koushiro/bip0039-rs/pull/19))
+
 # Version 0.7.2 [2021-01-18]
 
 - Add Portuguese language ([#16](https://github.com/koushiro/bip0039-rs/pull/16))
