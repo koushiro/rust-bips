@@ -1,6 +1,6 @@
 [package]
 name = "bip0039"
-version = "0.7.3"
+version = "0.8.0"
 authors = ["koushiro <koushiro.cqx@gmail.com>"]
 edition = "2018"
 description = "Another Rust implementation of BIP-0039 standard"

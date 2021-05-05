@@ -1,3 +1,11 @@
+# Version 0.8.0 [2021-05-05]
+
+- Update `pbkdf2` to 0.8 ([#23])
+- Update `hmac` to 0.11 ([#23])
+- Upgrade MSRV from 1.44+ to 1.47+ ([#23])
+
+[#23]: https://github.com/koushiro/bip0039-rs/pull/23
+
 # Version 0.7.3 [2021-02-01]
 
 - Split benchmark into separate crate ([#18]) 
