@@ -79,7 +79,7 @@ jobs:
         uses: actions-rs/toolchain@v1
         with:
           profile: minimal
-          toolchain: 1.44.0
+          toolchain: 1.47.0
           override: true
 
       - name: Test
