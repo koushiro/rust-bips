@@ -15,6 +15,7 @@ exclude = [
   "words",
   "benchmark",
 ]
+resolver = "2"
 
 [features]
 default = ["std", "all-languages", "rand"]
