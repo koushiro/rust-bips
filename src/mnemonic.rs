@@ -491,7 +491,7 @@ impl Mnemonic {
     pub fn into_phrase(mut self) -> String {
         // Create an empty string and swap values with the mnemonic's phrase.
         // This allows `Mnemonic` to implement `Drop`, while still returning the phrase.
-        mem::replace(&mut self.phrase, String::new())
+        mem::take(&mut self.phrase)
     }
 
     /// Returns the original entropy of the mnemonic phrase.
@@ -503,7 +503,7 @@ impl Mnemonic {
     pub fn into_entropy(mut self) -> Vec<u8> {
         // Create an empty bytes and swap values with the mnemonic's entropy.
         // This allows `Mnemonic` to implement `Drop`, while still returning the entropy.
-        mem::replace(&mut self.entropy, Vec::new())
+        mem::take(&mut self.entropy)
     }
 }
 
@@ -557,13 +557,13 @@ fn index_to_bits(index: usize, bits: &mut [bool], chunk_size: usize) {
 
 #[test]
 fn test_left_index_bit() {
-    assert_eq!(left_index_bit(0b1111_1111, 0), true);
-    assert_eq!(left_index_bit(0b1111_1111, 3), true);
-    assert_eq!(left_index_bit(0b1111_1111, 7), true);
-    assert_eq!(left_index_bit(0b1111_0111, 0), true);
-    assert_eq!(left_index_bit(0b1111_0111, 4), false);
-    assert_eq!(left_index_bit(0b0100_0000, 0), false);
-    assert_eq!(left_index_bit(0b0100_0000, 1), true);
+    assert!(left_index_bit(0b1111_1111, 0));
+    assert!(left_index_bit(0b1111_1111, 3));
+    assert!(left_index_bit(0b1111_1111, 7));
+    assert!(left_index_bit(0b1111_0111, 0));
+    assert!(!left_index_bit(0b1111_0111, 4));
+    assert!(!left_index_bit(0b0100_0000, 0));
+    assert!(left_index_bit(0b0100_0000, 1));
 }
 
 #[test]
