@@ -5,7 +5,7 @@ authors = ["koushiro <koushiro.cqx@gmail.com>"]
 edition = "2018"
 
 [dev-dependencies]
-bip0039 = { version = "0.8", path = ".." }
+bip0039 = { version = "0.9", path = ".." }
 tiny-bip39 = { package = "tiny-bip39", version = "0.8" }
 criterion = "0.3"
 
