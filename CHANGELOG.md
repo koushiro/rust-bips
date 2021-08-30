@@ -1,8 +1,10 @@
-# Unreleased
+# Version 0.9.0 [2021-08-30]
 
 - Use Cargo's New Feature Resolver, Bump the MSRV to 1.51+ ([#30])
+- Update `pbkdf2` to 0.9 ([#31])
 
 [#30]: https://github.com/koushiro/bip0039-rs/pull/30
+[#31]: https://github.com/koushiro/bip0039-rs/pull/31
 
 # Version 0.8.0 [2021-05-05]
 
