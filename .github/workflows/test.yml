@@ -1,13 +1,15 @@
-name: build
+name: test
 
 on:
   push:
     branches: [master]
   pull_request:
 
+env:
+  CARGO_TERM_COLOR: always
+
 jobs:
-  build:
-    name: Build 
+  test:
     strategy:
       fail-fast: false
       matrix:
@@ -25,19 +27,6 @@ jobs:
           profile: minimal
           toolchain: ${{ matrix.toolchain }}
           override: true
-          components: rustfmt, clippy
-
-      - name: Check Code Format
-        uses: actions-rs/cargo@v1
-        with:
-          command: fmt
-          args: --all -- --check
-
-      - name: Code Lint
-        uses: actions-rs/cargo@v1
-        with:
-          command: clippy
-          args: --all-features --all-targets -- -D warnings
 
       - name: Test
         uses: actions-rs/cargo@v1
@@ -45,8 +34,7 @@ jobs:
           command: test
           args: --all-features
 
-  build-no-std:
-    name: No-std Build
+  no-std:
     runs-on: ubuntu-latest
 
     steps:
@@ -67,8 +55,7 @@ jobs:
           command: build
           args: --no-default-features --features all-languages --target thumbv6m-none-eabi
 
-  msrv-build:
-    name: MSRV Build
+  msrv:
     runs-on: ubuntu-latest
 
     steps:
@@ -87,23 +74,3 @@ jobs:
         with:
           command: test
           args: --all-features
-
-  coverage:
-    name: Code Coverage
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Sources
-        uses: actions/checkout@v2
-
-      - name: Install Rust Toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-          override: true
-
-      - name: Generate Code Coverage
-        uses: actions-rs/tarpaulin@v0.1 
-
-      - name: Upload Code Coverage
-        uses: codecov/codecov-action@v2
