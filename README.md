@@ -1,4 +1,4 @@
-# bip0039-rs
+# bip0039
 
 [![ga-svg]][ga-url]
 [![crates-svg]][crates-url]
