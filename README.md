@@ -7,7 +7,7 @@
 [![codecov-svg]][codecov-url]
 [![deps-svg]][deps-url]
 
-[ga-svg]: https://github.com/koushiro/bip0039-rs/workflows/build/badge.svg
+[ga-svg]: https://github.com/koushiro/bip0039-rs/workflows/test/badge.svg
 [ga-url]: https://github.com/koushiro/bip0039-rs/actions
 [crates-svg]: https://img.shields.io/crates/v/bip0039
 [crates-url]: https://crates.io/crates/bip0039
