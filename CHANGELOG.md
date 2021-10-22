@@ -1,5 +1,9 @@
 # Unrelease
 
+- Upgrade the Rust to edition 2021, Bump the MSRV to 1.56+ ([#34])
+
+[#34]: https://github.com/koushiro/bip0039/pull/34
+
 # Version 0.9.0 [2021-08-30]
 
 - Use Cargo's New Feature Resolver, Bump the MSRV to 1.51+ ([#30])
