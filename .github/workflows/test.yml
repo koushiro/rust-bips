@@ -74,3 +74,23 @@ jobs:
         with:
           command: test
           args: --all-features
+
+  check-benchmark:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Sources
+        uses: actions/checkout@v2
+
+      - name: Install Rust Toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+
+      - name: Check
+        uses: actions-rs/cargo@v1
+        with:
+          command: bench
+          args: --manifest-path benchmark/Cargo.toml check
