@@ -7,18 +7,18 @@
 [![codecov-svg]][codecov-url]
 [![deps-svg]][deps-url]
 
-[ga-svg]: https://github.com/koushiro/bip0039-rs/workflows/test/badge.svg
-[ga-url]: https://github.com/koushiro/bip0039-rs/actions
+[ga-svg]: https://github.com/koushiro/bip0039/workflows/test/badge.svg
+[ga-url]: https://github.com/koushiro/bip0039/actions
 [crates-svg]: https://img.shields.io/crates/v/bip0039
 [crates-url]: https://crates.io/crates/bip0039
 [docs-svg]: https://docs.rs/bip0039/badge.svg
 [docs-url]: https://docs.rs/bip0039
-[msrv-svg]: https://img.shields.io/badge/rustc-1.51+-blue.svg
-[msrv-url]: https://blog.rust-lang.org/2021/03/25/Rust-1.51.0.html
-[codecov-svg]: https://img.shields.io/codecov/c/github/koushiro/bip0039-rs
-[codecov-url]: https://codecov.io/gh/koushiro/bip0039-rs
-[deps-svg]: https://deps.rs/repo/github/koushiro/bip0039-rs/status.svg
-[deps-url]: https://deps.rs/repo/github/koushiro/bip0039-rs
+[msrv-svg]: https://img.shields.io/badge/rustc-1.56+-blue.svg
+[msrv-url]: https://blog.rust-lang.org/2021/10/21/Rust-1.56.0.html
+[codecov-svg]: https://img.shields.io/codecov/c/github/koushiro/bip0039
+[codecov-url]: https://codecov.io/gh/koushiro/bip0039
+[deps-svg]: https://deps.rs/repo/github/koushiro/bip0039/status.svg
+[deps-url]: https://deps.rs/repo/github/koushiro/bip0039
 
 Another Rust implementation of [BIP-0039](https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki) standard.
 

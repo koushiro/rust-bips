@@ -6,7 +6,7 @@ use alloc::{
     vec,
     vec::Vec,
 };
-use core::{convert, fmt, mem, ops::Range, str};
+use core::{fmt, mem, ops::Range, str};
 #[cfg(feature = "std")]
 use std::borrow::Cow;
 
@@ -66,7 +66,7 @@ impl From<Count> for usize {
     }
 }
 
-impl convert::TryFrom<usize> for Count {
+impl TryFrom<usize> for Count {
     type Error = Error;
 
     fn try_from(count: usize) -> Result<Self, Self::Error> {
