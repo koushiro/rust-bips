@@ -2,10 +2,11 @@
 name = "bip0039-benchmark"
 version = "0.1.0"
 authors = ["koushiro <koushiro.cqx@gmail.com>"]
-edition = "2018"
+edition = "2021"
+resolver = "2"
 
 [dev-dependencies]
-bip0039 = { version = "0.9", path = ".." }
+bip0039 = { path = ".." }
 tiny-bip39 = { package = "tiny-bip39", version = "0.8" }
 criterion = "0.3"
 
