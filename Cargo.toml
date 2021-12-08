@@ -54,7 +54,7 @@ spanish = []
 hmac = { version = "0.11", default-features = false }
 pbkdf2 = { version = "0.9", default-features = false }
 rand = { version = "0.8", optional = true }
-sha2 = { version = "0.9", default-features = false }
+sha2 = { version = "0.10", default-features = false }
 unicode-normalization = { version = "0.1", default-features = false }
 zeroize = "1.2"
 
