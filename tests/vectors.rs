@@ -9,7 +9,7 @@ struct Case {
     mnemonic: String,
     passphrase: String,
     seed: String,
-    bip32_xprv: String,
+    _bip32_xprv: String,
 }
 
 #[test]
