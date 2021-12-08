@@ -33,6 +33,8 @@ mod error;
 mod language;
 mod mnemonic;
 
-pub use self::error::Error;
-pub use self::language::Language;
-pub use self::mnemonic::{Count, Mnemonic};
+pub use self::{
+    error::Error,
+    language::Language,
+    mnemonic::{Count, Mnemonic},
+};

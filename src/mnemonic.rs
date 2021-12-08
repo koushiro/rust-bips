@@ -14,8 +14,7 @@ use hmac::Hmac;
 use sha2::{Digest, Sha256, Sha512};
 use zeroize::Zeroize;
 
-use crate::error::Error;
-use crate::language::Language;
+use crate::{error::Error, language::Language};
 
 const BITS_PER_WORD: usize = 11;
 const BITS_PER_BYTE: usize = 8;
