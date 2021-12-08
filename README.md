@@ -24,24 +24,18 @@ Another Rust implementation of [BIP-0039](https://github.com/bitcoin/bips/blob/m
 
 ## Usage
 
-- Add the `bip0039` into the `Cargo.toml`.
+Generate a random BIP-0039 mnemonic in English.
 
-  ```toml
-  [dependencies]
-  bip0039 = "0.9"
-  ```
+```rust
+use bip0039::{Count, Mnemonic};
 
-- Generate a random BIP-0039 mnemonic in English.
-  ```rust
-  use bip0039::{Count, Mnemonic};
-
-  /// Generates an English mnemonic with 12 words randomly
-  let mnemonic = Mnemonic::generate(Count::Words12);
-  /// Gets the phrase
-  let phrase = mnemonic.phrase();
-  /// Generates the HD wallet seed from the mnemonic and the passphrase.
-  let seed = mnemonic.to_seed("");
-  ```
+/// Generates an English mnemonic with 12 words randomly
+let mnemonic = Mnemonic::generate(Count::Words12);
+/// Gets the phrase
+let phrase = mnemonic.phrase();
+/// Generates the HD wallet seed from the mnemonic and the passphrase.
+let seed = mnemonic.to_seed("");
+```
 
 ## Documentation
 
