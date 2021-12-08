@@ -1,6 +1,9 @@
-# Unrelease
+# Version 0.10.0 [2021-12-08]
 
 - Upgrade the Rust to edition 2021, Bump the MSRV to 1.56+ ([#34])
+- Update `hmac` to 0.12 ([#39])
+- Update `sha2` to 0.10 ([#39])
+- Update `pbkdf2` to 0.10 ([#39])
 
 [#34]: https://github.com/koushiro/bip0039/pull/34
 
