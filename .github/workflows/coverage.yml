@@ -25,6 +25,8 @@ jobs:
 
       - name: Generate Code Coverage
         uses: actions-rs/tarpaulin@v0.1
+        with:
+          args: '--all-features'
 
       - name: Upload Code Coverage
         uses: codecov/codecov-action@v2

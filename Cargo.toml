@@ -20,7 +20,7 @@ exclude = [
 ]
 
 [features]
-default = ["std", "all-languages", "rand"]
+default = ["std", "rand"]
 std = [
   "hmac/std",
   "pbkdf2/std",
