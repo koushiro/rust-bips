@@ -1,6 +1,6 @@
 [package]
 name = "bip0039"
-version = "0.10.0"
+version = "0.10.1"
 authors = ["koushiro <koushiro.cqx@gmail.com>"]
 edition = "2021"
 rust-version = "1.56"

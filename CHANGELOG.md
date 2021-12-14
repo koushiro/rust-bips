@@ -1,4 +1,10 @@
-# Version 0.10.0 [2021-12-08]
+# Version 0.10.1 [2021-12-14]
+
+- Disable `all-languages` feature by default ([#41])
+
+[#41]: https://github.com/koushiro/bip0039/pull/41
+
+# Version 0.10.0 [2021-12-08] yanked
 
 - Upgrade the Rust to edition 2021, Bump the MSRV to 1.56+ ([#34])
 - Update `hmac` to 0.12 ([#39])
