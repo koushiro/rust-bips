@@ -2,7 +2,7 @@ use criterion::{black_box, criterion_group, criterion_main, Criterion};
 
 fn bench_generate(c: &mut Criterion) {
     c.bench_function("tiny-bip39::generate", |b| {
-        use tiny_bip39::{Language, Mnemonic, MnemonicType};
+        use bip39::{Language, Mnemonic, MnemonicType};
         b.iter(|| {
             let _mnemonic = black_box(Mnemonic::new(MnemonicType::Words12, Language::English));
         })
@@ -21,7 +21,7 @@ fn bench_from_entropy(c: &mut Criterion) {
         0x7b,
     ];
     c.bench_function("tiny-bip39::from_entropy", |b| {
-        use tiny_bip39::{Language, Mnemonic};
+        use bip39::{Language, Mnemonic};
         b.iter(|| {
             let _mnemonic = black_box(Mnemonic::from_entropy(&entropy, Language::English));
         })
@@ -37,7 +37,7 @@ fn bench_from_entropy(c: &mut Criterion) {
 fn bench_from_phrase(c: &mut Criterion) {
     let phrase = "bottom drive obey lake curtain smoke basket hold race lonely fit walk";
     c.bench_function("tiny-bip39::from_phrase", |b| {
-        use tiny_bip39::{Language, Mnemonic};
+        use bip39::{Language, Mnemonic};
         b.iter(|| {
             let _mnemonic = black_box(Mnemonic::from_phrase(phrase, Language::English));
         })
@@ -52,7 +52,7 @@ fn bench_from_phrase(c: &mut Criterion) {
 
 fn bench_to_seed(c: &mut Criterion) {
     c.bench_function("tiny-bip39::to_seed", |b| {
-        use tiny_bip39::{Language, Mnemonic, MnemonicType, Seed};
+        use bip39::{Language, Mnemonic, MnemonicType, Seed};
         let mnemonic = Mnemonic::new(MnemonicType::Words12, Language::English);
         b.iter(|| {
             let _seed = black_box(Seed::new(&mnemonic, ""));

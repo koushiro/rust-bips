@@ -14,31 +14,31 @@ repository = "https://github.com/koushiro/bip0039"
 keywords = ["bip39", "bitcoin", "crypto", "mnemonic"]
 categories = ["cryptography"]
 exclude = [
-  ".github",
-  "words",
-  "benchmark",
+    ".github",
+    "words",
+    "benchmark",
 ]
 
 [features]
 default = ["std", "rand"]
 std = [
-  "hmac/std",
-  "pbkdf2/std",
-  "sha2/std",
-  "unicode-normalization/std",
+    "hmac/std",
+    "pbkdf2/std",
+    "sha2/std",
+    "unicode-normalization/std",
 ]
 # Support all languages
 # Note: English is the standard so always included
 all-languages = [
-  "chinese-simplified",
-  "chinese-traditional",
-  "czech",
-  "french",
-  "italian",
-  "japanese",
-  "korean",
-  "portuguese",
-  "spanish"
+    "chinese-simplified",
+    "chinese-traditional",
+    "czech",
+    "french",
+    "italian",
+    "japanese",
+    "korean",
+    "portuguese",
+    "spanish",
 ]
 chinese-simplified = []
 chinese-traditional = []
