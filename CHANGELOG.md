@@ -1,3 +1,8 @@
+# Unrelease
+- Update `pbkdf2` to 0.11, bump the MSRV to 1.57+ ([#47])
+
+[#47]: https://github.com/koushiro/bip0039/pull/47
+
 # Version 0.10.1 [2021-12-14]
 
 - Disable `all-languages` feature by default ([#41])
