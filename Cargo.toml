@@ -3,7 +3,7 @@ name = "bip0039"
 version = "0.10.1"
 authors = ["koushiro <koushiro.cqx@gmail.com>"]
 edition = "2021"
-rust-version = "1.56"
+rust-version = "1.57"
 resolver = "2"
 
 description = "Another Rust implementation of BIP-0039 standard"
