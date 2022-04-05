@@ -33,4 +33,4 @@ jobs:
           args: '--all-features'
 
       - name: Upload Code Coverage
-        uses: codecov/codecov-action@v2
+        uses: codecov/codecov-action@v3
