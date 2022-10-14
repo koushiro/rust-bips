@@ -349,7 +349,7 @@ impl Mnemonic {
         let entropy = Self::phrase_to_entropy(lang, phrase.as_ref())?;
         Ok(Mnemonic {
             lang,
-            phrase: phrase.into_owned(),
+            phrase: phrase.split_whitespace().collect::<Vec<&str>>().join(" "),
             entropy,
         })
     }
