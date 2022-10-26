@@ -60,6 +60,7 @@ See documentation and examples at https://docs.rs/bip0039.
 
 - [bip39](https://github.com/rust-bitcoin/rust-bip39)
 - [tiny-bip39](https://github.com/maciejhirsz/tiny-bip39)
+- [coins-bip39](https://github.com/summa-tx/bitcoins-rs/tree/main/bip39)
 
 ## License
 

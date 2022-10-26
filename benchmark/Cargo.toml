@@ -7,8 +7,10 @@ resolver = "2"
 
 [dev-dependencies]
 bip0039 = { path = ".." }
-bip39 = { package = "tiny-bip39", version = "0.8" }
-criterion = "0.3"
+bip39 = { package = "tiny-bip39", version = "1.0" }
+coins-bip39 = "0.7" 
+criterion = "0.4"
+rand = "0.8"
 
 [[bench]]
 name = "bench"

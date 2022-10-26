@@ -4,13 +4,25 @@ fn bench_generate(c: &mut Criterion) {
     c.bench_function("tiny-bip39::generate", |b| {
         use bip39::{Language, Mnemonic, MnemonicType};
         b.iter(|| {
-            let _mnemonic = black_box(Mnemonic::new(MnemonicType::Words12, Language::English));
+            let mnemonic = black_box(Mnemonic::new(MnemonicType::Words12, Language::English));
+            let _phrase = mnemonic.phrase();
+        })
+    });
+    c.bench_function("coins-bip39::new_with_count", |b| {
+        use coins_bip39::{English, Mnemonic};
+        b.iter(|| {
+            let _mnemonic = black_box({
+                let mut rng = rand::thread_rng();
+                let mnemonic = <Mnemonic<English>>::new_with_count(&mut rng, 12).unwrap();
+                let _phrase = mnemonic.to_phrase();
+            });
         })
     });
     c.bench_function("bip0039::generate", |b| {
         use bip0039::{Count, Language, Mnemonic};
         b.iter(|| {
-            let _mnemonic = black_box(Mnemonic::generate_in(Language::English, Count::Words12));
+            let mnemonic = black_box(Mnemonic::generate_in(Language::English, Count::Words12));
+            let _phrase = mnemonic.phrase();
         })
     });
 }
@@ -42,6 +54,12 @@ fn bench_from_phrase(c: &mut Criterion) {
             let _mnemonic = black_box(Mnemonic::from_phrase(phrase, Language::English));
         })
     });
+    c.bench_function("coins-bip39::new_from_phrase", |b| {
+        use coins_bip39::{English, Mnemonic};
+        b.iter(|| {
+            let _mnemonic = black_box(<Mnemonic<English>>::new_from_phrase(phrase).unwrap());
+        })
+    });
     c.bench_function("bip0039::from_phrase", |b| {
         use bip0039::{Language, Mnemonic};
         b.iter(|| {
@@ -56,6 +74,14 @@ fn bench_to_seed(c: &mut Criterion) {
         let mnemonic = Mnemonic::new(MnemonicType::Words12, Language::English);
         b.iter(|| {
             let _seed = black_box(Seed::new(&mnemonic, ""));
+        })
+    });
+    c.bench_function("coins-bip39::to_seed", |b| {
+        use coins_bip39::{English, Mnemonic};
+        let mut rng = rand::thread_rng();
+        let mnemonic = <Mnemonic<English>>::new_with_count(&mut rng, 12).unwrap();
+        b.iter(|| {
+            let _key = black_box(mnemonic.master_key(None).unwrap()); // calling `to_seed`
         })
     });
     c.bench_function("bip0039::to_seed", |b| {
