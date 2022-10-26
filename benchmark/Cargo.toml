@@ -1,18 +1,20 @@
 [package]
-name = "bip0039-benchmark"
+name = "bips-benchmark"
 version = "0.1.0"
 authors = ["koushiro <koushiro.cqx@gmail.com>"]
 edition = "2021"
 resolver = "2"
 
 [dev-dependencies]
-bip0039 = { path = ".." }
-bip39 = { package = "tiny-bip39", version = "1.0" }
-coins-bip39 = "0.7" 
 criterion = "0.4"
+
+# BIP-0039 benchmarks
+bip0039 = { path = "../bip0039" }
+bip39 = { package = "tiny-bip39", version = "1.0" }
+coins-bip39 = "0.7"
 rand = "0.8"
 
 [[bench]]
-name = "bench"
-path = "bench.rs"
+name = "bip0039"
+path = "bip0039.rs"
 harness = false
