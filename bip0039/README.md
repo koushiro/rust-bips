@@ -5,8 +5,8 @@
 [![docs-svg]][docs-url]
 [![msrv-svg]][msrv-url]
 
-[gha-svg]: https://github.com/koushiro/bip0039/workflows/test/badge.svg
-[gha-url]: https://github.com/koushiro/bip0039/actions
+[gha-svg]: https://github.com/koushiro/rust-bips/workflows/bip0039/badge.svg
+[gha-url]: https://github.com/koushiro/rust-bips/actions
 [crates-svg]: https://img.shields.io/crates/v/bip0039
 [crates-url]: https://crates.io/crates/bip0039
 [docs-svg]: https://docs.rs/bip0039/badge.svg

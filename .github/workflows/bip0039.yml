@@ -1,9 +1,17 @@
-name: test
+name: bip0039
 
 on:
   push:
-    branches: [master]
+    branches: master
   pull_request:
+    paths:
+      - ".github/workflows/bip0039.yml"
+      - "bip0039/**"
+      - "Cargo.*"
+
+defaults:
+  run:
+    working-directory: bip0039
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -78,23 +86,3 @@ jobs:
         with:
           command: test
           args: --all-features
-
-  check-benchmark:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout Sources
-        uses: actions/checkout@v3
-
-      - name: Install Rust Toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-          override: true
-
-      - name: Check
-        uses: actions-rs/cargo@v1
-        with:
-          command: bench
-          args: --manifest-path benchmark/Cargo.toml check
