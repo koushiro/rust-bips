@@ -29,18 +29,22 @@ fn test_all_vectors() {
         test_mnemonic(Language::English, &passphrase, &entropy, &mnemonic, &seed);
     }
 
-    // https://github.com/bip32JP/bip32JP.github.io/blob/master/test_JP_BIP39.json
-    // Japanese wordlist test with heavily normalized symbols as passphrase
-    let jp_cases = serde_json::from_str::<Vec<Case>>(include_str!("./test_JP_BIP39.json")).unwrap();
-    for Case {
-        entropy,
-        mnemonic,
-        passphrase,
-        seed,
-        ..
-    } in jp_cases
+    #[cfg(feature = "japanese")]
     {
-        test_mnemonic(Language::Japanese, &passphrase, &entropy, &mnemonic, &seed);
+        // https://github.com/bip32JP/bip32JP.github.io/blob/master/test_JP_BIP39.json
+        // Japanese wordlist test with heavily normalized symbols as passphrase
+        let jp_cases =
+            serde_json::from_str::<Vec<Case>>(include_str!("./test_JP_BIP39.json")).unwrap();
+        for Case {
+            entropy,
+            mnemonic,
+            passphrase,
+            seed,
+            ..
+        } in jp_cases
+        {
+            test_mnemonic(Language::Japanese, &passphrase, &entropy, &mnemonic, &seed);
+        }
     }
 }
 

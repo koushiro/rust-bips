@@ -4,25 +4,29 @@ fn bench_generate(c: &mut Criterion) {
     c.bench_function("tiny-bip39::generate", |b| {
         use bip39::{Language, Mnemonic, MnemonicType};
         b.iter(|| {
-            let mnemonic = black_box(Mnemonic::new(MnemonicType::Words12, Language::English));
-            let _phrase = mnemonic.phrase();
+            let _phrase = black_box({
+                let mnemonic = Mnemonic::new(MnemonicType::Words12, Language::English);
+                mnemonic.phrase().to_string()
+            });
         })
     });
     c.bench_function("coins-bip39::new_with_count", |b| {
         use coins_bip39::{English, Mnemonic};
         b.iter(|| {
-            let _mnemonic = black_box({
+            let _phrase = black_box({
                 let mut rng = rand::thread_rng();
                 let mnemonic = <Mnemonic<English>>::new_with_count(&mut rng, 12).unwrap();
-                let _phrase = mnemonic.to_phrase();
+                mnemonic.to_phrase()
             });
         })
     });
     c.bench_function("bip0039::generate", |b| {
         use bip0039::{Count, Language, Mnemonic};
         b.iter(|| {
-            let mnemonic = black_box(Mnemonic::generate_in(Language::English, Count::Words12));
-            let _phrase = mnemonic.phrase();
+            let _phrase = black_box({
+                let mnemonic = Mnemonic::generate_in(Language::English, Count::Words12);
+                mnemonic.phrase().to_string()
+            });
         })
     });
 }
