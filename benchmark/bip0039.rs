@@ -21,10 +21,10 @@ fn bench_generate(c: &mut Criterion) {
         })
     });
     c.bench_function("bip0039::generate", |b| {
-        use bip0039::{Count, Language, Mnemonic};
+        use bip0039::{Count, Mnemonic};
         b.iter(|| {
             let _phrase = black_box({
-                let mnemonic = Mnemonic::generate_in(Language::English, Count::Words12);
+                let mnemonic = <Mnemonic>::generate(Count::Words12);
                 mnemonic.phrase().to_string()
             });
         })
@@ -43,9 +43,9 @@ fn bench_from_entropy(c: &mut Criterion) {
         })
     });
     c.bench_function("bip0039::from_entropy", |b| {
-        use bip0039::{Language, Mnemonic};
+        use bip0039::Mnemonic;
         b.iter(|| {
-            let _mnemonic = black_box(Mnemonic::from_entropy_in(Language::English, entropy));
+            let _mnemonic = black_box(<Mnemonic>::from_entropy(entropy));
         })
     });
 }
@@ -65,9 +65,9 @@ fn bench_from_phrase(c: &mut Criterion) {
         })
     });
     c.bench_function("bip0039::from_phrase", |b| {
-        use bip0039::{Language, Mnemonic};
+        use bip0039::Mnemonic;
         b.iter(|| {
-            let _mnemonic = black_box(Mnemonic::from_phrase_in(Language::English, phrase));
+            let _mnemonic = black_box(<Mnemonic>::from_phrase(phrase));
         })
     });
 }
@@ -89,8 +89,8 @@ fn bench_to_seed(c: &mut Criterion) {
         })
     });
     c.bench_function("bip0039::to_seed", |b| {
-        use bip0039::{Count, Language, Mnemonic};
-        let mnemonic = Mnemonic::generate_in(Language::English, Count::Words12);
+        use bip0039::{Count, Mnemonic};
+        let mnemonic = <Mnemonic>::generate(Count::Words12);
         b.iter(|| {
             let _seed = black_box(mnemonic.to_seed(""));
         })

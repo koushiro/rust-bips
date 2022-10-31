@@ -3,10 +3,10 @@
 //! ## Usage
 //!
 //! ```rust
-//! use bip0039::{Count, Language, Mnemonic};
+//! use bip0039::{Count, Mnemonic, ChineseSimplified};
 //!
 //! /// Generates an English mnemonic with 12 words randomly
-//! let mnemonic = Mnemonic::generate(Count::Words12);
+//! let mnemonic = <Mnemonic>::generate(Count::Words12);
 //!
 //! /// Gets the phrase
 //! let phrase = mnemonic.phrase();
@@ -17,7 +17,7 @@
 //! println!("seed: {}", hex::encode(&seed[..]));
 //!
 //! /// Generates a Simplified Chinese mnemonic with 12 words randomly
-//! let mnemonic = Mnemonic::generate_in(Language::SimplifiedChinese, Count::Words12);
+//! let mnemonic = <Mnemonic<ChineseSimplified>>::generate(Count::Words12);
 //! println!("phrase: {}", mnemonic.phrase());
 //! ```
 //!
@@ -30,11 +30,31 @@
 extern crate alloc;
 
 mod error;
-mod language;
+/// Supported languages for BIP-0039.
+pub mod language;
 mod mnemonic;
 
 pub use self::{
     error::Error,
-    language::Language,
+    language::{English, Language},
     mnemonic::{Count, Mnemonic},
 };
+
+#[cfg(feature = "chinese-simplified")]
+pub use self::language::ChineseSimplified;
+#[cfg(feature = "chinese-traditional")]
+pub use self::language::ChineseTraditional;
+#[cfg(feature = "czech")]
+pub use self::language::Czech;
+#[cfg(feature = "french")]
+pub use self::language::French;
+#[cfg(feature = "italian")]
+pub use self::language::Italian;
+#[cfg(feature = "japanese")]
+pub use self::language::Japanese;
+#[cfg(feature = "korean")]
+pub use self::language::Korean;
+#[cfg(feature = "portuguese")]
+pub use self::language::Portuguese;
+#[cfg(feature = "spanish")]
+pub use self::language::Spanish;
