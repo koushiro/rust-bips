@@ -6,7 +6,7 @@ use alloc::{
     vec,
     vec::Vec,
 };
-use core::{fmt, mem, ops::Range, str};
+use core::{fmt, marker::PhantomData, mem, ops::Range, str};
 #[cfg(feature = "std")]
 use std::borrow::Cow;
 
@@ -14,7 +14,10 @@ use hmac::Hmac;
 use sha2::{Digest, Sha256, Sha512};
 use zeroize::Zeroize;
 
-use crate::{error::Error, language::Language};
+use crate::{
+    error::Error,
+    language::{English, Lang},
+};
 
 const BITS_PER_WORD: usize = 11;
 const BITS_PER_BYTE: usize = 8;
@@ -168,25 +171,25 @@ impl Count {
 /// a 128-bit key, while a 24 word mnemonic phrase is essentially a 256-bit key.
 ///
 #[derive(Clone, Ord, PartialOrd, Eq, PartialEq, Hash)]
-pub struct Mnemonic {
-    lang: Language,
+pub struct Mnemonic<L = English> {
+    lang: PhantomData<L>,
     phrase: String,
     entropy: Vec<u8>,
 }
 
-impl fmt::Debug for Mnemonic {
+impl<L: Lang> fmt::Debug for Mnemonic<L> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str(self.phrase())
     }
 }
 
-impl fmt::Display for Mnemonic {
+impl<L: Lang> fmt::Display for Mnemonic<L> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str(self.phrase())
     }
 }
 
-impl str::FromStr for Mnemonic {
+impl<L: Lang> str::FromStr for Mnemonic<L> {
     type Err = Error;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
@@ -194,53 +197,41 @@ impl str::FromStr for Mnemonic {
     }
 }
 
-impl AsRef<str> for Mnemonic {
+impl<L: Lang> AsRef<str> for Mnemonic<L> {
     fn as_ref(&self) -> &str {
         self.phrase()
     }
 }
 
-impl Zeroize for Mnemonic {
+impl<L> Zeroize for Mnemonic<L> {
     fn zeroize(&mut self) {
         self.phrase.zeroize();
         self.entropy.zeroize();
     }
 }
 
-impl Drop for Mnemonic {
+impl<L> Drop for Mnemonic<L> {
     fn drop(&mut self) {
         self.zeroize();
     }
 }
 
-impl Mnemonic {
-    /// Generates a new English [`Mnemonic`] randomly in the specified word count.
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// use bip0039::{Count, Mnemonic};
-    ///
-    /// let mnemonic = Mnemonic::generate(Count::Words12);
-    /// let phrase = mnemonic.phrase();
-    /// ```
-    #[cfg(feature = "rand")]
-    pub fn generate(word_count: Count) -> Self {
-        Self::generate_in(Language::English, word_count)
-    }
-
+impl<L: Lang> Mnemonic<L> {
     /// Generates a new [`Mnemonic`] randomly in the specified language and word count.
     ///
     /// # Example
     ///
     /// ```
-    /// use bip0039::{Count, Language, Mnemonic};
+    /// use bip0039::{ChineseSimplified, Count, Mnemonic};
     ///
-    /// let mnemonic = Mnemonic::generate_in(Language::SimplifiedChinese, Count::Words24);
+    /// let mnemonic = <Mnemonic>::generate(Count::Words12);
+    /// let phrase = mnemonic.phrase();
+    ///
+    /// let mnemonic = <Mnemonic<ChineseSimplified>>::generate(Count::Words24);
     /// let phrase = mnemonic.phrase();
     /// ```
     #[cfg(feature = "rand")]
-    pub fn generate_in(lang: Language, word_count: Count) -> Self {
+    pub fn generate(word_count: Count) -> Self {
         use rand::RngCore;
         const MAX_ENTROPY_BITS: usize = Count::Words24.entropy_bits();
 
@@ -249,23 +240,8 @@ impl Mnemonic {
         rng.fill_bytes(&mut entropy);
 
         let entropy_bytes = word_count.entropy_bits() / BITS_PER_BYTE;
-        Self::from_entropy_in(lang, &entropy[..entropy_bytes])
+        Self::from_entropy(&entropy[..entropy_bytes])
             .expect("valid entropy length won't fail to generate the mnemonic")
-    }
-
-    /// Creates a new English [`Mnemonic`] from the given entropy.
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// use bip0039::Mnemonic;
-    ///
-    /// let entropy = vec![0x1a, 0x48, 0x6a, 0x5f, 0xbe, 0x53, 0x63, 0x99, 0x84, 0xcb, 0x64, 0xb0, 0x70, 0x75, 0x5f, 0x7b];
-    /// let mnemonic = Mnemonic::from_entropy(entropy).unwrap();
-    /// assert_eq!(mnemonic.phrase(), "bottom drive obey lake curtain smoke basket hold race lonely fit walk");
-    /// ```
-    pub fn from_entropy<E: Into<Vec<u8>>>(entropy: E) -> Result<Self, Error> {
-        Self::from_entropy_in(Language::English, entropy)
     }
 
     /// Creates a new [`Mnemonic`] in the specified language from the given entropy.
@@ -273,13 +249,13 @@ impl Mnemonic {
     /// # Example
     ///
     /// ```
-    /// use bip0039::{Language, Mnemonic};
+    /// use bip0039::Mnemonic;
     ///
     /// let entropy = vec![0x1a, 0x48, 0x6a, 0x5f, 0xbe, 0x53, 0x63, 0x99, 0x84, 0xcb, 0x64, 0xb0, 0x70, 0x75, 0x5f, 0x7b];
-    /// let mnemonic = Mnemonic::from_entropy_in(Language::English, entropy).unwrap();
+    /// let mnemonic = <Mnemonic>::from_entropy(entropy).unwrap();
     /// assert_eq!(mnemonic.phrase(), "bottom drive obey lake curtain smoke basket hold race lonely fit walk");
     /// ```
-    pub fn from_entropy_in<E: Into<Vec<u8>>>(lang: Language, entropy: E) -> Result<Self, Error> {
+    pub fn from_entropy<E: Into<Vec<u8>>>(entropy: E) -> Result<Self, Error> {
         const MAX_TOTAL_BITS: usize = Count::Words24.total_bits();
 
         let entropy = entropy.into();
@@ -300,30 +276,15 @@ impl Mnemonic {
         let mut words = Vec::with_capacity(word_count.word_count());
         for chunk in bits[word_count.total()].chunks(BITS_PER_WORD) {
             let index = bits_to_uint(chunk, BITS_PER_WORD);
-            words.push(lang.word_of(index));
+            words.push(L::word_of(index));
         }
         let phrase = words.join(" ");
 
         Ok(Self {
-            lang,
+            lang: PhantomData::<L>,
             phrase,
             entropy,
         })
-    }
-
-    /// Creates a [`Mnemonic`] from an existing mnemonic phrase.
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// use bip0039::Mnemonic;
-    ///
-    /// let phrase = "bottom drive obey lake curtain smoke basket hold race lonely fit walk";
-    /// let mnemonic = Mnemonic::from_phrase(phrase).unwrap();
-    /// assert_eq!(mnemonic.phrase(), phrase);
-    /// ```
-    pub fn from_phrase<'a, P: Into<Cow<'a, str>>>(phrase: P) -> Result<Self, Error> {
-        Self::from_phrase_in(Language::English, phrase)
     }
 
     /// Creates a [`Mnemonic`] from an existing mnemonic phrase in the given language.
@@ -331,41 +292,24 @@ impl Mnemonic {
     /// # Example
     ///
     /// ```
-    /// use bip0039::{Error, Mnemonic, Language};
+    /// use bip0039::{Error, Mnemonic};
     ///
     /// let phrase = "bottom drive obey lake curtain smoke basket hold race lonely fit walk";
-    /// let mnemonic = Mnemonic::from_phrase_in(Language::English, phrase).unwrap();
+    /// let mnemonic = <Mnemonic>::from_phrase(phrase).unwrap();
     /// assert_eq!(mnemonic.phrase(), phrase);
     ///
     /// let phrase = "bottom drive obey lake curtain smoke basket hold race lonely fit shit";
-    /// let mnemonic = Mnemonic::from_phrase_in(Language::English, phrase);
+    /// let mnemonic = <Mnemonic>::from_phrase(phrase);
     /// assert_eq!(mnemonic.unwrap_err(), Error::UnknownWord("shit".into()));
     /// ```
-    pub fn from_phrase_in<'a, P: Into<Cow<'a, str>>>(
-        lang: Language,
-        phrase: P,
-    ) -> Result<Self, Error> {
+    pub fn from_phrase<'a, P: Into<Cow<'a, str>>>(phrase: P) -> Result<Self, Error> {
         let phrase = phrase.into();
-        let entropy = Self::phrase_to_entropy(lang, phrase.as_ref())?;
+        let entropy = Self::phrase_to_entropy(phrase.as_ref())?;
         Ok(Mnemonic {
-            lang,
+            lang: PhantomData::<L>,
             phrase: phrase.split_whitespace().collect::<Vec<&str>>().join(" "),
             entropy,
         })
-    }
-
-    /// Validates the word count and checksum of an English mnemonic phrase.
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// use bip0039::Mnemonic;
-    ///
-    /// let result = Mnemonic::validate("bottom drive obey lake curtain smoke basket hold race lonely fit walk");
-    /// assert!(result.is_ok());
-    /// ```
-    pub fn validate<'a, P: Into<Cow<'a, str>>>(phrase: P) -> Result<(), Error> {
-        Self::validate_in(Language::English, phrase)
     }
 
     /// Validates the word count and checksum of a mnemonic phrase in the given language.
@@ -373,39 +317,36 @@ impl Mnemonic {
     /// # Example
     ///
     /// ```
-    /// use bip0039::{Error, Language, Mnemonic};
+    /// use bip0039::{Error, Japanese, Mnemonic};
     /// use unicode_normalization::UnicodeNormalization;
     ///
     /// let phrase = "bottom drive obey lake curtain smoke basket hold race lonely fit walk";
-    /// let result = Mnemonic::validate_in(Language::English, phrase);
+    /// let result = <Mnemonic>::validate(phrase);
     /// assert!(result.is_ok());
     /// let phrase = "bottom drive obey lake curtain smoke basket hold race lonely fit shit";
-    /// let result = Mnemonic::validate_in(Language::English, phrase);
+    /// let result = <Mnemonic>::validate(phrase);
     /// assert_eq!(result.unwrap_err(), Error::UnknownWord("shit".into()));
     ///
     /// let phrase = "そつう　れきだい　ほんやく　わかす　りくつ　ばいか　ろせん　やちん　そつう　れきだい　ほんやく　わかめ";
-    /// let result = Mnemonic::validate_in(Language::Japanese, phrase);
+    /// let result = <Mnemonic<Japanese>>::validate(phrase);
     /// assert!(result.is_ok());
     /// let phrase = "そつう　れきだい　ほんやく　わかす　りくつ　ばいか　ろせん　やちん　そつう　れきだい　ほんやく　ばか";
-    /// let result = Mnemonic::validate_in(Language::Japanese, phrase);
+    /// let result = <Mnemonic<Japanese>>::validate(phrase);
     /// assert_eq!(result.unwrap_err(), Error::UnknownWord("ばか".nfkd().to_string()));
     /// ```
-    pub fn validate_in<'a, P: Into<Cow<'a, str>>>(lang: Language, phrase: P) -> Result<(), Error> {
-        let _entropy = Self::phrase_to_entropy(lang, phrase)?;
+    pub fn validate<'a, P: Into<Cow<'a, str>>>(phrase: P) -> Result<(), Error> {
+        let _entropy = Self::phrase_to_entropy(phrase)?;
         Ok(())
     }
 
-    fn phrase_to_entropy<'a, P: Into<Cow<'a, str>>>(
-        lang: Language,
-        phrase: P,
-    ) -> Result<Vec<u8>, Error> {
+    fn phrase_to_entropy<'a, P: Into<Cow<'a, str>>>(phrase: P) -> Result<Vec<u8>, Error> {
         let mut phrase = phrase.into();
         normalize_utf8(&mut phrase);
         let word_count = Count::from_phrase(phrase.as_ref())?;
 
         let mut bits = vec![false; word_count.total_bits()];
         for (i, word) in phrase.split_whitespace().enumerate() {
-            if let Some(index) = lang.index_of(word) {
+            if let Some(index) = L::index_of(word) {
                 index_to_bits(index, &mut bits[i * BITS_PER_WORD..], BITS_PER_WORD);
             } else {
                 return Err(Error::UnknownWord(word.to_string()));
@@ -444,7 +385,7 @@ impl Mnemonic {
     /// use bip0039::Mnemonic;
     ///
     /// let phrase = "bottom drive obey lake curtain smoke basket hold race lonely fit walk";
-    /// let mnemonic = Mnemonic::from_phrase(phrase).unwrap();
+    /// let mnemonic = <Mnemonic>::from_phrase(phrase).unwrap();
     /// assert_eq!(
     ///     mnemonic.to_seed("").to_vec(),
     ///     hex::decode("02d5cd1db85b4d1397d78978062a1160e76e94cc5aaad3089644846865bb18fc68ddf383059d3fe82902a203d60790a8c8ab488de5013d10a8a8bded8d9174b9").unwrap()
@@ -474,11 +415,6 @@ impl Mnemonic {
             &mut seed,
         );
         seed
-    }
-
-    /// Returns the [`Language`] of the mnemonic.
-    pub fn lang(&self) -> Language {
-        self.lang
     }
 
     /// Returns the mnemonic phrase as a string slice.
@@ -649,7 +585,7 @@ fn test_mnemonic_zeroize_when_drop() {
     {
         // phrase = "absurd amount doctor acoustic avoid letter advice cage absurd amount doctor adjust"
         // entropy = [1u8; 16]
-        let m = Mnemonic::from_entropy([1u8; 16]).unwrap();
+        let m = <Mnemonic>::from_entropy([1u8; 16]).unwrap();
         p = &m.phrase;
         e = &m.entropy;
         unsafe {
@@ -673,7 +609,7 @@ fn test_mnemonic_zeroize_when_drop() {
 fn test_mnemonic_consume() {
     let p: *const String;
     {
-        let m = Mnemonic::from_entropy([1u8; 16]).unwrap();
+        let m = <Mnemonic>::from_entropy([1u8; 16]).unwrap();
         p = &m.phrase;
         unsafe {
             println!("*p: {} ({:p})", (*p), p);
@@ -689,7 +625,7 @@ fn test_mnemonic_consume() {
 
     let e: *const Vec<u8>;
     {
-        let m = Mnemonic::from_entropy([1u8; 16]).unwrap();
+        let m = <Mnemonic>::from_entropy([1u8; 16]).unwrap();
         e = &m.entropy;
         unsafe {
             println!("*e: {:?} ({:p})", (*e), e);

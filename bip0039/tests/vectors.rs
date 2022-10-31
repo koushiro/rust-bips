@@ -1,4 +1,4 @@
-use bip0039::{Language, Mnemonic};
+use bip0039::{English, Lang, Mnemonic};
 use serde::Deserialize;
 use unicode_normalization::UnicodeNormalization;
 
@@ -26,11 +26,12 @@ fn test_all_vectors() {
         ..
     } in en_cases
     {
-        test_mnemonic(Language::English, &passphrase, &entropy, &mnemonic, &seed);
+        test_mnemonic::<English>(&passphrase, &entropy, &mnemonic, &seed);
     }
 
     #[cfg(feature = "japanese")]
     {
+        use bip0039::Japanese;
         // https://github.com/bip32JP/bip32JP.github.io/blob/master/test_JP_BIP39.json
         // Japanese wordlist test with heavily normalized symbols as passphrase
         let jp_cases =
@@ -43,22 +44,21 @@ fn test_all_vectors() {
             ..
         } in jp_cases
         {
-            test_mnemonic(Language::Japanese, &passphrase, &entropy, &mnemonic, &seed);
+            test_mnemonic::<Japanese>(&passphrase, &entropy, &mnemonic, &seed);
         }
     }
 }
 
-fn test_mnemonic(
-    lang: Language,
+fn test_mnemonic<L: Lang>(
     passphrase: &str,
     entropy_hex: &str,
     expected_phrase: &str,
     expected_seed_hex: &str,
 ) {
     let entropy = hex::decode(entropy_hex).unwrap();
-    let mnemonic = Mnemonic::from_entropy_in(lang, entropy).unwrap();
+    let mnemonic = <Mnemonic<L>>::from_entropy(entropy).unwrap();
     assert_eq!(mnemonic.phrase(), expected_phrase.nfkd().to_string());
-    assert!(Mnemonic::from_phrase_in(lang, expected_phrase).is_ok());
+    assert!(<Mnemonic<L>>::from_phrase(expected_phrase).is_ok());
 
     let seed = mnemonic.to_seed(passphrase);
     assert_eq!(hex::encode(&seed[..]), expected_seed_hex);

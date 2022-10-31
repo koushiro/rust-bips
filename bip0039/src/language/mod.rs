@@ -22,182 +22,166 @@ mod spanish;
 ///
 /// The English language is always available, other languages are enabled using
 /// the compilation features.
-#[derive(Copy, Clone, Debug, Ord, PartialOrd, Eq, PartialEq, Hash)]
-pub enum Language {
-    /// The English language.
-    English,
-    /// The Simplified Chinese language.
-    #[cfg(feature = "chinese-simplified")]
-    SimplifiedChinese,
-    /// The Traditional Chinese language.
-    #[cfg(feature = "chinese-traditional")]
-    TraditionalChinese,
-    /// The Czech language.
-    #[cfg(feature = "czech")]
-    Czech,
-    /// The French language.
-    #[cfg(feature = "french")]
-    French,
-    /// The Italian language.
-    #[cfg(feature = "italian")]
-    Italian,
-    /// The Japanese language.
-    #[cfg(feature = "japanese")]
-    Japanese,
-    /// The Korean language.
-    #[cfg(feature = "korean")]
-    Korean,
-    /// The Portuguese language.
-    #[cfg(feature = "portuguese")]
-    Portuguese,
-    /// The Spanish language.
-    #[cfg(feature = "spanish")]
-    Spanish,
-}
-
-impl Default for Language {
-    fn default() -> Self {
-        Language::English
-    }
-}
-
-impl core::fmt::Display for Language {
-    fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
-        core::fmt::Debug::fmt(self, f)
-    }
-}
-
-impl Language {
-    /// The list of supported languages.
-    /// Language support is managed by the compile features.
-    pub fn all() -> &'static [Language] {
-        &[
-            Language::English,
-            #[cfg(feature = "chinese-simplified")]
-            Language::SimplifiedChinese,
-            #[cfg(feature = "chinese-traditional")]
-            Language::TraditionalChinese,
-            #[cfg(feature = "czech")]
-            Language::Czech,
-            #[cfg(feature = "french")]
-            Language::French,
-            #[cfg(feature = "italian")]
-            Language::Italian,
-            #[cfg(feature = "japanese")]
-            Language::Japanese,
-            #[cfg(feature = "korean")]
-            Language::Korean,
-            #[cfg(feature = "spanish")]
-            Language::Spanish,
-        ]
-    }
-
+pub trait Lang: Sized {
     /// The word list for this language.
-    #[inline]
-    pub(crate) fn word_list(self) -> &'static [&'static str] {
-        match self {
-            Language::English => &english::WORDS,
-            #[cfg(feature = "chinese-simplified")]
-            Language::SimplifiedChinese => &chinese_simplified::WORDS,
-            #[cfg(feature = "chinese-traditional")]
-            Language::TraditionalChinese => &chinese_traditional::WORDS,
-            #[cfg(feature = "czech")]
-            Language::Czech => &czech::WORDS,
-            #[cfg(feature = "french")]
-            Language::French => &french::WORDS,
-            #[cfg(feature = "italian")]
-            Language::Italian => &italian::WORDS,
-            #[cfg(feature = "japanese")]
-            Language::Japanese => &japanese::WORDS,
-            #[cfg(feature = "korean")]
-            Language::Korean => &korean::WORDS,
-            #[cfg(feature = "portuguese")]
-            Language::Portuguese => &portuguese::WORDS,
-            #[cfg(feature = "spanish")]
-            Language::Spanish => &spanish::WORDS,
-        }
-    }
+    const WORD_LIST: &'static [&'static str];
 
     /// Returns the word of `index` in the word list.
     #[inline]
-    pub(crate) fn word_of(self, index: usize) -> &'static str {
+    fn word_of(index: usize) -> &'static str {
         debug_assert!(index < 2048, "Invalid wordlist index");
-        self.word_list()[index]
-    }
-
-    /// Checks if the word list of this language are sorted.
-    #[inline]
-    pub(crate) fn is_sorted(self) -> bool {
-        match self {
-            Language::English => true,
-            #[cfg(feature = "chinese-simplified")]
-            Language::SimplifiedChinese => false,
-            #[cfg(feature = "chinese-traditional")]
-            Language::TraditionalChinese => false,
-            #[cfg(feature = "czech")]
-            Language::Czech => false,
-            #[cfg(feature = "french")]
-            Language::French => false,
-            #[cfg(feature = "italian")]
-            Language::Italian => true,
-            #[cfg(feature = "japanese")]
-            Language::Japanese => false,
-            #[cfg(feature = "korean")]
-            Language::Korean => true,
-            #[cfg(feature = "portuguese")]
-            Language::Portuguese => true,
-            #[cfg(feature = "spanish")]
-            Language::Spanish => false,
-        }
+        Self::WORD_LIST[index]
     }
 
     /// Returns the index of the word in the word list.
     #[inline]
-    pub(crate) fn index_of(self, word: &str) -> Option<usize> {
+    fn index_of(word: &str) -> Option<usize> {
         // For ordered word lists, we can use binary search to improve the search speed.
-        if self.is_sorted() {
-            self.word_list().binary_search(&word).ok()
+        if Self::is_sorted() {
+            Self::WORD_LIST.binary_search(&word).ok()
         } else {
-            self.word_list().iter().position(|&w| w == word)
+            Self::WORD_LIST.iter().position(|&w| w == word)
         }
     }
 
-    /// Returns words from the word list that start with the given prefix.
-    pub fn words_by_prefix(self, prefix: &str) -> &[&'static str] {
-        // The words in the word list are ordered lexicographically.
-        // This means that we cannot use `binary_search` to find words more efficiently,
-        // because the Rust ordering is based on the byte values.
-        // However, it does mean that words that share a prefix will follow each other.
+    /// Checks if the word list of this language are sorted by the byte values.
+    ///
+    /// The words in the word list are ordered lexicographically, which means that we cannot use
+    /// `binary_search` to find words more efficiently if the ordering of the words is not be
+    /// sorted by the byte values, because the Rust ordering is based on the byte values.
+    #[inline]
+    fn is_sorted() -> bool {
+        false
+    }
 
-        let first = match self.word_list().iter().position(|w| w.starts_with(prefix)) {
+    /// Returns words from the word list that start with the given prefix.
+    /// The words in the word list are ordered lexicographically, which means that we cannot use
+    /// `binary_search` to find words more efficiently if the ordering of the words is not be
+    /// sorted by the byte values, because the Rust ordering is based on the byte values.
+    /// However, it does mean that words that share a prefix will follow each other.
+    fn words_by_prefix(prefix: &str) -> &[&'static str] {
+        let first = match Self::WORD_LIST.iter().position(|w| w.starts_with(prefix)) {
             Some(i) => i,
             None => return &[],
         };
-        let count = self.word_list()[first..]
+        let count = Self::WORD_LIST[first..]
             .iter()
             .take_while(|w| w.starts_with(prefix))
             .count();
-        &self.word_list()[first..first + count]
+        &Self::WORD_LIST[first..first + count]
     }
+}
+
+/// The `English` language.
+///
+/// The `English` language is always available,
+/// other languages are enabled using the compilation features.
+#[derive(Copy, Clone, Debug)]
+pub struct English;
+impl Lang for English {
+    const WORD_LIST: &'static [&'static str] = &english::WORDS;
+
+    fn is_sorted() -> bool {
+        true
+    }
+}
+
+/// The `Simplified Chinese` language.
+#[cfg(feature = "chinese-simplified")]
+#[derive(Copy, Clone, Debug)]
+pub struct ChineseSimplified;
+#[cfg(feature = "chinese-simplified")]
+impl Lang for ChineseSimplified {
+    const WORD_LIST: &'static [&'static str] = &chinese_simplified::WORDS;
+}
+
+/// The `Traditional Chinese` language.
+#[cfg(feature = "chinese-traditional")]
+#[derive(Copy, Clone, Debug)]
+pub struct ChineseTraditional;
+#[cfg(feature = "chinese-traditional")]
+impl Lang for ChineseTraditional {
+    const WORD_LIST: &'static [&'static str] = &chinese_traditional::WORDS;
+}
+
+/// The `Czech` language.
+#[cfg(feature = "czech")]
+#[derive(Copy, Clone, Debug)]
+pub struct Czech;
+#[cfg(feature = "czech")]
+impl Lang for Czech {
+    const WORD_LIST: &'static [&'static str] = &czech::WORDS;
+}
+
+/// The `French` language.
+#[cfg(feature = "french")]
+#[derive(Copy, Clone, Debug)]
+pub struct French;
+#[cfg(feature = "french")]
+impl Lang for French {
+    const WORD_LIST: &'static [&'static str] = &french::WORDS;
+}
+
+/// The `Italian` language.
+#[cfg(feature = "italian")]
+#[derive(Copy, Clone, Debug)]
+pub struct Italian;
+#[cfg(feature = "italian")]
+impl Lang for Italian {
+    const WORD_LIST: &'static [&'static str] = &italian::WORDS;
+
+    fn is_sorted() -> bool {
+        true
+    }
+}
+
+/// The `Japanese` language.
+#[cfg(feature = "japanese")]
+#[derive(Copy, Clone, Debug)]
+pub struct Japanese;
+#[cfg(feature = "japanese")]
+impl Lang for Japanese {
+    const WORD_LIST: &'static [&'static str] = &japanese::WORDS;
+}
+
+/// The `Korean` language.
+#[cfg(feature = "korean")]
+#[derive(Copy, Clone, Debug)]
+pub struct Korean;
+#[cfg(feature = "korean")]
+impl Lang for Korean {
+    const WORD_LIST: &'static [&'static str] = &korean::WORDS;
+
+    fn is_sorted() -> bool {
+        true
+    }
+}
+
+/// The `Portuguese` language.
+#[cfg(feature = "portuguese")]
+#[derive(Copy, Clone, Debug)]
+pub struct Portuguese;
+#[cfg(feature = "portuguese")]
+impl Lang for Portuguese {
+    const WORD_LIST: &'static [&'static str] = &portuguese::WORDS;
+
+    fn is_sorted() -> bool {
+        true
+    }
+}
+
+/// The `Spanish` language.
+#[cfg(feature = "spanish")]
+#[derive(Copy, Clone, Debug)]
+pub struct Spanish;
+#[cfg(feature = "spanish")]
+impl Lang for Spanish {
+    const WORD_LIST: &'static [&'static str] = &spanish::WORDS;
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn words_by_prefix() {
-        let lang = Language::English;
-
-        let res = lang.words_by_prefix("woo");
-        assert_eq!(res, ["wood", "wool"]);
-
-        let res = lang.words_by_prefix("");
-        assert_eq!(res.len(), 2048);
-
-        let res = lang.words_by_prefix("woof");
-        assert!(res.is_empty());
-    }
 
     #[cfg(feature = "all-languages")]
     #[test]
@@ -218,81 +202,64 @@ mod tests {
         //   spanish.txt             : 46846a5a0139d1e3cb77293e521c2865f7bcdb82c44e8d0a06a2cd0ecba48c0b
 
         use sha2::{Digest, Sha256};
-
-        let checksums = [
-            (
-                Language::SimplifiedChinese,
-                "5c5942792bd8340cb8b27cd592f1015edf56a8c5b26276ee18a482428e7c5726",
-            ),
-            (
-                Language::TraditionalChinese,
-                "417b26b3d8500a4ae3d59717d7011952db6fc2fb84b807f3f94ac734e89c1b5f",
-            ),
-            (
-                Language::Czech,
-                "7e80e161c3e93d9554c2efb78d4e3cebf8fc727e9c52e03b83b94406bdcc95fc",
-            ),
-            (
-                Language::English,
-                "2f5eed53a4727b4bf8880d8f3f199efc90e58503646d9ff8eff3a2ed3b24dbda",
-            ),
-            (
-                Language::French,
-                "ebc3959ab7801a1df6bac4fa7d970652f1df76b683cd2f4003c941c63d517e59",
-            ),
-            (
-                Language::Italian,
-                "d392c49fdb700a24cd1fceb237c1f65dcc128f6b34a8aacb58b59384b5c648c2",
-            ),
-            (
-                Language::Japanese,
-                "2eed0aef492291e061633d7ad8117f1a2b03eb80a29d0e4e3117ac2528d05ffd",
-            ),
-            (
-                Language::Korean,
-                "9e95f86c167de88f450f0aaf89e87f6624a57f973c67b516e338e8e8b8897f60",
-            ),
-            (
-                Language::Portuguese,
-                "2685e9c194c82ae67e10ba59d9ea5345a23dc093e92276fc5361f6667d79cd3f",
-            ),
-            (
-                Language::Spanish,
-                "46846a5a0139d1e3cb77293e521c2865f7bcdb82c44e8d0a06a2cd0ecba48c0b",
-            ),
-        ];
-
-        for &(lang, sha256sum) in &checksums {
-            let mut digest = Sha256::new();
-            for &word in lang.word_list() {
-                assert!(unicode_normalization::is_nfkd(word));
-                digest.update(format!("{}\n", word));
-            }
-            assert_eq!(hex::encode(digest.finalize()), sha256sum);
+        macro_rules! generate_checksum_test {
+            ($lang:ident => $checksum:expr) => {{
+                let mut digest = Sha256::new();
+                for &word in $lang::WORD_LIST {
+                    assert!(unicode_normalization::is_nfkd(word));
+                    digest.update(format!("{}\n", word));
+                }
+                assert_eq!(hex::encode(digest.finalize()), $checksum);
+            }};
         }
+
+        generate_checksum_test!(ChineseSimplified => "5c5942792bd8340cb8b27cd592f1015edf56a8c5b26276ee18a482428e7c5726");
+        generate_checksum_test!(ChineseTraditional => "417b26b3d8500a4ae3d59717d7011952db6fc2fb84b807f3f94ac734e89c1b5f");
+        generate_checksum_test!(Czech => "7e80e161c3e93d9554c2efb78d4e3cebf8fc727e9c52e03b83b94406bdcc95fc");
+        generate_checksum_test!(English => "2f5eed53a4727b4bf8880d8f3f199efc90e58503646d9ff8eff3a2ed3b24dbda");
+        generate_checksum_test!(French => "ebc3959ab7801a1df6bac4fa7d970652f1df76b683cd2f4003c941c63d517e59");
+        generate_checksum_test!(Italian => "d392c49fdb700a24cd1fceb237c1f65dcc128f6b34a8aacb58b59384b5c648c2");
+        generate_checksum_test!(Japanese => "2eed0aef492291e061633d7ad8117f1a2b03eb80a29d0e4e3117ac2528d05ffd");
+        generate_checksum_test!(Korean => "9e95f86c167de88f450f0aaf89e87f6624a57f973c67b516e338e8e8b8897f60");
+        generate_checksum_test!(Portuguese => "2685e9c194c82ae67e10ba59d9ea5345a23dc093e92276fc5361f6667d79cd3f");
+        generate_checksum_test!(Spanish => "46846a5a0139d1e3cb77293e521c2865f7bcdb82c44e8d0a06a2cd0ecba48c0b");
     }
 
     #[cfg(feature = "all-languages")]
     #[test]
     fn word_list_is_sorted() {
         use std::cmp::Ordering;
-        fn is_sorted(words: &[&'static str]) -> bool {
-            words.windows(2).all(|w| {
+        fn is_sorted<L: Lang>() -> bool {
+            L::WORD_LIST.windows(2).all(|w| {
                 w[0].partial_cmp(w[1])
                     .map(|o| o != Ordering::Greater)
                     .unwrap_or(false)
             })
         }
-        for lang in Language::all() {
-            assert_eq!(is_sorted(lang.word_list()), lang.is_sorted());
+
+        macro_rules! generate_is_sorted_test {
+            ($lang:ident) => {
+                assert_eq!(is_sorted::<$lang>(), $lang::is_sorted());
+            };
         }
+
+        generate_is_sorted_test!(ChineseSimplified);
+        generate_is_sorted_test!(ChineseTraditional);
+        generate_is_sorted_test!(Czech);
+        generate_is_sorted_test!(English);
+        generate_is_sorted_test!(French);
+        generate_is_sorted_test!(Italian);
+        generate_is_sorted_test!(Japanese);
+        generate_is_sorted_test!(Korean);
+        generate_is_sorted_test!(Portuguese);
+        generate_is_sorted_test!(Spanish);
     }
 
     #[cfg(feature = "all-languages")]
     #[test]
     fn word_list_is_normalized() {
-        for lang in Language::all() {
-            for &word in lang.word_list() {
+        fn check_normalized<L: Lang>() {
+            for &word in L::WORD_LIST {
                 assert!(
                     unicode_normalization::is_nfkd(word),
                     "word '{}' is not normalized",
@@ -300,5 +267,34 @@ mod tests {
                 )
             }
         }
+
+        macro_rules! generate_check_normalized_test {
+            ($lang:ident) => {
+                check_normalized::<$lang>();
+            };
+        }
+
+        generate_check_normalized_test!(ChineseSimplified);
+        generate_check_normalized_test!(ChineseTraditional);
+        generate_check_normalized_test!(Czech);
+        generate_check_normalized_test!(English);
+        generate_check_normalized_test!(French);
+        generate_check_normalized_test!(Italian);
+        generate_check_normalized_test!(Japanese);
+        generate_check_normalized_test!(Korean);
+        generate_check_normalized_test!(Portuguese);
+        generate_check_normalized_test!(Spanish);
+    }
+
+    #[test]
+    fn words_by_prefix() {
+        let res = English::words_by_prefix("woo");
+        assert_eq!(res, ["wood", "wool"]);
+
+        let res = English::words_by_prefix("");
+        assert_eq!(res.len(), 2048);
+
+        let res = English::words_by_prefix("woof");
+        assert!(res.is_empty());
     }
 }
