@@ -16,7 +16,7 @@ use zeroize::Zeroize;
 
 use crate::{
     error::Error,
-    language::{English, Lang},
+    language::{English, Language},
 };
 
 const BITS_PER_WORD: usize = 11;
@@ -177,19 +177,19 @@ pub struct Mnemonic<L = English> {
     entropy: Vec<u8>,
 }
 
-impl<L: Lang> fmt::Debug for Mnemonic<L> {
+impl<L: Language> fmt::Debug for Mnemonic<L> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str(self.phrase())
     }
 }
 
-impl<L: Lang> fmt::Display for Mnemonic<L> {
+impl<L: Language> fmt::Display for Mnemonic<L> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str(self.phrase())
     }
 }
 
-impl<L: Lang> str::FromStr for Mnemonic<L> {
+impl<L: Language> str::FromStr for Mnemonic<L> {
     type Err = Error;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
@@ -197,7 +197,7 @@ impl<L: Lang> str::FromStr for Mnemonic<L> {
     }
 }
 
-impl<L: Lang> AsRef<str> for Mnemonic<L> {
+impl<L: Language> AsRef<str> for Mnemonic<L> {
     fn as_ref(&self) -> &str {
         self.phrase()
     }
@@ -216,7 +216,7 @@ impl<L> Drop for Mnemonic<L> {
     }
 }
 
-impl<L: Lang> Mnemonic<L> {
+impl<L: Language> Mnemonic<L> {
     /// Generates a new [`Mnemonic`] randomly in the specified language and word count.
     ///
     /// # Example

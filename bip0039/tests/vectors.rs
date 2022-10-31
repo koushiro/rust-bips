@@ -1,4 +1,4 @@
-use bip0039::{English, Lang, Mnemonic};
+use bip0039::{English, Language, Mnemonic};
 use serde::Deserialize;
 use unicode_normalization::UnicodeNormalization;
 
@@ -49,7 +49,7 @@ fn test_all_vectors() {
     }
 }
 
-fn test_mnemonic<L: Lang>(
+fn test_mnemonic<L: Language>(
     passphrase: &str,
     entropy_hex: &str,
     expected_phrase: &str,

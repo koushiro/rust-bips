@@ -1,9 +1,9 @@
 #[cfg(feature = "rand")]
 #[test]
 fn test_generate() {
-    use bip0039::{language, Count, Lang, Mnemonic};
+    use bip0039::{language, Count, Language, Mnemonic};
 
-    fn generate<L: Lang>(expected_word_count: Count) {
+    fn generate<L: Language>(expected_word_count: Count) {
         let mnemonic = <Mnemonic<L>>::generate(expected_word_count);
         let actual_word_count = mnemonic.phrase().split_whitespace().count();
         assert_eq!(actual_word_count, expected_word_count.word_count());

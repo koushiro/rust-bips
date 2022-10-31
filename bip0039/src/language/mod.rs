@@ -22,7 +22,7 @@ mod spanish;
 ///
 /// The English language is always available, other languages are enabled using
 /// the compilation features.
-pub trait Lang: Sized {
+pub trait Language: Sized {
     /// The word list for this language.
     const WORD_LIST: &'static [&'static str];
 
@@ -78,7 +78,7 @@ pub trait Lang: Sized {
 /// other languages are enabled using the compilation features.
 #[derive(Copy, Clone, Debug)]
 pub struct English;
-impl Lang for English {
+impl Language for English {
     const WORD_LIST: &'static [&'static str] = &english::WORDS;
 
     fn is_sorted() -> bool {
@@ -91,7 +91,7 @@ impl Lang for English {
 #[derive(Copy, Clone, Debug)]
 pub struct ChineseSimplified;
 #[cfg(feature = "chinese-simplified")]
-impl Lang for ChineseSimplified {
+impl Language for ChineseSimplified {
     const WORD_LIST: &'static [&'static str] = &chinese_simplified::WORDS;
 }
 
@@ -100,7 +100,7 @@ impl Lang for ChineseSimplified {
 #[derive(Copy, Clone, Debug)]
 pub struct ChineseTraditional;
 #[cfg(feature = "chinese-traditional")]
-impl Lang for ChineseTraditional {
+impl Language for ChineseTraditional {
     const WORD_LIST: &'static [&'static str] = &chinese_traditional::WORDS;
 }
 
@@ -109,7 +109,7 @@ impl Lang for ChineseTraditional {
 #[derive(Copy, Clone, Debug)]
 pub struct Czech;
 #[cfg(feature = "czech")]
-impl Lang for Czech {
+impl Language for Czech {
     const WORD_LIST: &'static [&'static str] = &czech::WORDS;
 }
 
@@ -118,7 +118,7 @@ impl Lang for Czech {
 #[derive(Copy, Clone, Debug)]
 pub struct French;
 #[cfg(feature = "french")]
-impl Lang for French {
+impl Language for French {
     const WORD_LIST: &'static [&'static str] = &french::WORDS;
 }
 
@@ -127,7 +127,7 @@ impl Lang for French {
 #[derive(Copy, Clone, Debug)]
 pub struct Italian;
 #[cfg(feature = "italian")]
-impl Lang for Italian {
+impl Language for Italian {
     const WORD_LIST: &'static [&'static str] = &italian::WORDS;
 
     fn is_sorted() -> bool {
@@ -140,7 +140,7 @@ impl Lang for Italian {
 #[derive(Copy, Clone, Debug)]
 pub struct Japanese;
 #[cfg(feature = "japanese")]
-impl Lang for Japanese {
+impl Language for Japanese {
     const WORD_LIST: &'static [&'static str] = &japanese::WORDS;
 }
 
@@ -149,7 +149,7 @@ impl Lang for Japanese {
 #[derive(Copy, Clone, Debug)]
 pub struct Korean;
 #[cfg(feature = "korean")]
-impl Lang for Korean {
+impl Language for Korean {
     const WORD_LIST: &'static [&'static str] = &korean::WORDS;
 
     fn is_sorted() -> bool {
@@ -162,7 +162,7 @@ impl Lang for Korean {
 #[derive(Copy, Clone, Debug)]
 pub struct Portuguese;
 #[cfg(feature = "portuguese")]
-impl Lang for Portuguese {
+impl Language for Portuguese {
     const WORD_LIST: &'static [&'static str] = &portuguese::WORDS;
 
     fn is_sorted() -> bool {
@@ -175,7 +175,7 @@ impl Lang for Portuguese {
 #[derive(Copy, Clone, Debug)]
 pub struct Spanish;
 #[cfg(feature = "spanish")]
-impl Lang for Spanish {
+impl Language for Spanish {
     const WORD_LIST: &'static [&'static str] = &spanish::WORDS;
 }
 
@@ -229,7 +229,7 @@ mod tests {
     #[test]
     fn word_list_is_sorted() {
         use std::cmp::Ordering;
-        fn is_sorted<L: Lang>() -> bool {
+        fn is_sorted<L: Language>() -> bool {
             L::WORD_LIST.windows(2).all(|w| {
                 w[0].partial_cmp(w[1])
                     .map(|o| o != Ordering::Greater)
@@ -258,7 +258,7 @@ mod tests {
     #[cfg(feature = "all-languages")]
     #[test]
     fn word_list_is_normalized() {
-        fn check_normalized<L: Lang>() {
+        fn check_normalized<L: Language>() {
             for &word in L::WORD_LIST {
                 assert!(
                     unicode_normalization::is_nfkd(word),
