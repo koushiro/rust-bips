@@ -217,19 +217,28 @@ impl<L> Drop for Mnemonic<L> {
 }
 
 impl<L: Language> Mnemonic<L> {
-    /// Generates a new [`Mnemonic`] randomly in the specified language and word count.
+    /// Generates a new [`Mnemonic`] randomly in the specified word count.
     ///
-    /// # Example
+    /// # Examples
     ///
-    /// ```
-    /// use bip0039::{ChineseSimplified, Count, Mnemonic};
+    /// ```rust
+    /// use bip0039::{Count, Mnemonic};
     ///
     /// let mnemonic = <Mnemonic>::generate(Count::Words12);
     /// let phrase = mnemonic.phrase();
-    ///
-    /// let mnemonic = <Mnemonic<ChineseSimplified>>::generate(Count::Words24);
-    /// let phrase = mnemonic.phrase();
     /// ```
+    ///
+    #[cfg_attr(
+        feature = "chinese-simplified",
+        doc = r##"
+```rust
+use bip0039::{ChineseSimplified, Count, Mnemonic};
+
+let mnemonic = <Mnemonic<ChineseSimplified>>::generate(Count::Words24);
+let phrase = mnemonic.phrase();
+```
+"##
+    )]
     #[cfg(feature = "rand")]
     pub fn generate(word_count: Count) -> Self {
         use rand::RngCore;
@@ -244,11 +253,11 @@ impl<L: Language> Mnemonic<L> {
             .expect("valid entropy length won't fail to generate the mnemonic")
     }
 
-    /// Creates a new [`Mnemonic`] in the specified language from the given entropy.
+    /// Creates a new [`Mnemonic`] from the given entropy.
     ///
     /// # Example
     ///
-    /// ```
+    /// ```rust
     /// use bip0039::Mnemonic;
     ///
     /// let entropy = vec![0x1a, 0x48, 0x6a, 0x5f, 0xbe, 0x53, 0x63, 0x99, 0x84, 0xcb, 0x64, 0xb0, 0x70, 0x75, 0x5f, 0x7b];
@@ -287,11 +296,11 @@ impl<L: Language> Mnemonic<L> {
         })
     }
 
-    /// Creates a [`Mnemonic`] from an existing mnemonic phrase in the given language.
+    /// Creates a [`Mnemonic`] from an existing mnemonic phrase.
     ///
-    /// # Example
+    /// # Examples
     ///
-    /// ```
+    /// ```rust
     /// use bip0039::{Error, Mnemonic};
     ///
     /// let phrase = "bottom drive obey lake curtain smoke basket hold race lonely fit walk";
@@ -312,28 +321,40 @@ impl<L: Language> Mnemonic<L> {
         })
     }
 
-    /// Validates the word count and checksum of a mnemonic phrase in the given language.
+    /// Validates the word count and checksum of a mnemonic phrase.
     ///
-    /// # Example
+    /// # Examples
     ///
-    /// ```
-    /// use bip0039::{Error, Japanese, Mnemonic};
+    /// ```rust
+    /// use bip0039::{Error, Mnemonic};
     /// use unicode_normalization::UnicodeNormalization;
     ///
     /// let phrase = "bottom drive obey lake curtain smoke basket hold race lonely fit walk";
     /// let result = <Mnemonic>::validate(phrase);
     /// assert!(result.is_ok());
+    ///
     /// let phrase = "bottom drive obey lake curtain smoke basket hold race lonely fit shit";
     /// let result = <Mnemonic>::validate(phrase);
     /// assert_eq!(result.unwrap_err(), Error::UnknownWord("shit".into()));
+    ///```
     ///
-    /// let phrase = "そつう　れきだい　ほんやく　わかす　りくつ　ばいか　ろせん　やちん　そつう　れきだい　ほんやく　わかめ";
-    /// let result = <Mnemonic<Japanese>>::validate(phrase);
-    /// assert!(result.is_ok());
-    /// let phrase = "そつう　れきだい　ほんやく　わかす　りくつ　ばいか　ろせん　やちん　そつう　れきだい　ほんやく　ばか";
-    /// let result = <Mnemonic<Japanese>>::validate(phrase);
-    /// assert_eq!(result.unwrap_err(), Error::UnknownWord("ばか".nfkd().to_string()));
-    /// ```
+    #[cfg_attr(
+        feature = "japanese",
+        doc = r##"
+```rust
+use bip0039::{Error, Japanese, Mnemonic};
+use unicode_normalization::UnicodeNormalization;
+
+let phrase = "そつう　れきだい　ほんやく　わかす　りくつ　ばいか　ろせん　やちん　そつう　れきだい　ほんやく　わかめ";
+let result = <Mnemonic<Japanese>>::validate(phrase);
+assert!(result.is_ok());
+
+let phrase = "そつう　れきだい　ほんやく　わかす　りくつ　ばいか　ろせん　やちん　そつう　れきだい　ほんやく　ばか";
+let result = <Mnemonic<Japanese>>::validate(phrase);
+assert_eq!(result.unwrap_err(), Error::UnknownWord("ばか".nfkd().to_string()));
+```
+"##
+    )]
     pub fn validate<'a, P: Into<Cow<'a, str>>>(phrase: P) -> Result<(), Error> {
         let _entropy = Self::phrase_to_entropy(phrase)?;
         Ok(())
@@ -381,7 +402,7 @@ impl<L: Language> Mnemonic<L> {
     ///
     /// # Example
     ///
-    /// ```
+    /// ```rust
     /// use bip0039::Mnemonic;
     ///
     /// let phrase = "bottom drive obey lake curtain smoke basket hold race lonely fit walk";

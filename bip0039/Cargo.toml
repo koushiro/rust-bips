@@ -15,6 +15,13 @@ keywords = ["bip39", "bitcoin", "crypto", "mnemonic"]
 categories = ["cryptography"]
 exclude = ["words"]
 
+# docs.rs-specific configuration
+[package.metadata.docs.rs]
+# RUSTDOCFLAGS="--cfg doc_cfg"
+# To build locally: cargo +nightly doc --all-features --no-deps --open
+all-features = true
+rustdoc-args = ["--cfg", "doc_cfg"]
+
 [features]
 default = ["std", "rand"]
 std = [
