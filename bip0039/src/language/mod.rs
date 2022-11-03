@@ -55,6 +55,7 @@ pub trait Language: Sized {
     }
 
     /// Returns words from the word list that start with the given prefix.
+    ///
     /// The words in the word list are ordered lexicographically, which means that we cannot use
     /// `binary_search` to find words more efficiently if the ordering of the words is not be
     /// sorted by the byte values, because the Rust ordering is based on the byte values.
