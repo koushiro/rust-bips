@@ -1,4 +1,4 @@
-# Unreleased
+# Version 0.11.0 [2022-11-04]
 
 - Update `pbkdf2` to 0.11, bump the MSRV to 1.57+ ([#47])
 - Sanitize mnemonic phrase for extra whitespace ([#49])
