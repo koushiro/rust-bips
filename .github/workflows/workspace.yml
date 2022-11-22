@@ -41,25 +41,6 @@ jobs:
           command: clippy
           args: --all-features --all-targets -- -D warnings
 
-  check-benchmark:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Sources
-        uses: actions/checkout@v3
-
-      - name: Install Rust Toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-          override: true
-
-      - name: Check
-        uses: actions-rs/cargo@v1
-        with:
-          command: bench
-          args: --manifest-path benchmark/Cargo.toml check
-
   coverage:
     runs-on: ubuntu-latest
     steps:
