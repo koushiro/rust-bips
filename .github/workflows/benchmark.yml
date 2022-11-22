@@ -7,6 +7,7 @@ on:
     paths:
       - .github/workflows/benchmark.yml
       - benchmark/**
+      - Cargo.*
 
 defaults:
   run:
