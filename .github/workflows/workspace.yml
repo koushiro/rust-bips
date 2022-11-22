@@ -3,8 +3,6 @@ name: workspace
 on:
   push:
     branches: master
-    path-ignore:
-      - README.md
   pull_request:
     path-ignore:
       - README.md

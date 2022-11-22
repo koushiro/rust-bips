@@ -1,9 +1,10 @@
 [package]
 name = "bips-benchmark"
-version = "0.1.0"
+version = "0.0.0"
 authors = ["koushiro <koushiro.cqx@gmail.com>"]
 edition = "2021"
 resolver = "2"
+publish = false
 
 [dev-dependencies]
 criterion = "0.4"
