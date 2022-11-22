@@ -22,11 +22,6 @@ exclude = ["words"]
 all-features = true
 rustdoc-args = ["--cfg", "doc_cfg"]
 
-# cargo-release specific configuration
-[package.metadata.release]
-allow-branch = "master"
-pre-release-commit-message = "Release bip0039 {{version}}"
-
 [features]
 default = ["std", "rand"]
 std = [
