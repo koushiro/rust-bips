@@ -6,8 +6,7 @@ on:
   pull_request:
     paths:
       - .github/workflows/bip0039.yml
-      - bip0039/src/**
-      - bip0039/tests/**
+      - bip0039/**
       - Cargo.*
     path-ignore:
       - bip0039/README.md

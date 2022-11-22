@@ -1,0 +1,40 @@
+name: benchmark
+
+on:
+  push:
+    branches: master
+  pull_request:
+    paths:
+      - .github/workflows/benchmark.yml
+      - benchmark/**
+
+defaults:
+  run:
+    working-directory: benchmark
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  check-benchmark:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Sources
+        uses: actions/checkout@v3
+
+      - name: Install Rust Toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+
+      - name: Check
+        uses: actions-rs/cargo@v1
+        with:
+          command: bench
+          args: check
