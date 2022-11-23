@@ -2,8 +2,6 @@
 //!
 //! # Usage
 //!
-//!
-//!
 //! ```rust
 //! use bip0039::{Count, Mnemonic};
 //!

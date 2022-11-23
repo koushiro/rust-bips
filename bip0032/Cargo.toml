@@ -1,0 +1,17 @@
+[package]
+name = "bip0032"
+version = "0.0.0"
+authors = ["koushiro <koushiro.cqx@gmail.com>"]
+edition = "2021"
+rust-version = "1.56.0"
+resolver = "2"
+
+description = "Another Rust implementation of BIP-0032 standard"
+readme = "README.md"
+license = "MIT/Apache-2.0"
+documentation = "https://docs.rs/bip0032"
+repository = "https://github.com/koushiro/bip0032"
+keywords = ["bip32", "bitcoin", "crypto"]
+categories = ["cryptography"]
+
+[dependencies]
