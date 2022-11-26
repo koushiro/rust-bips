@@ -11,8 +11,8 @@
 [crates-url]: https://crates.io/crates/bip0032
 [docs-svg]: https://docs.rs/bip0032/badge.svg
 [docs-url]: https://docs.rs/bip0032
-[msrv-svg]: https://img.shields.io/badge/rustc-1.56+-blue.svg
-[msrv-url]: https://blog.rust-lang.org/2021/10/21/Rust-1.56.0.html
+[msrv-svg]: https://img.shields.io/badge/rustc-1.57+-blue.svg
+[msrv-url]: https://blog.rust-lang.org/2021/12/02/Rust-1.57.0.html
 
 Another Rust implementation of [BIP-0032](https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki) standard.
 
