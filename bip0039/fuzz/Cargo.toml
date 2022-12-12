@@ -23,18 +23,18 @@ debug = 1
 
 [[bin]]
 name = "generate"
-path = "fuzz_targets/fuzz_generate.rs"
+path = "fuzz_targets/generate.rs"
 test = false
 doc = false
 
 [[bin]]
 name = "from_entropy"
-path = "fuzz_targets/fuzz_from_entropy.rs"
+path = "fuzz_targets/from_entropy.rs"
 test = false
 doc = false
 
 [[bin]]
 name = "from_phrase"
-path = "fuzz_targets/fuzz_from_phrase.rs"
+path = "fuzz_targets/from_phrase.rs"
 test = false
 doc = false
