@@ -3,7 +3,7 @@ name = "bip0039"
 version = "0.11.0"
 authors = ["koushiro <koushiro.cqx@gmail.com>"]
 edition = "2021"
-rust-version = "1.57"
+rust-version = "1.60.0"
 resolver = "2"
 
 description = "Another Rust implementation of BIP-0039 standard"
@@ -55,7 +55,7 @@ spanish = []
 
 [dependencies]
 hmac = { version = "0.12", default-features = false }
-pbkdf2 = { version = "0.11", default-features = false }
+pbkdf2 = { version = "0.12", default-features = false }
 rand = { version = "0.8", optional = true }
 sha2 = { version = "0.10", default-features = false }
 unicode-normalization = { version = "0.1", default-features = false }

@@ -434,7 +434,8 @@ assert_eq!(result.unwrap_err(), Error::UnknownWord("ばか".nfkd().to_string()))
             normalized_salt.as_bytes(),
             PBKDF2_ROUNDS,
             &mut seed,
-        );
+        )
+        .expect("HMAC can be initialized with any key length");
         seed
     }
 
