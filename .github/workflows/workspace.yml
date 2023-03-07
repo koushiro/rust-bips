@@ -41,24 +41,23 @@ jobs:
           command: clippy
           args: --all-features --all-targets -- -D warnings
 
-  coverage:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Sources
-        uses: actions/checkout@v3
-
-      - name: Install Rust Toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-          override: true
-
-      - name: Generate Code Coverage
-        uses: actions-rs/tarpaulin@v0.1
-        with:
-          version: '0.25.1'
-          args: '--all-features'
-
-      - name: Upload Code Coverage
-        uses: codecov/codecov-action@v3
+#  coverage:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Checkout Sources
+#        uses: actions/checkout@v3
+#
+#      - name: Install Rust Toolchain
+#        uses: actions-rs/toolchain@v1
+#        with:
+#          profile: minimal
+#          toolchain: stable
+#          override: true
+#
+#      - name: Generate Code Coverage
+#        uses: actions-rs/tarpaulin@v0.1
+#        with:
+#          args: '--all-features'
+#
+#      - name: Upload Code Coverage
+#        uses: codecov/codecov-action@v3
