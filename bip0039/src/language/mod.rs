@@ -24,7 +24,7 @@ mod spanish;
 ///
 /// The English language is always available, other languages are enabled using
 /// the compilation features.
-pub trait Language: Sized + Ord + PartialOrd + PartialEq + Eq + Hash {
+pub trait Language: Sized {
     /// The word list for this language.
     const WORD_LIST: &'static [&'static str];
 
