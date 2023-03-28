@@ -1,3 +1,5 @@
+use core::hash::Hash;
+
 #[cfg(feature = "chinese-simplified")]
 mod chinese_simplified;
 #[cfg(feature = "chinese-traditional")]
@@ -77,7 +79,7 @@ pub trait Language: Sized {
 ///
 /// The `English` language is always available,
 /// other languages are enabled using the compilation features.
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, Ord, PartialOrd, Eq, PartialEq, Hash)]
 pub struct English;
 impl Language for English {
     const WORD_LIST: &'static [&'static str] = &english::WORDS;
@@ -89,7 +91,7 @@ impl Language for English {
 
 /// The `Simplified Chinese` language.
 #[cfg(feature = "chinese-simplified")]
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, Ord, PartialOrd, Eq, PartialEq, Hash)]
 pub struct ChineseSimplified;
 #[cfg(feature = "chinese-simplified")]
 impl Language for ChineseSimplified {
@@ -98,7 +100,7 @@ impl Language for ChineseSimplified {
 
 /// The `Traditional Chinese` language.
 #[cfg(feature = "chinese-traditional")]
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, Ord, PartialOrd, Eq, PartialEq, Hash)]
 pub struct ChineseTraditional;
 #[cfg(feature = "chinese-traditional")]
 impl Language for ChineseTraditional {
@@ -107,7 +109,7 @@ impl Language for ChineseTraditional {
 
 /// The `Czech` language.
 #[cfg(feature = "czech")]
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, Ord, PartialOrd, Eq, PartialEq, Hash)]
 pub struct Czech;
 #[cfg(feature = "czech")]
 impl Language for Czech {
@@ -116,7 +118,7 @@ impl Language for Czech {
 
 /// The `French` language.
 #[cfg(feature = "french")]
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, Ord, PartialOrd, Eq, PartialEq, Hash)]
 pub struct French;
 #[cfg(feature = "french")]
 impl Language for French {
@@ -125,7 +127,7 @@ impl Language for French {
 
 /// The `Italian` language.
 #[cfg(feature = "italian")]
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, Ord, PartialOrd, Eq, PartialEq, Hash)]
 pub struct Italian;
 #[cfg(feature = "italian")]
 impl Language for Italian {
@@ -138,7 +140,7 @@ impl Language for Italian {
 
 /// The `Japanese` language.
 #[cfg(feature = "japanese")]
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, Ord, PartialOrd, Eq, PartialEq, Hash)]
 pub struct Japanese;
 #[cfg(feature = "japanese")]
 impl Language for Japanese {
@@ -147,7 +149,7 @@ impl Language for Japanese {
 
 /// The `Korean` language.
 #[cfg(feature = "korean")]
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, Ord, PartialOrd, Eq, PartialEq, Hash)]
 pub struct Korean;
 #[cfg(feature = "korean")]
 impl Language for Korean {
@@ -160,7 +162,7 @@ impl Language for Korean {
 
 /// The `Portuguese` language.
 #[cfg(feature = "portuguese")]
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, Ord, PartialOrd, Eq, PartialEq, Hash)]
 pub struct Portuguese;
 #[cfg(feature = "portuguese")]
 impl Language for Portuguese {
@@ -173,7 +175,7 @@ impl Language for Portuguese {
 
 /// The `Spanish` language.
 #[cfg(feature = "spanish")]
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, Ord, PartialOrd, Eq, PartialEq, Hash)]
 pub struct Spanish;
 #[cfg(feature = "spanish")]
 impl Language for Spanish {
