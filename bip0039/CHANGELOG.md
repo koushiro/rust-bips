@@ -24,6 +24,7 @@
 - Update `pbkdf2` to 0.10 ([#39])
 
 [#34]: https://github.com/koushiro/rust-bips/pull/34
+[#39]: https://github.com/koushiro/rust-bips/pull/39
 
 # Version 0.9.0 [2021-08-30]
 
