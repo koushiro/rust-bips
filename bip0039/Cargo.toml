@@ -10,9 +10,9 @@ description = "Another Rust implementation of BIP-0039 standard"
 readme = "README.md"
 license = "MIT/Apache-2.0"
 documentation = "https://docs.rs/bip0039"
-repository = "https://github.com/koushiro/bip0039"
+repository = "https://github.com/koushiro/rust-bips"
 keywords = ["bip39", "bitcoin", "crypto", "mnemonic"]
-categories = ["cryptography"]
+categories = ["cryptography", "no-std"]
 exclude = ["words"]
 
 # docs.rs-specific configuration

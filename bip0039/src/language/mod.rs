@@ -1,5 +1,3 @@
-use core::hash::Hash;
-
 #[cfg(feature = "chinese-simplified")]
 mod chinese_simplified;
 #[cfg(feature = "chinese-traditional")]
