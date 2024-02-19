@@ -1,3 +1,9 @@
+# Version 0.12.0 [2024-02-19]
+
+- Update `pbkdf2` to 0.12, bump the MSRV to 1.60+ ([#68])
+
+[#68]: https://github.com/koushiro/rust-bips/pull/68
+
 # Version 0.11.0 [2022-11-22]
 
 - Update `pbkdf2` to 0.11, bump the MSRV to 1.57+ ([#47])
