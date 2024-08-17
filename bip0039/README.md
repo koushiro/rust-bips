@@ -3,7 +3,7 @@
 [![gha-svg]][gha-url]
 [![crates-svg]][crates-url]
 [![docs-svg]][docs-url]
-[![msrv-svg]][msrv-url]
+![msrv-svg]
 
 [gha-svg]: https://github.com/koushiro/rust-bips/workflows/bip0039/badge.svg
 [gha-url]: https://github.com/koushiro/rust-bips/actions
@@ -11,8 +11,7 @@
 [crates-url]: https://crates.io/crates/bip0039
 [docs-svg]: https://docs.rs/bip0039/badge.svg
 [docs-url]: https://docs.rs/bip0039
-[msrv-svg]: https://img.shields.io/badge/rustc-1.60+-blue.svg
-[msrv-url]: https://blog.rust-lang.org/2022/04/07/Rust-1.60.0.html
+[msrv-svg]: https://img.shields.io/badge/rustc-1.61+-blue.svg
 
 Another Rust implementation of [BIP-0039](https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki) standard.
 
