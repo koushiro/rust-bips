@@ -12,7 +12,7 @@
 //!
 //! // Generates the HD wallet seed from the mnemonic and the passphrase.
 //! let seed = mnemonic.to_seed("");
-//! println!("seed: {}", hex::encode(&seed[..]));
+//! println!("seed: {}", const_hex::encode(&seed[..]));
 //! ```
 //!
 #![cfg_attr(

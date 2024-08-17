@@ -409,7 +409,7 @@ assert_eq!(result.unwrap_err(), Error::UnknownWord("ばか".nfkd().to_string()))
     /// let mnemonic = <Mnemonic>::from_phrase(phrase).unwrap();
     /// assert_eq!(
     ///     mnemonic.to_seed("").to_vec(),
-    ///     hex::decode("02d5cd1db85b4d1397d78978062a1160e76e94cc5aaad3089644846865bb18fc68ddf383059d3fe82902a203d60790a8c8ab488de5013d10a8a8bded8d9174b9").unwrap()
+    ///     const_hex::decode("02d5cd1db85b4d1397d78978062a1160e76e94cc5aaad3089644846865bb18fc68ddf383059d3fe82902a203d60790a8c8ab488de5013d10a8a8bded8d9174b9").unwrap()
     /// );
     /// ```
     pub fn to_seed<P: AsRef<str>>(&self, passphrase: P) -> [u8; 64] {
