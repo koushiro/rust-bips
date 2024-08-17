@@ -17,10 +17,10 @@ exclude = ["words"]
 
 # docs.rs-specific configuration
 [package.metadata.docs.rs]
-# RUSTDOCFLAGS="--cfg doc_cfg"
+# RUSTDOCFLAGS="--cfg docsrs"
 # To build locally: cargo +nightly doc --all-features --no-deps --open
 all-features = true
-rustdoc-args = ["--cfg", "doc_cfg"]
+rustdoc-args = ["--cfg", "docsrs"]
 
 [features]
 default = ["std", "rand"]
