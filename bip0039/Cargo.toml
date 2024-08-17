@@ -3,7 +3,7 @@ name = "bip0039"
 version = "0.12.0"
 authors = ["koushiro <koushiro.cqx@gmail.com>"]
 edition = "2021"
-rust-version = "1.60.0"
+rust-version = "1.64.0"
 resolver = "2"
 
 description = "Another Rust implementation of BIP-0039 standard"
@@ -62,6 +62,6 @@ unicode-normalization = { version = "0.1", default-features = false }
 zeroize = "1.2"
 
 [dev-dependencies]
-hex = "0.4"
+const-hex = "1.12"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"

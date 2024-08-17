@@ -55,11 +55,11 @@ fn test_mnemonic<L: Language>(
     expected_phrase: &str,
     expected_seed_hex: &str,
 ) {
-    let entropy = hex::decode(entropy_hex).unwrap();
+    let entropy = const_hex::decode(entropy_hex).unwrap();
     let mnemonic = <Mnemonic<L>>::from_entropy(entropy).unwrap();
     assert_eq!(mnemonic.phrase(), expected_phrase.nfkd().to_string());
     assert!(<Mnemonic<L>>::from_phrase(expected_phrase).is_ok());
 
     let seed = mnemonic.to_seed(passphrase);
-    assert_eq!(hex::encode(&seed[..]), expected_seed_hex);
+    assert_eq!(const_hex::encode(&seed[..]), expected_seed_hex);
 }

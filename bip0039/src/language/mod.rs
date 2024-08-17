@@ -210,7 +210,7 @@ mod tests {
                     assert!(unicode_normalization::is_nfkd(word));
                     digest.update(format!("{}\n", word));
                 }
-                assert_eq!(hex::encode(digest.finalize()), $checksum);
+                assert_eq!(const_hex::encode(digest.finalize()), $checksum);
             }};
         }
 
