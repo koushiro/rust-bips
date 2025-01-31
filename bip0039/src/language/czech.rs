@@ -1,3 +1,4 @@
+#[allow(clippy::large_const_arrays)]
 pub const WORDS: [&str; 2048] = [
     "abdikace", "abeceda", "adresa", "agrese", "akce", "aktovka", "alej", "alkohol", "amputace",
     "ananas", "andulka", "anekdota", "anketa", "antika", "anulovat", "archa", "arogance", "asfalt",

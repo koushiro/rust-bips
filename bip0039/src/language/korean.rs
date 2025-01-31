@@ -1,3 +1,4 @@
+#[allow(clippy::large_const_arrays)]
 pub const WORDS: [&str; 2048] = [
     "가격",
     "가끔",
