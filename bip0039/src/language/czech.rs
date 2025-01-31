@@ -1,4 +1,4 @@
-pub const WORDS: [&str; 2048] = [
+pub static WORDS: [&str; 2048] = [
     "abdikace", "abeceda", "adresa", "agrese", "akce", "aktovka", "alej", "alkohol", "amputace",
     "ananas", "andulka", "anekdota", "anketa", "antika", "anulovat", "archa", "arogance", "asfalt",
     "asistent", "aspirace", "astma", "astronom", "atlas", "atletika", "atol", "autobus", "azyl",

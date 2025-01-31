@@ -1,4 +1,4 @@
-pub const WORDS: [&str; 2048] = [
+pub static WORDS: [&str; 2048] = [
     "가격",
     "가끔",
     "가난",
