@@ -11,9 +11,10 @@ criterion = "0.5"
 
 # BIP-0039 benchmarks
 bip0039 = { path = "../bip0039" }
-bip39 = { package = "tiny-bip39", version = "1.0" }
+bip39 = { package = "tiny-bip39", version = "2.0", features = ["rand"] }
 coins-bip39 = "0.12"
-rand = "0.8"
+rand = "0.9"
+rand_08 = { package = "rand", version = "0.8" }
 
 [[bench]]
 name = "bip0039"

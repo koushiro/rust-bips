@@ -244,7 +244,7 @@ let phrase = mnemonic.phrase();
         use rand::RngCore;
         const MAX_ENTROPY_BITS: usize = Count::Words24.entropy_bits();
 
-        let mut rng = rand::thread_rng();
+        let mut rng = rand::rng();
         let mut entropy = [0u8; MAX_ENTROPY_BITS / BITS_PER_BYTE];
         rng.fill_bytes(&mut entropy);
 

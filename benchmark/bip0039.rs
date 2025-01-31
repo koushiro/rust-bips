@@ -14,7 +14,7 @@ fn bench_generate(c: &mut Criterion) {
         use coins_bip39::{English, Mnemonic};
         b.iter(|| {
             let _phrase = black_box({
-                let mut rng = rand::thread_rng();
+                let mut rng = rand_08::thread_rng();
                 let mnemonic = <Mnemonic<English>>::new_with_count(&mut rng, 12).unwrap();
                 mnemonic.to_phrase()
             });
@@ -82,7 +82,7 @@ fn bench_to_seed(c: &mut Criterion) {
     });
     c.bench_function("coins-bip39::to_seed", |b| {
         use coins_bip39::{English, Mnemonic};
-        let mut rng = rand::thread_rng();
+        let mut rng = rand_08::thread_rng();
         let mnemonic = <Mnemonic<English>>::new_with_count(&mut rng, 12).unwrap();
         b.iter(|| {
             let _key = black_box(mnemonic.master_key(None).unwrap()); // calling `to_seed`
