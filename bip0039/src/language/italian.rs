@@ -1,4 +1,5 @@
-pub static WORDS: [&str; 2048] = [
+#[allow(clippy::large_const_arrays)]
+pub const WORDS: [&str; 2048] = [
     "abaco",
     "abbaglio",
     "abbinato",
