@@ -32,10 +32,10 @@ jobs:
         toolchain: [stable]
     runs-on: ${{ matrix.platform }}
     steps:
-      - name: Checkout Sources
+      - name: Checkout sources
         uses: actions/checkout@v4
 
-      - name: Install Rust Toolchain
+      - name: Install toolchain
         uses: actions-rs/toolchain@v1
         with:
           profile: minimal
@@ -51,10 +51,10 @@ jobs:
   no-std:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Sources
+      - name: Checkout sources
         uses: actions/checkout@v4
 
-      - name: Install Rust Toolchain
+      - name: Install toolchain
         uses: actions-rs/toolchain@v1
         with:
           profile: minimal
@@ -71,10 +71,10 @@ jobs:
   msrv:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Sources
+      - name: Checkout sources
         uses: actions/checkout@v4
 
-      - name: Install Rust Toolchain
+      - name: Install toolchain
         uses: actions-rs/toolchain@v1
         with:
           profile: minimal

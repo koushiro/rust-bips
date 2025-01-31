@@ -1,3 +1,4 @@
+#[allow(clippy::large_const_arrays)]
 pub const WORDS: [&str; 2048] = [
     "abacate", "abaixo", "abalar", "abater", "abduzir", "abelha", "aberto", "abismo", "abotoar",
     "abranger", "abreviar", "abrigar", "abrupto", "absinto", "absoluto", "absurdo", "abutre",
