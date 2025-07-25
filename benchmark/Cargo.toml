@@ -7,7 +7,7 @@ resolver = "2"
 publish = false
 
 [dev-dependencies]
-criterion = "0.5"
+criterion = "0.7"
 
 # BIP-0039 benchmarks
 bip0039 = { path = "../bip0039" }
