@@ -1,34 +1,47 @@
 ## https://taplo.tamasfe.dev/configuration/#configuration-file
 
-include = ["**/Cargo.toml"]
+include = ["**/*.toml"]
+exclude = ["target/**"]
 
 [formatting]
-# Align consecutive entries vertically.
+## Align consecutive entries vertically.
 align_entries = false
-# Append trailing commas for multi-line arrays.
+## Align consecutive comments after entries and items vertically.
+align_comments = true
+## Put trailing commas for multiline arrays.
 array_trailing_comma = true
-# Expand arrays to multiple lines that exceed the maximum column width.
+## Automatically expand arrays to multiple lines when they exceed column_width characters.
 array_auto_expand = true
-# Collapse arrays that don't exceed the maximum column width and don't contain comments.
-array_auto_collapse = false
-# Omit white space padding from single-line arrays
+## Automatically collapse arrays if they fit in one line.
+array_auto_collapse = false # Default: true
+## Omit white space padding from single-line arrays
 compact_arrays = true
-# Omit white space padding from the start and end of inline tables.
+## Omit whitespace padding inside inline tables.
 compact_inline_tables = false
-# Maximum column width in characters, affects array expansion and collapse, this doesn't take whitespace into account.
-# Note that this is not set in stone, and works on a best-effort basis.
-column_width = 160
-# Indent based on tables and arrays of tables and their subtables, subtables out of order are not indented.
+## Expand values (e.g. arrays) inside inline tables.
+inline_table_expand = true
+## Omit whitespace around =.
+compact_entries = false
+## Target maximum column width after which arrays are expanded into new lines.
+## Note that this is not set in stone, and works on a best-effort basis.
+column_width = 100 # Default: 80
+## Indent subtables if they come in order.
 indent_tables = false
-# The substring that is used for indentation, should be tabs or spaces (but technically can be anything).
-indent_string = '    '
-# Add trailing newline at the end of the file if not present.
+## Indent entries under tables.
+indent_entries = false
+## Indentation to use, should be tabs or spaces but technically could be anything.
+indent_string = "    " # Default: 2 spaces
+## Add trailing newline to the source.
 trailing_newline = true
-# Alphabetically reorder keys that are not separated by empty lines.
+## Alphabetically reorder keys that are not separated by blank lines.
 reorder_keys = false
-# Maximum amount of allowed consecutive blank lines. This does not affect the whitespace at the end of the document, as it is always stripped.
-allowed_blank_lines = 1
-# Use CRLF for line endings.
+## Alphabetically reorder array values that are not separated by blank lines.
+reorder_arrays = false
+## Alphabetically reorder inline tables.
+reorder_inline_tables = false
+## The maximum amount of consecutive blank lines allowed.
+allowed_blank_lines = 1 # Default: 2
+## Use CRLF line endings.
 crlf = false
 
 [[rule]]
