@@ -2,62 +2,57 @@ name: workspace
 
 on:
   push:
-    branches: master
+    branches:
+      - main
   pull_request:
-    path-ignore:
+    paths-ignore:
       - README.md
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event_name }}
   cancel-in-progress: true
 
 env:
   CARGO_TERM_COLOR: always
+  TAPLO_CLI_VERSION: 0.10.0
 
 jobs:
-  style:
+  check-format:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Sources
-        uses: actions/checkout@v5
+      - uses: actions/checkout@v5
 
-      - name: Install Rust Toolchain
-        uses: actions-rs/toolchain@v1
+      - name: Cache taplo-cli
+        id: cache-taplo
+        uses: actions/cache@v4
         with:
-          profile: minimal
-          toolchain: stable
-          override: true
-          components: rustfmt, clippy
+          path: ~/.cargo/bin/taplo
+          key: ${{ runner.os }}-taplo-${{ env.TAPLO_CLI_VERSION }}
 
-      - name: Check Code Format
-        uses: actions-rs/cargo@v1
+      - name: Install taplo-cli if not cached
+        if: steps.cache-taplo.outputs.cache-hit != 'true'
+        shell: bash
+        run: cargo install taplo-cli@${TAPLO_CLI_VERSION} --locked
+
+      - name: Run taplo fmt
+        run: taplo fmt --check
+
+      - name: Run cargo fmt
+        run: cargo fmt --all -- --check
+
+  check-clippy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Cache
+        uses: actions/cache@v4
         with:
-          command: fmt
-          args: --all -- --check
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
-      - name: Code Lint
-        uses: actions-rs/cargo@v1
-        with:
-          command: clippy
-          args: --all-features --all-targets -- -D warnings
-
-#  coverage:
-#    runs-on: ubuntu-latest
-#    steps:
-#      - name: Checkout Sources
-#        uses: actions/checkout@v5
-#
-#      - name: Install Rust Toolchain
-#        uses: actions-rs/toolchain@v1
-#        with:
-#          profile: minimal
-#          toolchain: stable
-#          override: true
-#
-#      - name: Generate Code Coverage
-#        uses: actions-rs/tarpaulin@v0.1
-#        with:
-#          args: '--all-features'
-#
-#      - name: Upload Code Coverage
-#        uses: codecov/codecov-action@v3
+      - name: Run cargo clippy
+        run: cargo clippy --workspace --all-targets --all-features -- -D warnings

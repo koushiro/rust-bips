@@ -1,5 +1,5 @@
 [package]
-name = "bips-benchmark"
+name = "bips-benchmarks"
 version = "0.0.0"
 authors = ["koushiro <koushiro.cqx@gmail.com>"]
 edition = "2021"

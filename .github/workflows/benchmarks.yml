@@ -1,0 +1,31 @@
+name: benchmarks
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    paths:
+      - .github/workflows/benchmark.yml
+      - benchmarks/**
+      - Cargo.*
+
+defaults:
+  run:
+    working-directory: benchmarks
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event_name }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  check-benchmarks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Check benchmarks
+        run: cargo bench --no-run

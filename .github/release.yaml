@@ -1,0 +1,20 @@
+changelog:
+  categories:
+    - title: Added
+      labels:
+        - release-note/feat
+    - title: Changed
+      labels:
+        - release-note/refactor
+    - title: Fixed
+      labels:
+        - release-note/fix
+    - title: CI
+      labels:
+        - release-note/ci
+    - title: Chore
+      labels:
+        - release-note/chore
+    - title: Docs
+      labels:
+        - release-note/docs
