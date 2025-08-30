@@ -1,10 +1,7 @@
 # rust-bips
 
-[![codecov-svg]][codecov-url]
 [![deps-svg]][deps-url]
 
-[codecov-svg]: https://img.shields.io/codecov/c/github/koushiro/rust-bips
-[codecov-url]: https://codecov.io/gh/koushiro/rust-bips
 [deps-svg]: https://deps.rs/repo/github/koushiro/rust-bips/status.svg
 [deps-url]: https://deps.rs/repo/github/koushiro/rust-bips
 
