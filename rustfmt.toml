@@ -1,4 +1,18 @@
-reorder_imports = true
-single_line_if_else_max_width = 80
-imports_granularity = "Crate"
+# Basic
+edition = "2021"
+max_width = 100
+use_small_heuristics = "Max"
+# Imports
 group_imports = "StdExternalCrate"
+imports_granularity = "Crate"
+reorder_imports = true
+# Consistency
+newline_style = "Unix"
+# Format comments
+comment_width = 120
+wrap_comments = true
+# Misc
+chain_width = 80
+match_block_trailing_comma = true
+merge_derives = false
+use_field_init_shorthand = true

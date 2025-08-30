@@ -65,10 +65,7 @@ pub trait Language: Sized {
             Some(i) => i,
             None => return &[],
         };
-        let count = Self::WORD_LIST[first..]
-            .iter()
-            .take_while(|w| w.starts_with(prefix))
-            .count();
+        let count = Self::WORD_LIST[first..].iter().take_while(|w| w.starts_with(prefix)).count();
         &Self::WORD_LIST[first..first + count]
     }
 }
@@ -191,16 +188,16 @@ mod tests {
         //
         // They are as follows in the [bips](https://github.com/bitcoin/bips/blob/master/bip-0039/bip-0039-wordlists.md):
         //
-        //   chinese_simplified.txt  : 5c5942792bd8340cb8b27cd592f1015edf56a8c5b26276ee18a482428e7c5726
-        //   chinese_traditional.txt : 417b26b3d8500a4ae3d59717d7011952db6fc2fb84b807f3f94ac734e89c1b5f
-        //   czech.txt               : 7e80e161c3e93d9554c2efb78d4e3cebf8fc727e9c52e03b83b94406bdcc95fc
-        //   english.txt             : 2f5eed53a4727b4bf8880d8f3f199efc90e58503646d9ff8eff3a2ed3b24dbda
-        //   french.txt              : ebc3959ab7801a1df6bac4fa7d970652f1df76b683cd2f4003c941c63d517e59
-        //   italian.txt             : d392c49fdb700a24cd1fceb237c1f65dcc128f6b34a8aacb58b59384b5c648c2
-        //   japanese.txt            : 2eed0aef492291e061633d7ad8117f1a2b03eb80a29d0e4e3117ac2528d05ffd
-        //   korean.txt              : 9e95f86c167de88f450f0aaf89e87f6624a57f973c67b516e338e8e8b8897f60
-        //   portuguese.txt          : 2685e9c194c82ae67e10ba59d9ea5345a23dc093e92276fc5361f6667d79cd3f
-        //   spanish.txt             : 46846a5a0139d1e3cb77293e521c2865f7bcdb82c44e8d0a06a2cd0ecba48c0b
+        // Chinese(simplified):     5c5942792bd8340cb8b27cd592f1015edf56a8c5b26276ee18a482428e7c5726
+        // Chinese(traditional):    417b26b3d8500a4ae3d59717d7011952db6fc2fb84b807f3f94ac734e89c1b5f
+        // Czech:                   7e80e161c3e93d9554c2efb78d4e3cebf8fc727e9c52e03b83b94406bdcc95fc
+        // English:                 2f5eed53a4727b4bf8880d8f3f199efc90e58503646d9ff8eff3a2ed3b24dbda
+        // French:                  ebc3959ab7801a1df6bac4fa7d970652f1df76b683cd2f4003c941c63d517e59
+        // Italian:                 d392c49fdb700a24cd1fceb237c1f65dcc128f6b34a8aacb58b59384b5c648c2
+        // Japanese:                2eed0aef492291e061633d7ad8117f1a2b03eb80a29d0e4e3117ac2528d05ffd
+        // Korean:                  9e95f86c167de88f450f0aaf89e87f6624a57f973c67b516e338e8e8b8897f60
+        // Portuguese:              2685e9c194c82ae67e10ba59d9ea5345a23dc093e92276fc5361f6667d79cd3f
+        // Spanish:                 46846a5a0139d1e3cb77293e521c2865f7bcdb82c44e8d0a06a2cd0ecba48c0b
 
         use sha2::{Digest, Sha256};
         macro_rules! generate_checksum_test {
@@ -231,11 +228,9 @@ mod tests {
     fn word_list_is_sorted() {
         use std::cmp::Ordering;
         fn is_sorted<L: Language>() -> bool {
-            L::WORD_LIST.windows(2).all(|w| {
-                w[0].partial_cmp(w[1])
-                    .map(|o| o != Ordering::Greater)
-                    .unwrap_or(false)
-            })
+            L::WORD_LIST
+                .windows(2)
+                .all(|w| w[0].partial_cmp(w[1]).map(|o| o != Ordering::Greater).unwrap_or(false))
         }
 
         macro_rules! generate_is_sorted_test {
@@ -261,11 +256,7 @@ mod tests {
     fn word_list_is_normalized() {
         fn check_normalized<L: Language>() {
             for &word in L::WORD_LIST {
-                assert!(
-                    unicode_normalization::is_nfkd(word),
-                    "word '{}' is not normalized",
-                    word
-                )
+                assert!(unicode_normalization::is_nfkd(word), "word '{word}' is not normalized")
             }
         }
 
