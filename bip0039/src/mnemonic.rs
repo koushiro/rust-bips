@@ -169,7 +169,6 @@ impl Count {
 ///
 /// For example, a 12 word mnemonic phrase is essentially a friendly representation of
 /// a 128-bit key, while a 24 word mnemonic phrase is essentially a 256-bit key.
-///
 #[derive(Clone, Ord, PartialOrd, Eq, PartialEq, Hash)]
 pub struct Mnemonic<L = English> {
     lang: PhantomData<L>,
@@ -227,7 +226,6 @@ impl<L: Language> Mnemonic<L> {
     /// let mnemonic = <Mnemonic>::generate(Count::Words12);
     /// let phrase = mnemonic.phrase();
     /// ```
-    ///
     #[cfg_attr(
         feature = "chinese-simplified",
         doc = r##"
@@ -289,11 +287,7 @@ let phrase = mnemonic.phrase();
         }
         let phrase = words.join(" ");
 
-        Ok(Self {
-            lang: PhantomData::<L>,
-            phrase,
-            entropy,
-        })
+        Ok(Self { lang: PhantomData::<L>, phrase, entropy })
     }
 
     /// Creates a [`Mnemonic`] from an existing mnemonic phrase.
@@ -336,8 +330,7 @@ let phrase = mnemonic.phrase();
     /// let phrase = "bottom drive obey lake curtain smoke basket hold race lonely fit shit";
     /// let result = <Mnemonic>::validate(phrase);
     /// assert_eq!(result.unwrap_err(), Error::UnknownWord("shit".into()));
-    ///```
-    ///
+    /// ```
     #[cfg_attr(
         feature = "japanese",
         doc = r##"
@@ -376,10 +369,8 @@ assert_eq!(result.unwrap_err(), Error::UnknownWord("ばか".nfkd().to_string()))
 
         let mut entropy = vec![0u8; word_count.entropy_bits() / BITS_PER_BYTE];
         entropy.iter_mut().enumerate().for_each(|(i, byte)| {
-            *byte = bits_to_uint(
-                &bits[i * BITS_PER_BYTE..(i + 1) * BITS_PER_BYTE],
-                BITS_PER_BYTE,
-            ) as u8;
+            *byte = bits_to_uint(&bits[i * BITS_PER_BYTE..(i + 1) * BITS_PER_BYTE], BITS_PER_BYTE)
+                as u8;
         });
 
         // verify the checksum
@@ -604,26 +595,27 @@ fn test_mnemonic_word_count() {
 fn test_mnemonic_zeroize_when_drop() {
     let p: *const String;
     let e: *const Vec<u8>;
+
+    // phrase = "absurd amount doctor acoustic avoid letter advice cage absurd amount doctor adjust"
+    // entropy = [1u8; 16]
     {
-        // phrase = "absurd amount doctor acoustic avoid letter advice cage absurd amount doctor adjust"
-        // entropy = [1u8; 16]
         let m = <Mnemonic>::from_entropy([1u8; 16]).unwrap();
         p = &m.phrase;
         e = &m.entropy;
         unsafe {
-            println!("*p: {}", (*p));
-            println!("*e: {:?}", (*e));
+            println!("*p: {}", *p);
+            println!("*e: {:?}", *e);
         }
     }
 
     unsafe {
         assert_ne!(
-            (*p),
+            *p,
             "absurd amount doctor acoustic avoid letter advice cage absurd amount doctor adjust"
         );
-        println!("*p: {}", (*p));
-        assert_ne!((*e), [1u8; 16]);
-        println!("*e: {:?}", (*e));
+        println!("*p: {}", *p);
+        assert_ne!(*e, [1u8; 16]);
+        println!("*e: {:?}", *e);
     }
 }
 
@@ -634,7 +626,7 @@ fn test_mnemonic_consume() {
         let m = <Mnemonic>::from_entropy([1u8; 16]).unwrap();
         p = &m.phrase;
         unsafe {
-            println!("*p: {} ({:p})", (*p), p);
+            println!("*p: {} ({:p})", *p, p);
         }
         let phrase = m.into_phrase();
         assert_ne!(p, &phrase);
@@ -650,7 +642,7 @@ fn test_mnemonic_consume() {
         let m = <Mnemonic>::from_entropy([1u8; 16]).unwrap();
         e = &m.entropy;
         unsafe {
-            println!("*e: {:?} ({:p})", (*e), e);
+            println!("*e: {:?} ({:p})", *e, e);
         }
         let entropy = m.into_entropy();
         assert_ne!(e, &entropy);

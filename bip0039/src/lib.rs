@@ -14,7 +14,6 @@
 //! let seed = mnemonic.to_seed("");
 //! println!("seed: {}", const_hex::encode(&seed[..]));
 //! ```
-//!
 #![cfg_attr(
     feature = "chinese-simplified",
     doc = r##"

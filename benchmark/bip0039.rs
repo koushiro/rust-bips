@@ -99,11 +99,5 @@ fn bench_to_seed(c: &mut Criterion) {
     });
 }
 
-criterion_group!(
-    benches,
-    bench_generate,
-    bench_from_entropy,
-    bench_from_phrase,
-    bench_to_seed
-);
+criterion_group!(benches, bench_generate, bench_from_entropy, bench_from_phrase, bench_to_seed);
 criterion_main!(benches);

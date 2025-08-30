@@ -18,14 +18,7 @@ fn test_all_vectors() {
     // https://github.com/bip32JP/bip32JP.github.io/blob/master/test_EN_BIP39.json
     // The passphrase "TREZOR" is used for all vectors.
     let en_cases = serde_json::from_str::<Vec<Case>>(include_str!("./test_EN_BIP39.json")).unwrap();
-    for Case {
-        entropy,
-        mnemonic,
-        passphrase,
-        seed,
-        ..
-    } in en_cases
-    {
+    for Case { entropy, mnemonic, passphrase, seed, .. } in en_cases {
         test_mnemonic::<English>(&passphrase, &entropy, &mnemonic, &seed);
     }
 
@@ -36,14 +29,7 @@ fn test_all_vectors() {
         // Japanese wordlist test with heavily normalized symbols as passphrase
         let jp_cases =
             serde_json::from_str::<Vec<Case>>(include_str!("./test_JP_BIP39.json")).unwrap();
-        for Case {
-            entropy,
-            mnemonic,
-            passphrase,
-            seed,
-            ..
-        } in jp_cases
-        {
+        for Case { entropy, mnemonic, passphrase, seed, .. } in jp_cases {
             test_mnemonic::<Japanese>(&passphrase, &entropy, &mnemonic, &seed);
         }
     }
