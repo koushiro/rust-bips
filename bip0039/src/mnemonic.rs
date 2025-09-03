@@ -12,7 +12,7 @@ use std::borrow::Cow;
 
 use hmac::Hmac;
 use sha2::{Digest, Sha256, Sha512};
-use zeroize::Zeroize;
+use zeroize::Zeroizing;
 
 use crate::{
     error::Error,
@@ -169,11 +169,11 @@ impl Count {
 ///
 /// For example, a 12 word mnemonic phrase is essentially a friendly representation of
 /// a 128-bit key, while a 24 word mnemonic phrase is essentially a 256-bit key.
-#[derive(Clone, Ord, PartialOrd, Eq, PartialEq, Hash)]
+#[derive(Clone, Eq, PartialEq)]
 pub struct Mnemonic<L = English> {
     lang: PhantomData<L>,
-    phrase: String,
-    entropy: Vec<u8>,
+    phrase: Zeroizing<String>,
+    entropy: Zeroizing<Vec<u8>>,
 }
 
 impl<L: Language> fmt::Debug for Mnemonic<L> {
@@ -199,19 +199,6 @@ impl<L: Language> str::FromStr for Mnemonic<L> {
 impl<L: Language> AsRef<str> for Mnemonic<L> {
     fn as_ref(&self) -> &str {
         self.phrase()
-    }
-}
-
-impl<L> Zeroize for Mnemonic<L> {
-    fn zeroize(&mut self) {
-        self.phrase.zeroize();
-        self.entropy.zeroize();
-    }
-}
-
-impl<L> Drop for Mnemonic<L> {
-    fn drop(&mut self) {
-        self.zeroize();
     }
 }
 
@@ -287,7 +274,11 @@ let phrase = mnemonic.phrase();
         }
         let phrase = words.join(" ");
 
-        Ok(Self { lang: PhantomData::<L>, phrase, entropy })
+        Ok(Self {
+            lang: PhantomData::<L>,
+            phrase: Zeroizing::new(phrase),
+            entropy: Zeroizing::new(entropy),
+        })
     }
 
     /// Creates a [`Mnemonic`] from an existing mnemonic phrase.
@@ -308,10 +299,12 @@ let phrase = mnemonic.phrase();
     pub fn from_phrase<'a, P: Into<Cow<'a, str>>>(phrase: P) -> Result<Self, Error> {
         let phrase = phrase.into();
         let entropy = Self::phrase_to_entropy(phrase.as_ref())?;
+        let phrase = phrase.split_whitespace().collect::<Vec<&str>>().join(" ");
+
         Ok(Mnemonic {
             lang: PhantomData::<L>,
-            phrase: phrase.split_whitespace().collect::<Vec<&str>>().join(" "),
-            entropy,
+            phrase: Zeroizing::new(phrase),
+            entropy: Zeroizing::new(entropy),
         })
     }
 
@@ -338,11 +331,11 @@ let phrase = mnemonic.phrase();
 use bip0039::{Error, Japanese, Mnemonic};
 use unicode_normalization::UnicodeNormalization;
 
-let phrase = "そつう　れきだい　ほんやく　わかす　りくつ　ばいか　ろせん　やちん　そつう　れきだい　ほんやく　わかめ";
+let phrase = "そつう れきだい ほんやく わかす りくつ ばいか ろせん やちん そつう れきだい ほんやく わかめ";
 let result = <Mnemonic<Japanese>>::validate(phrase);
 assert!(result.is_ok());
 
-let phrase = "そつう　れきだい　ほんやく　わかす　りくつ　ばいか　ろせん　やちん　そつう　れきだい　ほんやく　ばか";
+let phrase = "そつう れきだい ほんやく わかす りくつ ばいか ろせん やちん そつう れきだい ほんやく ばか";
 let result = <Mnemonic<Japanese>>::validate(phrase);
 assert_eq!(result.unwrap_err(), Error::UnknownWord("ばか".nfkd().to_string()));
 ```
@@ -600,8 +593,8 @@ fn test_mnemonic_zeroize_when_drop() {
     // entropy = [1u8; 16]
     {
         let m = <Mnemonic>::from_entropy([1u8; 16]).unwrap();
-        p = &m.phrase;
-        e = &m.entropy;
+        p = &*m.phrase;
+        e = &*m.entropy;
         unsafe {
             println!("*p: {}", *p);
             println!("*e: {:?}", *e);
@@ -624,7 +617,7 @@ fn test_mnemonic_consume() {
     let p: *const String;
     {
         let m = <Mnemonic>::from_entropy([1u8; 16]).unwrap();
-        p = &m.phrase;
+        p = &*m.phrase;
         unsafe {
             println!("*p: {} ({:p})", *p, p);
         }
@@ -640,7 +633,7 @@ fn test_mnemonic_consume() {
     let e: *const Vec<u8>;
     {
         let m = <Mnemonic>::from_entropy([1u8; 16]).unwrap();
-        e = &m.entropy;
+        e = &*m.entropy;
         unsafe {
             println!("*e: {:?} ({:p})", *e, e);
         }
