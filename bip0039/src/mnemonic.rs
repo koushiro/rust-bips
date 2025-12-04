@@ -24,9 +24,10 @@ const BITS_PER_BYTE: usize = 8;
 const ENTROPY_OFFSET: usize = 8;
 
 /// Determines the words count that will be present in a [`Mnemonic`] phrase.
-#[derive(Copy, Clone, Debug, Ord, PartialOrd, Eq, PartialEq, Hash)]
+#[derive(Copy, Clone, Debug, Default, Ord, PartialOrd, Eq, PartialEq, Hash)]
 pub enum Count {
     /// 12 words, entropy length: 128 bits, the checksum length: 4 bits.
+    #[default]
     Words12 = (128 << ENTROPY_OFFSET) | 4,
     /// 15 words, entropy length: 160 bits, the checksum length: 5 bits.
     Words15 = (160 << ENTROPY_OFFSET) | 5,
@@ -36,12 +37,6 @@ pub enum Count {
     Words21 = (224 << ENTROPY_OFFSET) | 7,
     /// 24 words, entropy length: 256 bits, the checksum length: 8 bits.
     Words24 = (256 << ENTROPY_OFFSET) | 8,
-}
-
-impl Default for Count {
-    fn default() -> Self {
-        Self::Words12
-    }
 }
 
 impl fmt::Display for Count {
