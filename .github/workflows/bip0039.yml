@@ -29,7 +29,7 @@ jobs:
         os: [ubuntu-latest, macos-latest, windows-latest]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Cache
         uses: actions/cache@v4
@@ -48,7 +48,7 @@ jobs:
   check-no-std:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Check no-std
         run: cargo build --no-default-features --features all-languages
@@ -58,7 +58,7 @@ jobs:
     env:
       MSRV: 1.85.0
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Setup MSRV
         run: rustup toolchain install ${MSRV} --no-self-update
