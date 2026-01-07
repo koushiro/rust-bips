@@ -27,6 +27,7 @@ readme = "README.md"
 documentation = "https://docs.rs/bip0039"
 keywords = ["bip39", "bitcoin", "crypto", "mnemonic"]
 categories = ["cryptography", "no-std"]
+exclude = ["words"]
 
 [package.metadata.docs.rs]
 all-features = true
