@@ -5,7 +5,7 @@
 [![](https://img.shields.io/crates/v/bip0032)][crates.io]
 [![](https://img.shields.io/crates/l/bip0032)][crates.io]
 [![](https://img.shields.io/crates/d/bip0032.svg)][crates.io]
-[![](https://img.shields.io/badge/MSRV-1.64.0-green?logo=rust)][whatrustisit]
+[![](https://img.shields.io/badge/MSRV-1.85.0-green?logo=rust)][whatrustisit]
 
 [actions]: https://github.com/koushiro/rust-bips/actions
 [docs.rs]: https://docs.rs/bip0032
