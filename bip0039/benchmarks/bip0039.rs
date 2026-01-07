@@ -1,15 +1,24 @@
 use std::hint::black_box;
 
-use criterion::{criterion_group, criterion_main, Criterion};
+use criterion::{Criterion, criterion_group, criterion_main};
 
 fn bench_generate(c: &mut Criterion) {
     let mut group = c.benchmark_group("generate");
     group.bench_function("tiny-bip39", |b| {
-        use bip39::{Language, Mnemonic, MnemonicType};
+        use tiny_bip39::{Language, Mnemonic, MnemonicType};
         b.iter(|| {
             let _phrase = black_box({
                 let mnemonic = Mnemonic::new(MnemonicType::Words12, Language::English);
                 mnemonic.phrase().to_string()
+            });
+        });
+    });
+    group.bench_function("bip39", |b| {
+        use bip39::Mnemonic;
+        b.iter(|| {
+            let _phrase = black_box({
+                let mnemonic = Mnemonic::generate(12).unwrap();
+                mnemonic.to_string()
             });
         });
     });
@@ -43,9 +52,15 @@ fn bench_from_entropy(c: &mut Criterion) {
 
     let mut group = c.benchmark_group("from_entropy");
     group.bench_function("tiny-bip39", |b| {
-        use bip39::{Language, Mnemonic};
+        use tiny_bip39::{Language, Mnemonic};
         b.iter(|| {
             let _mnemonic = black_box(Mnemonic::from_entropy(&entropy, Language::English).unwrap());
+        });
+    });
+    group.bench_function("bip39", |b| {
+        use bip39::Mnemonic;
+        b.iter(|| {
+            let _mnemonic = black_box(Mnemonic::from_entropy(&entropy).unwrap());
         });
     });
     group.bench_function("coins-bip39", |b| {
@@ -69,9 +84,15 @@ fn bench_from_phrase(c: &mut Criterion) {
 
     let mut group = c.benchmark_group("from_phrase");
     group.bench_function("tiny-bip39", |b| {
-        use bip39::{Language, Mnemonic};
+        use tiny_bip39::{Language, Mnemonic};
         b.iter(|| {
             let _mnemonic = black_box(Mnemonic::from_phrase(phrase, Language::English).unwrap());
+        });
+    });
+    group.bench_function("bip39", |b| {
+        use bip39::Mnemonic;
+        b.iter(|| {
+            let _mnemonic = black_box(Mnemonic::parse_normalized(phrase).unwrap());
         });
     });
     group.bench_function("coins-bip39", |b| {
@@ -92,10 +113,17 @@ fn bench_from_phrase(c: &mut Criterion) {
 fn bench_to_seed(c: &mut Criterion) {
     let mut group = c.benchmark_group("to_seed");
     group.bench_function("tiny-bip39", |b| {
-        use bip39::{Language, Mnemonic, MnemonicType, Seed};
+        use tiny_bip39::{Language, Mnemonic, MnemonicType, Seed};
         let mnemonic = Mnemonic::new(MnemonicType::Words12, Language::English);
         b.iter(|| {
             let _seed = black_box(Seed::new(&mnemonic, ""));
+        })
+    });
+    group.bench_function("bip39", |b| {
+        use bip39::Mnemonic;
+        let mnemonic = Mnemonic::generate(12).unwrap();
+        b.iter(|| {
+            let _seed = black_box(&mnemonic.to_seed(""));
         })
     });
     group.bench_function("coins-bip39", |b| {
@@ -118,7 +146,7 @@ fn bench_to_seed(c: &mut Criterion) {
 
 criterion_group!(
     name = benches;
-    config = Criterion::default().sample_size(70);
+    config = Criterion::default().sample_size(50);
     targets = bench_generate, bench_from_entropy, bench_from_phrase, bench_to_seed
 );
 criterion_main!(benches);

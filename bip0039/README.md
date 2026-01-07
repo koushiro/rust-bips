@@ -1,17 +1,16 @@
 # bip0039
 
-[![gha-svg]][gha-url]
-[![crates-svg]][crates-url]
-[![docs-svg]][docs-url]
-![msrv-svg]
+[![](https://github.com/koushiro/rust-bips/actions/workflows/bip0039.yml/badge.svg)][actions]
+[![](https://img.shields.io/docsrs/bip0039)][docs.rs]
+[![](https://img.shields.io/crates/v/bip0039)][crates.io]
+[![](https://img.shields.io/crates/l/bip0039)][crates.io]
+[![](https://img.shields.io/crates/d/bip0039.svg)][crates.io]
+[![](https://img.shields.io/badge/MSRV-1.85.0-green?logo=rust)][whatrustisit]
 
-[gha-svg]: https://github.com/koushiro/rust-bips/workflows/bip0039/badge.svg
-[gha-url]: https://github.com/koushiro/rust-bips/actions
-[crates-svg]: https://img.shields.io/crates/v/bip0039
-[crates-url]: https://crates.io/crates/bip0039
-[docs-svg]: https://docs.rs/bip0039/badge.svg
-[docs-url]: https://docs.rs/bip0039
-[msrv-svg]: https://img.shields.io/badge/rustc-1.64+-blue.svg
+[actions]: https://github.com/koushiro/rust-bips/actions
+[docs.rs]: https://docs.rs/bip0039
+[crates.io]: https://crates.io/crates/bip0039
+[whatrustisit]: https://www.whatrustisit.com
 
 Another Rust implementation of [BIP-0039](https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki) standard.
 
@@ -59,15 +58,4 @@ See documentation and examples at https://docs.rs/bip0039.
 
 ## License
 
-Licensed under either of
-
-- [Apache License, Version 2.0](LICENSE-APACHE)
-- [MIT License](LICENSE-MIT)
-
-at your option.
-
-## Contribution
-
-Unless you explicitly state otherwise, any contribution intentionally submitted
-for inclusion in the work by you, as defined in the Apache-2.0 license, shall be
-dual licensed as above, without any additional terms or conditions.
+This project is licensed under the Apache License, Version 2.0 - see the [LICENSE](../LICENSE) file for details.

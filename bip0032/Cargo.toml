@@ -1,16 +1,27 @@
+[workspace]
+members = []
+resolver = "3"
+
+[workspace.package]
+edition = "2024"
+license = "Apache-2.0"
+repository = "https://github.com/koushiro/rust-bips"
+homepage = "https://github.com/koushiro/rust-bips"
+rust-version = "1.85.0"
+
 [package]
 name = "bip0032"
 version = "0.0.0"
 authors = ["koushiro <koushiro.cqx@gmail.com>"]
-edition = "2021"
-rust-version = "1.64.0"
-resolver = "2"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+homepage.workspace = true
+repository.workspace = true
 
 description = "Another Rust implementation of BIP-0032 standard"
 readme = "README.md"
-license = "MIT/Apache-2.0"
 documentation = "https://docs.rs/bip0032"
-repository = "https://github.com/koushiro/rust-bips"
 keywords = ["bip32", "bitcoin", "crypto"]
 categories = ["cryptography", "no-std"]
 

@@ -1,7 +1,0 @@
-[workspace]
-members = [
-    "benchmarks",
-    "bip0032",
-    "bip0039",
-]
-resolver = "2"
