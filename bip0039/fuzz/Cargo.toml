@@ -1,25 +1,19 @@
 [package]
 name = "bip0039-fuzz"
 version = "0.0.0"
+authors = ["koushiro <koushiro.cqx@gmail.com>"]
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
 publish = false
-edition = "2021"
 
 [package.metadata]
 cargo-fuzz = true
 
 [dependencies]
 arbitrary = { version = "1", features = ["derive"] }
+bip0039 = { path = ".." }
 libfuzzer-sys = "0.4"
-
-[dependencies.bip0039]
-path = ".."
-
-# Prevent this from interfering with workspaces
-[workspace]
-members = ["."]
-
-[profile.release]
-debug = 1
 
 [[bin]]
 name = "generate"

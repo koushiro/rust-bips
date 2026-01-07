@@ -1,17 +1,16 @@
 # bip0032
 
-[![gha-svg]][gha-url]
-[![crates-svg]][crates-url]
-[![docs-svg]][docs-url]
-![msrv-svg]
+[![](https://github.com/koushiro/rust-bips/actions/workflows/bip0032.yml/badge.svg)][actions]
+[![](https://img.shields.io/docsrs/bip0032)][docs.rs]
+[![](https://img.shields.io/crates/v/bip0032)][crates.io]
+[![](https://img.shields.io/crates/l/bip0032)][crates.io]
+[![](https://img.shields.io/crates/d/bip0032.svg)][crates.io]
+[![](https://img.shields.io/badge/MSRV-1.85.0-green?logo=rust)][whatrustisit]
 
-[gha-svg]: https://github.com/koushiro/rust-bips/workflows/bip0032/badge.svg
-[gha-url]: https://github.com/koushiro/rust-bips/actions
-[crates-svg]: https://img.shields.io/crates/v/bip0032
-[crates-url]: https://crates.io/crates/bip0032
-[docs-svg]: https://docs.rs/bip0032/badge.svg
-[docs-url]: https://docs.rs/bip0032
-[msrv-svg]: https://img.shields.io/badge/rustc-1.64+-blue.svg
+[actions]: https://github.com/koushiro/rust-bips/actions
+[docs.rs]: https://docs.rs/bip0032
+[crates.io]: https://crates.io/crates/bip0032
+[whatrustisit]: https://www.whatrustisit.com
 
 Another Rust implementation of [BIP-0032](https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki) standard.
 
@@ -31,15 +30,4 @@ See documentation and examples at https://docs.rs/bip0032.
 
 ## License
 
-Licensed under either of
-
-- [Apache License, Version 2.0](LICENSE-APACHE)
-- [MIT License](LICENSE-MIT)
-
-at your option.
-
-## Contribution
-
-Unless you explicitly state otherwise, any contribution intentionally submitted
-for inclusion in the work by you, as defined in the Apache-2.0 license, shall be
-dual licensed as above, without any additional terms or conditions.
+This project is licensed under the Apache License, Version 2.0 - see the [LICENSE](../LICENSE) file for details.

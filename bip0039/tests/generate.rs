@@ -1,7 +1,7 @@
 #[cfg(feature = "rand")]
 #[test]
 fn test_generate() {
-    use bip0039::{language, Count, Language, Mnemonic};
+    use bip0039::{Count, Language, Mnemonic, language};
 
     fn generate<L: Language>(expected_word_count: Count) {
         let mnemonic = <Mnemonic<L>>::generate(expected_word_count);

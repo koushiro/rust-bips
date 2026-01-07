@@ -1,0 +1,21 @@
+[package]
+name = "bip0039-benchmarks"
+version = "0.0.0"
+authors = ["koushiro <koushiro.cqx@gmail.com>"]
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish = false
+
+[dev-dependencies]
+bip0039 = { path = ".." }
+bip39 = { version = "2.2", features = ["rand"] }
+coins-bip39 = "0.13"
+criterion = "0.8"
+rand = "0.9"
+tiny_bip39 = { package = "tiny-bip39", version = "2.0", features = ["rand"] }
+
+[[bench]]
+name = "bip0039"
+path = "bip0039.rs"
+harness = false

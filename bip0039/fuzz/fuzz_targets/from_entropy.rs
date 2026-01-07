@@ -23,19 +23,19 @@ fuzz_target!(|entropys: Vec<EntropySize>| {
         match entropy {
             EntropySize::Words12(entropy) => {
                 let _ = <Mnemonic>::from_entropy(entropy).unwrap();
-            }
+            },
             EntropySize::Words15(entropy) => {
                 let _ = <Mnemonic>::from_entropy(entropy).unwrap();
-            }
+            },
             EntropySize::Words18(entropy) => {
                 let _ = <Mnemonic>::from_entropy(entropy).unwrap();
-            }
+            },
             EntropySize::Words21(entropy) => {
                 let _ = <Mnemonic>::from_entropy(entropy).unwrap();
-            }
+            },
             EntropySize::Words24(entropy) => {
                 let _ = <Mnemonic>::from_entropy(entropy).unwrap();
-            }
+            },
         }
     }
 });
