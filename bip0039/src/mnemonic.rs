@@ -451,7 +451,7 @@ assert_eq!(result.unwrap_err(), Error::UnknownWord("ばか".nfkd().to_string()))
 /// Avoid allocation for normalization when there are no special UTF8 characters in the string.
 #[inline]
 fn normalize_utf8(s: &mut Cow<'_, str>) {
-    use unicode_normalization::{is_nfkd_quick, IsNormalized, UnicodeNormalization};
+    use unicode_normalization::{IsNormalized, UnicodeNormalization, is_nfkd_quick};
     if is_nfkd_quick(s.as_ref().chars()) != IsNormalized::Yes {
         *s = Cow::Owned(s.as_ref().nfkd().to_string())
     }
