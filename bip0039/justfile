@@ -41,7 +41,8 @@ fuzz target runs='1000':
     cargo +nightly fuzz run {{ target }} -- -runs={{ runs }}
 
 # Cleanup fuzz artifacts
+[working-directory('fuzz')]
 fuzz-clean:
     #!/usr/bin/env bash
     set -eo pipefail
-    cd fuzz && rm -rf artifacts corpus && cargo clean
+    rm -rf artifacts corpus
