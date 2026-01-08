@@ -1,0 +1,47 @@
+# bip0039 specific justfile
+
+# Import shared recipes from root
+import "../justfile"
+
+# Run a benchmark: `just bench <name> [args]`
+[positional-arguments]
+[working-directory('benchmarks')]
+bench name *args:
+    #!/usr/bin/env bash
+    set -eo pipefail
+    if [ -n "{{ args }}" ]; then
+        echo "Running benchmark \"{{ name }}\" with: {{ args }}"
+        cargo bench --bench {{ name }} -- {{ args }}
+    else
+        echo "Running benchmark \"{{ name }}\""
+        cargo bench --bench {{ name }} -- --quiet
+    fi
+
+# Run all benchmarks: `just benches [args]`
+[positional-arguments]
+[working-directory('benchmarks')]
+benches *args:
+    #!/usr/bin/env bash
+    set -eo pipefail
+    if [ -n "{{ args }}" ]; then
+        echo "Running all benchmarks with: {{ args }}"
+        cargo bench -- {{ args }}
+    else
+        echo "Running all benchmarks"
+        cargo bench -- --quiet
+    fi
+
+# Run fuzz: `just fuzz <target> [runs]`
+[positional-arguments]
+[working-directory('fuzz')]
+fuzz target runs='1000':
+    #!/usr/bin/env bash
+    set -eo pipefail
+    echo "Running fuzzer on target \"{{ target }}\" with {{ runs }} runs"
+    cargo +nightly fuzz run {{ target }} -- -runs={{ runs }}
+
+# Cleanup fuzz artifacts
+fuzz-clean:
+    #!/usr/bin/env bash
+    set -eo pipefail
+    cd fuzz && rm -rf artifacts corpus && cargo clean

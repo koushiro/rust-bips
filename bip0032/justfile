@@ -1,0 +1,4 @@
+# bip0032 specific justfile
+
+# Import shared recipes from root
+import "../justfile"
