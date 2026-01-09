@@ -59,7 +59,6 @@ pub use self::language::Korean;
 pub use self::language::Portuguese;
 #[cfg(feature = "spanish")]
 pub use self::language::Spanish;
-
 pub use self::{
     error::Error,
     language::{English, Language},

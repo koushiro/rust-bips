@@ -3,8 +3,8 @@
 //! This module is the public surface for language support.
 //!
 //! - [`Language`] is the only public capability trait exposed for consumers.
-//! - Built-in languages are enabled via Cargo features and backed by crate-private
-//!   generated wordlists.
+//! - Built-in languages are enabled via Cargo features and backed by crate-private generated
+//!   wordlists.
 
 use crate::wordlist::*;
 
@@ -20,8 +20,8 @@ use crate::wordlist::*;
 /// # Requirements
 ///
 /// - `word_of(index)` must return a valid word for all indices `0..2048`.
-/// - `index_of(word)` must return the correct index (BIP-0039 order) for all words
-///   in the language wordlist; return `None` for unknown words.
+/// - `index_of(word)` must return the correct index (BIP-0039 order) for all words in the language
+///   wordlist; return `None` for unknown words.
 pub trait Language: Sized {
     /// Returns the word at `index` (BIP-0039 order).
     fn word_of(index: usize) -> &'static str;
@@ -176,8 +176,9 @@ impl WordlistProvider for Spanish {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use sha2::{Digest, Sha256};
+
+    use super::*;
 
     // Check the sha256sum of the word lists.
     //
