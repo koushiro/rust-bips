@@ -37,9 +37,9 @@ println!("phrase: {}", mnemonic.phrase());
 extern crate alloc;
 
 mod error;
-/// Supported languages for BIP-0039.
 pub mod language;
 mod mnemonic;
+mod wordlist;
 
 #[cfg(feature = "chinese-simplified")]
 pub use self::language::ChineseSimplified;

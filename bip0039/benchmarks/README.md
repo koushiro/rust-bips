@@ -10,24 +10,24 @@ cargo bench --bench bip0039 -- --quiet
 ```
 
 ```text
-generate/tiny-bip39     time:   [527.36 ns 529.05 ns 530.98 ns]
-generate/coins-bip39    time:   [644.87 ns 646.28 ns 647.96 ns]
-generate/bip39          time:   [593.55 ns 594.89 ns 596.57 ns]
-generate/bip0039        time:   [661.24 ns 663.00 ns 665.20 ns]
+generate/tiny-bip39     time:   [522.95 ns 523.86 ns 524.79 ns]
+generate/bip39          time:   [587.87 ns 589.02 ns 590.20 ns]
+generate/coins-bip39    time:   [665.02 ns 691.86 ns 723.01 ns]
+generate/bip0039        time:   [659.25 ns 660.11 ns 661.10 ns]
 
-from_entropy/tiny-bip39 time:   [411.69 ns 412.30 ns 412.91 ns]
-from_entropy/bip39      time:   [242.64 ns 242.96 ns 243.27 ns]
+from_entropy/tiny-bip39 time:   [406.60 ns 407.36 ns 408.14 ns]
+from_entropy/bip39      time:   [241.30 ns 242.55 ns 244.87 ns]
 from_entropy/coins-bip39
-                        time:   [493.04 ps 494.29 ps 495.46 ps]
-from_entropy/bip0039    time:   [410.42 ns 411.94 ns 413.48 ns]
+                        time:   [487.28 ps 490.99 ps 498.07 ps]
+from_entropy/bip0039    time:   [404.98 ns 406.86 ns 409.21 ns]
 
-from_phrase/tiny-bip39  time:   [1.2370 µs 1.2409 µs 1.2446 µs]
-from_phrase/bip39       time:   [1.2458 µs 1.2474 µs 1.2493 µs]
-from_phrase/coins-bip39 time:   [2.4056 µs 2.4099 µs 2.4147 µs]
-from_phrase/bip0039     time:   [1.5468 µs 1.5506 µs 1.5550 µs]
+from_phrase/tiny-bip39  time:   [1.2218 µs 1.2233 µs 1.2249 µs]
+from_phrase/bip39       time:   [1.2177 µs 1.2205 µs 1.2237 µs]
+from_phrase/coins-bip39 time:   [2.3764 µs 2.3815 µs 2.3863 µs]
+from_phrase/bip0039     time:   [953.19 ns 955.01 ns 957.02 ns]
 
-to_seed/tiny-bip39      time:   [979.66 µs 981.75 µs 984.18 µs]
-to_seed/bip39           time:   [1.0900 ms 1.0919 ms 1.0939 ms]
-to_seed/coins-bip39     time:   [984.12 µs 986.20 µs 989.16 µs]
-to_seed/bip0039         time:   [987.35 µs 989.50 µs 991.54 µs]
+to_seed/tiny-bip39      time:   [975.05 µs 976.48 µs 978.08 µs]
+to_seed/bip39           time:   [1.0783 ms 1.0798 ms 1.0813 ms]
+to_seed/coins-bip39     time:   [974.05 µs 975.17 µs 976.39 µs]
+to_seed/bip0039         time:   [980.59 µs 990.79 µs 1.0071 ms]
 ```

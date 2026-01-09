@@ -21,13 +21,13 @@ rust-version.workspace = true
 license.workspace = true
 homepage.workspace = true
 repository.workspace = true
+build = "build.rs"
 
 description = "Another Rust implementation of BIP-0039 standard"
 readme = "README.md"
 documentation = "https://docs.rs/bip0039"
 keywords = ["bip39", "bitcoin", "crypto", "mnemonic"]
 categories = ["cryptography", "no-std"]
-exclude = ["words"]
 
 [package.metadata.docs.rs]
 all-features = true
@@ -38,8 +38,10 @@ default = ["std", "rand"]
 std = [
     "hmac/std",
     "pbkdf2/std",
+    "phf/std",
     "sha2/std",
     "unicode-normalization/std",
+    "zeroize/std",
 ]
 # Note: English is the standard so always included
 all-languages = [
@@ -66,10 +68,15 @@ spanish = []
 [dependencies]
 hmac = { version = "0.12", default-features = false }
 pbkdf2 = { version = "0.12", default-features = false }
+phf = { version = "0.13.1", default-features = false }
 rand = { version = "0.9", optional = true }
 sha2 = { version = "0.10", default-features = false }
 unicode-normalization = { version = "0.1", default-features = false }
-zeroize = "1.2"
+zeroize = { version = "1.8", default-features = false, features = ["alloc"] }
+
+[build-dependencies]
+anyhow = "1.0"
+phf_codegen = "0.13.1"
 
 [dev-dependencies]
 const-hex = "1.12"
