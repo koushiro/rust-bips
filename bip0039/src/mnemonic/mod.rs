@@ -312,17 +312,7 @@ let phrase = mnemonic.phrase();
         let mut phrase = phrase.into();
         normalize_utf8(&mut phrase);
 
-        let decoded = decode_phrase::<L>(&phrase, DecodeMode::BuildNormalizedPhrase)?;
-        let entropy = decoded.entropy;
-        let normalized_phrase = decoded
-            .normalized_phrase
-            .expect("BuildNormalizedPhrase always constructs a normalized phrase");
-
-        Ok(Mnemonic {
-            lang: PhantomData::<L>,
-            phrase: Zeroizing::new(normalized_phrase),
-            entropy: Zeroizing::new(entropy),
-        })
+        Self::from_normalized_phrase(phrase)
     }
 
     /// Creates a [`Mnemonic`] from a phrase that is already normalized.
@@ -330,15 +320,23 @@ let phrase = mnemonic.phrase();
     /// Use this when you can guarantee the input is already normalized to UTF-8 NFKD
     ///
     /// This avoids constructing a normalized phrase string during decoding.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use bip0039::{Error, Mnemonic};
+    ///
+    /// let phrase = "bottom drive obey lake curtain smoke basket hold race lonely fit walk";
+    /// let mnemonic = <Mnemonic>::from_normalized_phrase(phrase).unwrap();
+    /// assert_eq!(mnemonic.phrase(), phrase);
+    ///
+    /// let phrase = "bottom drive obey lake curtain smoke basket hold race lonely fit shit";
+    /// let mnemonic = <Mnemonic>::from_phrase(phrase);
+    /// assert_eq!(mnemonic.unwrap_err(), Error::UnknownWord("shit".into()));
+    /// ```
     pub fn from_normalized_phrase<'a, P: Into<Cow<'a, str>>>(phrase: P) -> Result<Self, Error> {
         let phrase = phrase.into();
 
-        // NFKD-only check: caller promises the phrase won't change under NFKD normalization.
-        if is_nfkd_quick(phrase.as_ref().chars()) != IsNormalized::Yes {
-            return Err(Error::NotNormalized);
-        }
-
-        // Validate/decode without allocating a rebuilt normalized phrase.
         let decoded = decode_phrase::<L>(&phrase, DecodeMode::BuildNormalizedPhrase)?;
         let entropy = decoded.entropy;
         let normalized_phrase = decoded
@@ -473,6 +471,23 @@ fn normalize_utf8(s: &mut Cow<'_, str>) {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_mnemonic_roundtrip() {
+        let mnemonic = <Mnemonic>::generate(Count::Words12);
+        let entropy = mnemonic.entropy();
+        let phrase = mnemonic.phrase();
+
+        {
+            let m = <Mnemonic>::from_entropy(entropy).unwrap();
+            assert_eq!(phrase, m.phrase());
+        }
+
+        {
+            let m = <Mnemonic>::from_phrase(phrase).unwrap();
+            assert_eq!(entropy, m.entropy());
+        }
+    }
 
     #[test]
     fn test_mnemonic_zeroize_when_drop() {

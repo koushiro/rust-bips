@@ -188,7 +188,7 @@ fn bench_from_phrase(c: &mut Criterion) {
         });
 
         group.bench_function(format!("bip39 ({} words)", words), |b| {
-            use bip39::Mnemonic;
+            use bip39::{Language, Mnemonic};
 
             let phrase = {
                 let m = Mnemonic::generate(words).unwrap();
@@ -197,7 +197,7 @@ fn bench_from_phrase(c: &mut Criterion) {
 
             b.iter(|| {
                 let _entropy = black_box({
-                    let mnemonic = Mnemonic::parse_in(bip39::Language::English, &phrase).unwrap();
+                    let mnemonic = Mnemonic::parse_in(Language::English, &phrase).unwrap();
                     mnemonic.to_entropy_array()
                 });
             });
@@ -234,6 +234,52 @@ fn bench_from_phrase(c: &mut Criterion) {
 
             b.iter(|| {
                 let mnemonic = black_box(<Mnemonic>::from_phrase(&phrase).unwrap());
+                let _entropy = mnemonic.entropy();
+            });
+        });
+
+        group.finish();
+    }
+}
+
+fn bench_from_normalized_phrase(c: &mut Criterion) {
+    for words in WORDS {
+        let mut group = c.benchmark_group("from_normalized_phrase");
+
+        group.bench_function(format!("bip39 ({} words)", words), |b| {
+            use bip39::{Language, Mnemonic};
+
+            let phrase = {
+                let m = Mnemonic::generate(words).unwrap();
+                m.to_string()
+            };
+
+            b.iter(|| {
+                let _entropy = black_box({
+                    let mnemonic =
+                        Mnemonic::parse_in_normalized(Language::English, &phrase).unwrap();
+                    mnemonic.to_entropy_array()
+                });
+            });
+        });
+
+        group.bench_function(format!("bip0039 ({} words)", words), |b| {
+            use bip0039::{Count, Mnemonic};
+
+            let phrase = {
+                let count = match words {
+                    12 => Count::Words12,
+                    15 => Count::Words15,
+                    18 => Count::Words18,
+                    24 => Count::Words24,
+                    _ => unreachable!("unsupported word count"),
+                };
+                let m = <Mnemonic>::generate(count);
+                m.phrase().to_owned()
+            };
+
+            b.iter(|| {
+                let mnemonic = black_box(<Mnemonic>::from_normalized_phrase(&phrase).unwrap());
                 let _entropy = mnemonic.entropy();
             });
         });
@@ -314,6 +360,11 @@ fn bench_to_seed(c: &mut Criterion) {
 criterion_group!(
     name = benches;
     config = Criterion::default().sample_size(50);
-    targets = bench_generate, bench_from_entropy, bench_from_phrase, bench_to_seed
+    targets =
+        bench_generate,
+        bench_from_entropy,
+        bench_from_phrase,
+        bench_from_normalized_phrase,
+        bench_to_seed,
 );
 criterion_main!(benches);
