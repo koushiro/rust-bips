@@ -6,7 +6,9 @@
 //! - Built-in languages are enabled via Cargo features and backed by crate-private generated
 //!   wordlists.
 
-use crate::wordlist::*;
+mod wordlist;
+
+use self::wordlist::*;
 
 /// Language to be used for the mnemonic phrase.
 ///
