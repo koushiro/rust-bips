@@ -3,19 +3,25 @@ mod entropy;
 mod phrase;
 
 #[cfg(not(feature = "std"))]
-use alloc::{borrow::Cow, format, string::String, vec::Vec};
+use alloc::{
+    borrow::Cow,
+    format,
+    string::{String, ToString},
+    vec::Vec,
+};
 use core::{fmt, marker::PhantomData, mem, str};
 #[cfg(feature = "std")]
 use std::borrow::Cow;
 
 use hmac::Hmac;
 use sha2::Sha512;
+use unicode_normalization::{IsNormalized, UnicodeNormalization, is_nfkd_quick};
 use zeroize::Zeroizing;
 
 use self::{
     bit_accumulator::BitAccumulator,
     entropy::encode_entropy,
-    phrase::{ParseMode, decode_phrase, normalize_utf8},
+    phrase::{DecodeMode, decode_phrase},
 };
 use crate::{
     error::Error,
@@ -286,6 +292,9 @@ let phrase = mnemonic.phrase();
 
     /// Creates a [`Mnemonic`] from an existing mnemonic phrase.
     ///
+    /// This method will normalize the input (UTF-8 NFKD) and normalize whitespace
+    /// (single ASCII spaces).
+    ///
     /// # Examples
     ///
     /// ```rust
@@ -300,9 +309,38 @@ let phrase = mnemonic.phrase();
     /// assert_eq!(mnemonic.unwrap_err(), Error::UnknownWord("shit".into()));
     /// ```
     pub fn from_phrase<'a, P: Into<Cow<'a, str>>>(phrase: P) -> Result<Self, Error> {
-        let parsed = decode_phrase::<'a, L, P>(phrase, ParseMode::BuildNormalizedPhrase)?;
-        let entropy = parsed.entropy;
-        let normalized_phrase = parsed
+        let mut phrase = phrase.into();
+        normalize_utf8(&mut phrase);
+
+        Self::from_normalized_phrase(phrase)
+    }
+
+    /// Creates a [`Mnemonic`] from a phrase that is already normalized.
+    ///
+    /// Use this when you can guarantee the input is already normalized to UTF-8 NFKD.
+    ///
+    /// This avoids the UTF-8 NFKD normalization step during decoding, since the input is already
+    /// normalized.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use bip0039::{Error, Mnemonic};
+    ///
+    /// let phrase = "bottom drive obey lake curtain smoke basket hold race lonely fit walk";
+    /// let mnemonic = <Mnemonic>::from_normalized_phrase(phrase).unwrap();
+    /// assert_eq!(mnemonic.phrase(), phrase);
+    ///
+    /// let phrase = "bottom drive obey lake curtain smoke basket hold race lonely fit shit";
+    /// let mnemonic = <Mnemonic>::from_normalized_phrase(phrase);
+    /// assert_eq!(mnemonic.unwrap_err(), Error::UnknownWord("shit".into()));
+    /// ```
+    pub fn from_normalized_phrase<'a, P: Into<Cow<'a, str>>>(phrase: P) -> Result<Self, Error> {
+        let phrase = phrase.into();
+
+        let decoded = decode_phrase::<L>(&phrase, DecodeMode::BuildNormalizedPhrase)?;
+        let entropy = decoded.entropy;
+        let normalized_phrase = decoded
             .normalized_phrase
             .expect("BuildNormalizedPhrase always constructs a normalized phrase");
 
@@ -347,7 +385,10 @@ assert_eq!(result.unwrap_err(), Error::UnknownWord("ばか".nfkd().to_string()))
 "##
     )]
     pub fn validate<'a, P: Into<Cow<'a, str>>>(phrase: P) -> Result<(), Error> {
-        decode_phrase::<'a, L, P>(phrase, ParseMode::ValidateOnly)?;
+        let mut phrase = phrase.into();
+        normalize_utf8(&mut phrase);
+
+        let _decoded = decode_phrase::<L>(&phrase, DecodeMode::ValidateOnly)?;
         Ok(())
     }
 
@@ -419,9 +460,35 @@ assert_eq!(result.unwrap_err(), Error::UnknownWord("ばか".nfkd().to_string()))
     }
 }
 
+/// Ensure the content of the `s` is normalized UTF8.
+/// Avoid allocation for normalization when there are no special UTF8 characters in the string.
+#[inline]
+fn normalize_utf8(s: &mut Cow<'_, str>) {
+    if is_nfkd_quick(s.as_ref().chars()) != IsNormalized::Yes {
+        *s = Cow::Owned(s.as_ref().nfkd().to_string())
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_mnemonic_roundtrip() {
+        let mnemonic = <Mnemonic>::generate(Count::Words12);
+        let entropy = mnemonic.entropy();
+        let phrase = mnemonic.phrase();
+
+        {
+            let m = <Mnemonic>::from_entropy(entropy).unwrap();
+            assert_eq!(phrase, m.phrase());
+        }
+
+        {
+            let m = <Mnemonic>::from_phrase(phrase).unwrap();
+            assert_eq!(entropy, m.entropy());
+        }
+    }
 
     #[test]
     fn test_mnemonic_zeroize_when_drop() {
