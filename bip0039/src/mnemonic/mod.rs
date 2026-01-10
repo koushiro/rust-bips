@@ -1,19 +1,22 @@
+mod bit_accumulator;
+mod entropy;
+mod phrase;
+
 #[cfg(not(feature = "std"))]
-use alloc::{
-    borrow::Cow,
-    format,
-    string::{String, ToString},
-    vec,
-    vec::Vec,
-};
-use core::{fmt, marker::PhantomData, mem, ops::Range, str};
+use alloc::{borrow::Cow, format, string::String, vec::Vec};
+use core::{fmt, marker::PhantomData, mem, str};
 #[cfg(feature = "std")]
 use std::borrow::Cow;
 
 use hmac::Hmac;
-use sha2::{Digest, Sha256, Sha512};
+use sha2::Sha512;
 use zeroize::Zeroizing;
 
+use self::{
+    bit_accumulator::BitAccumulator,
+    entropy::encode_entropy,
+    phrase::{ParseMode, decode_phrase, normalize_utf8},
+};
 use crate::{
     error::Error,
     language::{English, Language},
@@ -21,22 +24,21 @@ use crate::{
 
 const BITS_PER_WORD: usize = 11;
 const BITS_PER_BYTE: usize = 8;
-const ENTROPY_OFFSET: usize = 8;
 
-/// Determines the words count that will be present in a [`Mnemonic`] phrase.
+/// Determines the words count that will be present in a [`Mnemonic`](crate::Mnemonic) phrase.
 #[derive(Copy, Clone, Debug, Default, Ord, PartialOrd, Eq, PartialEq, Hash)]
 pub enum Count {
     /// 12 words, entropy length: 128 bits, the checksum length: 4 bits.
     #[default]
-    Words12 = (128 << ENTROPY_OFFSET) | 4,
+    Words12,
     /// 15 words, entropy length: 160 bits, the checksum length: 5 bits.
-    Words15 = (160 << ENTROPY_OFFSET) | 5,
+    Words15,
     /// 18 words, entropy length: 192 bits, the checksum length: 6 bits.
-    Words18 = (192 << ENTROPY_OFFSET) | 6,
+    Words18,
     /// 21 words, entropy length: 224 bits, the checksum length: 7 bits.
-    Words21 = (224 << ENTROPY_OFFSET) | 7,
+    Words21,
     /// 24 words, entropy length: 256 bits, the checksum length: 8 bits.
-    Words24 = (256 << ENTROPY_OFFSET) | 8,
+    Words24,
 }
 
 impl fmt::Display for Count {
@@ -45,8 +47,8 @@ impl fmt::Display for Count {
             f,
             "{} words (entropy {} bits + checksum {} bits)",
             self.word_count(),
-            self.entropy_bits(),
-            self.checksum_bits()
+            self.entropy_bit_length(),
+            self.checksum_bit_length()
         )
     }
 }
@@ -104,34 +106,40 @@ impl Count {
 
     /// Returns the number of words.
     pub const fn word_count(&self) -> usize {
-        self.total_bits() / BITS_PER_WORD
+        match self {
+            Self::Words12 => 12,
+            Self::Words15 => 15,
+            Self::Words18 => 18,
+            Self::Words21 => 21,
+            Self::Words24 => 24,
+        }
     }
 
-    /// Returns the number of entropy+checksum bits.
-    pub const fn total_bits(&self) -> usize {
-        self.entropy_bits() + self.checksum_bits()
+    /// Returns the size of `entropy + checksum` in bits.
+    pub const fn total_bit_length(&self) -> usize {
+        self.entropy_bit_length() + self.checksum_bit_length()
     }
 
-    /// Returns the number of entropy bits.
-    pub const fn entropy_bits(&self) -> usize {
-        (*self as usize) >> ENTROPY_OFFSET
+    /// Returns the size of entropy in bits.
+    pub const fn entropy_bit_length(&self) -> usize {
+        match self {
+            Self::Words12 => 128,
+            Self::Words15 => 160,
+            Self::Words18 => 192,
+            Self::Words21 => 224,
+            Self::Words24 => 256,
+        }
     }
 
-    /// Returns the number of checksum bits.
-    pub const fn checksum_bits(&self) -> usize {
-        (*self as usize) as u8 as usize
-    }
-
-    const fn total(&self) -> Range<usize> {
-        0..self.total_bits()
-    }
-
-    const fn entropy(&self) -> Range<usize> {
-        0..self.entropy_bits()
-    }
-
-    const fn checksum(&self) -> Range<usize> {
-        self.entropy_bits()..self.total_bits()
+    /// Returns the size of checksum in bits.
+    pub const fn checksum_bit_length(&self) -> usize {
+        match self {
+            Self::Words12 => 4,
+            Self::Words15 => 5,
+            Self::Words18 => 6,
+            Self::Words21 => 7,
+            Self::Words24 => 8,
+        }
     }
 }
 
@@ -222,15 +230,36 @@ let phrase = mnemonic.phrase();
     #[cfg(feature = "rand")]
     pub fn generate(word_count: Count) -> Self {
         use rand::RngCore;
-        const MAX_ENTROPY_BITS: usize = Count::Words24.entropy_bits();
-
         let mut rng = rand::rng();
-        let mut entropy = [0u8; MAX_ENTROPY_BITS / BITS_PER_BYTE];
-        rng.fill_bytes(&mut entropy);
 
-        let entropy_bytes = word_count.entropy_bits() / BITS_PER_BYTE;
-        Self::from_entropy(&entropy[..entropy_bytes])
-            .expect("valid entropy length won't fail to generate the mnemonic")
+        match word_count {
+            Count::Words12 => {
+                let mut entropy = [0u8; 16];
+                rng.fill_bytes(&mut entropy);
+                Self::from_entropy(entropy)
+            },
+            Count::Words15 => {
+                let mut entropy = [0u8; 20];
+                rng.fill_bytes(&mut entropy);
+                Self::from_entropy(entropy)
+            },
+            Count::Words18 => {
+                let mut entropy = [0u8; 24];
+                rng.fill_bytes(&mut entropy);
+                Self::from_entropy(entropy)
+            },
+            Count::Words21 => {
+                let mut entropy = [0u8; 28];
+                rng.fill_bytes(&mut entropy);
+                Self::from_entropy(entropy)
+            },
+            Count::Words24 => {
+                let mut entropy = [0u8; 32];
+                rng.fill_bytes(&mut entropy);
+                Self::from_entropy(entropy)
+            },
+        }
+        .expect("valid entropy length won't fail to generate the mnemonic")
     }
 
     /// Creates a new [`Mnemonic`] from the given entropy.
@@ -245,29 +274,8 @@ let phrase = mnemonic.phrase();
     /// assert_eq!(mnemonic.phrase(), "bottom drive obey lake curtain smoke basket hold race lonely fit walk");
     /// ```
     pub fn from_entropy<E: Into<Vec<u8>>>(entropy: E) -> Result<Self, Error> {
-        const MAX_TOTAL_BITS: usize = Count::Words24.total_bits();
-
         let entropy = entropy.into();
-        let word_count = Count::from_key_size(entropy.len() * BITS_PER_BYTE)?;
-
-        // An initial entropy of ENT bits is given.
-        let mut bits = [false; MAX_TOTAL_BITS];
-        for (index, bit) in bits[word_count.entropy()].iter_mut().enumerate() {
-            *bit = left_index_bit(entropy[index / BITS_PER_BYTE], index % BITS_PER_BYTE);
-        }
-        // A checksum is generated by taking the first `ENT/32` bits of its SHA256 hash.
-        // and this checksum is appended to the end of the initial entropy.
-        let checksum_byte = Sha256::digest(&entropy)[0];
-        for (index, bit) in bits[word_count.checksum()].iter_mut().enumerate() {
-            *bit = left_index_bit(checksum_byte, index);
-        }
-
-        let mut words = Vec::with_capacity(word_count.word_count());
-        for chunk in bits[word_count.total()].chunks(BITS_PER_WORD) {
-            let index = bits_to_uint(chunk, BITS_PER_WORD);
-            words.push(L::word_of(index));
-        }
-        let phrase = words.join(" ");
+        let phrase = encode_entropy::<L>(&entropy)?;
 
         Ok(Self {
             lang: PhantomData::<L>,
@@ -292,13 +300,15 @@ let phrase = mnemonic.phrase();
     /// assert_eq!(mnemonic.unwrap_err(), Error::UnknownWord("shit".into()));
     /// ```
     pub fn from_phrase<'a, P: Into<Cow<'a, str>>>(phrase: P) -> Result<Self, Error> {
-        let phrase = phrase.into();
-        let entropy = Self::phrase_to_entropy(phrase.as_ref())?;
-        let phrase = phrase.split_whitespace().collect::<Vec<&str>>().join(" ");
+        let parsed = decode_phrase::<'a, L, P>(phrase, ParseMode::BuildNormalizedPhrase)?;
+        let entropy = parsed.entropy;
+        let normalized_phrase = parsed
+            .normalized_phrase
+            .expect("BuildNormalizedPhrase always constructs a normalized phrase");
 
         Ok(Mnemonic {
             lang: PhantomData::<L>,
-            phrase: Zeroizing::new(phrase),
+            phrase: Zeroizing::new(normalized_phrase),
             entropy: Zeroizing::new(entropy),
         })
     }
@@ -337,42 +347,8 @@ assert_eq!(result.unwrap_err(), Error::UnknownWord("ばか".nfkd().to_string()))
 "##
     )]
     pub fn validate<'a, P: Into<Cow<'a, str>>>(phrase: P) -> Result<(), Error> {
-        let _entropy = Self::phrase_to_entropy(phrase)?;
+        decode_phrase::<'a, L, P>(phrase, ParseMode::ValidateOnly)?;
         Ok(())
-    }
-
-    fn phrase_to_entropy<'a, P: Into<Cow<'a, str>>>(phrase: P) -> Result<Vec<u8>, Error> {
-        let mut phrase = phrase.into();
-        normalize_utf8(&mut phrase);
-        let word_count = Count::from_phrase(phrase.as_ref())?;
-
-        let mut bits = vec![false; word_count.total_bits()];
-        for (i, word) in phrase.split_whitespace().enumerate() {
-            if let Some(index) = L::index_of(word) {
-                index_to_bits(index, &mut bits[i * BITS_PER_WORD..], BITS_PER_WORD);
-            } else {
-                return Err(Error::UnknownWord(word.to_string()));
-            }
-        }
-
-        let mut entropy = vec![0u8; word_count.entropy_bits() / BITS_PER_BYTE];
-        entropy.iter_mut().enumerate().for_each(|(i, byte)| {
-            *byte = bits_to_uint(&bits[i * BITS_PER_BYTE..(i + 1) * BITS_PER_BYTE], BITS_PER_BYTE)
-                as u8;
-        });
-
-        // verify the checksum
-        let checksum_bits = &bits[word_count.checksum()];
-        let actual_checksum = bits_to_uint(checksum_bits, word_count.checksum_bits()) as u8;
-
-        let checksum_byte = Sha256::digest(&entropy)[0];
-        let expected_checksum = checksum(checksum_byte, word_count.checksum_bits());
-
-        if actual_checksum != expected_checksum {
-            return Err(Error::InvalidChecksum);
-        }
-
-        Ok(entropy)
     }
 
     /// Generates the seed from the [`Mnemonic`] and the passphrase.
@@ -443,201 +419,70 @@ assert_eq!(result.unwrap_err(), Error::UnknownWord("ばか".nfkd().to_string()))
     }
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// Some helper functions
-///////////////////////////////////////////////////////////////////////////////
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-/// Ensure the content of the `s` is normalized UTF8.
-/// Avoid allocation for normalization when there are no special UTF8 characters in the string.
-#[inline]
-fn normalize_utf8(s: &mut Cow<'_, str>) {
-    use unicode_normalization::{IsNormalized, UnicodeNormalization, is_nfkd_quick};
-    if is_nfkd_quick(s.as_ref().chars()) != IsNormalized::Yes {
-        *s = Cow::Owned(s.as_ref().nfkd().to_string())
-    }
-}
+    #[test]
+    fn test_mnemonic_zeroize_when_drop() {
+        let p: *const String;
+        let e: *const Vec<u8>;
 
-/// Extract the first `bits` from the `source` byte.
-/// Can operate on 8-bit integers only.
-const fn checksum(source: u8, bits: usize) -> u8 {
-    source >> (BITS_PER_BYTE - bits)
-}
+        // phrase = "absurd amount doctor acoustic avoid letter advice cage absurd amount doctor
+        // adjust" entropy = [1u8; 16]
+        {
+            let m = <Mnemonic>::from_entropy([1u8; 16]).unwrap();
+            p = &*m.phrase;
+            e = &*m.entropy;
+            unsafe {
+                println!("*p: {}", *p);
+                println!("*e: {:?}", *e);
+            }
+        }
 
-/// Extract the left `index` bit from the `source` byte.
-/// Can operate on 0-7 integers only.
-const fn left_index_bit(source: u8, index: usize) -> bool {
-    let mask = 1 << (BITS_PER_BYTE - 1 - index);
-    source & mask > 0
-}
-
-/// Converts `chunk_size` bits to the integer.
-#[inline]
-fn bits_to_uint(bits: &[bool], chunk_size: usize) -> usize {
-    debug_assert_eq!(bits.len(), chunk_size);
-    bits.iter()
-        .take(chunk_size)
-        .enumerate()
-        .map(|(i, bit)| if *bit { 1 << (chunk_size - 1 - i) } else { 0 })
-        .sum::<usize>()
-}
-
-/// Converts a index to bits.
-#[inline]
-fn index_to_bits(index: usize, bits: &mut [bool], chunk_size: usize) {
-    debug_assert!(index < (2 << chunk_size));
-    bits.iter_mut()
-        .take(chunk_size)
-        .enumerate()
-        .for_each(|(i, bit)| *bit = (index >> (chunk_size - 1 - i)) & 1 == 1);
-}
-
-#[test]
-fn test_left_index_bit() {
-    assert!(left_index_bit(0b1111_1111, 0));
-    assert!(left_index_bit(0b1111_1111, 3));
-    assert!(left_index_bit(0b1111_1111, 7));
-    assert!(left_index_bit(0b1111_0111, 0));
-    assert!(!left_index_bit(0b1111_0111, 4));
-    assert!(!left_index_bit(0b0100_0000, 0));
-    assert!(left_index_bit(0b0100_0000, 1));
-}
-
-#[test]
-fn test_bits_to_uint() {
-    assert_eq!(bits_to_uint(&[false; 11], BITS_PER_WORD), 0b000_0000_0000); // 0
-    assert_eq!(bits_to_uint(&[true; 11], BITS_PER_WORD), 0b111_1111_1111); // 2047
-    let mut bits = [false; 11];
-    bits[0] = true;
-    bits[1] = true;
-    bits[2] = true;
-    bits[3] = true;
-    bits[4] = true;
-    assert_eq!(bits_to_uint(&bits, BITS_PER_WORD), 0b111_1100_0000); //1984
-
-    assert_eq!(bits_to_uint(&[false; 8], BITS_PER_BYTE), 0b0000_0000); // 0
-    assert_eq!(bits_to_uint(&[true; 8], BITS_PER_BYTE), 0b1111_1111); // 255
-    let mut bits = [false; 8];
-    bits[0] = true;
-    bits[1] = true;
-    bits[2] = true;
-    bits[3] = true;
-    bits[4] = true;
-    assert_eq!(bits_to_uint(&bits, BITS_PER_BYTE), 0b1111_1000); //248
-}
-
-#[test]
-fn test_index_to_bits() {
-    let mut bits: [bool; BITS_PER_WORD] = Default::default();
-    index_to_bits(0b000_0000_0000, &mut bits, BITS_PER_WORD);
-    assert_eq!(bits, [false; BITS_PER_WORD]); // 0
-
-    let mut bits: [bool; BITS_PER_WORD] = Default::default();
-    index_to_bits(0b111_1111_1111, &mut bits, BITS_PER_WORD);
-    assert_eq!(bits, [true; BITS_PER_WORD]); // 2047
-
-    let mut bits: [bool; BITS_PER_WORD] = Default::default();
-    index_to_bits(0b111_1100_0000, &mut bits, BITS_PER_WORD);
-    let mut expected_bits = [false; BITS_PER_WORD];
-    expected_bits[0] = true;
-    expected_bits[1] = true;
-    expected_bits[2] = true;
-    expected_bits[3] = true;
-    expected_bits[4] = true;
-    assert_eq!(bits, expected_bits); // 1984
-}
-
-#[test]
-fn test_mnemonic_word_count() {
-    let mnemonic = Count::Words12;
-    assert_eq!(mnemonic.word_count(), 12);
-    assert_eq!(mnemonic.total_bits(), 128 + 4);
-    assert_eq!(mnemonic.entropy_bits(), 128);
-    assert_eq!(mnemonic.checksum_bits(), 4);
-
-    let mnemonic = Count::Words15;
-    assert_eq!(mnemonic.word_count(), 15);
-    assert_eq!(mnemonic.total_bits(), 160 + 5);
-    assert_eq!(mnemonic.entropy_bits(), 160);
-    assert_eq!(mnemonic.checksum_bits(), 5);
-
-    let mnemonic = Count::Words18;
-    assert_eq!(mnemonic.word_count(), 18);
-    assert_eq!(mnemonic.total_bits(), 192 + 6);
-    assert_eq!(mnemonic.entropy_bits(), 192);
-    assert_eq!(mnemonic.checksum_bits(), 6);
-
-    let mnemonic = Count::Words21;
-    assert_eq!(mnemonic.word_count(), 21);
-    assert_eq!(mnemonic.total_bits(), 224 + 7);
-    assert_eq!(mnemonic.entropy_bits(), 224);
-    assert_eq!(mnemonic.checksum_bits(), 7);
-
-    let mnemonic = Count::Words24;
-    assert_eq!(mnemonic.word_count(), 24);
-    assert_eq!(mnemonic.total_bits(), 256 + 8);
-    assert_eq!(mnemonic.entropy_bits(), 256);
-    assert_eq!(mnemonic.checksum_bits(), 8);
-}
-
-#[test]
-fn test_mnemonic_zeroize_when_drop() {
-    let p: *const String;
-    let e: *const Vec<u8>;
-
-    // phrase = "absurd amount doctor acoustic avoid letter advice cage absurd amount doctor adjust"
-    // entropy = [1u8; 16]
-    {
-        let m = <Mnemonic>::from_entropy([1u8; 16]).unwrap();
-        p = &*m.phrase;
-        e = &*m.entropy;
         unsafe {
+            assert_ne!(
+                *p,
+                "absurd amount doctor acoustic avoid letter advice cage absurd amount doctor adjust"
+            );
             println!("*p: {}", *p);
+            assert_ne!(*e, [1u8; 16]);
             println!("*e: {:?}", *e);
         }
     }
 
-    unsafe {
-        assert_ne!(
-            *p,
-            "absurd amount doctor acoustic avoid letter advice cage absurd amount doctor adjust"
-        );
-        println!("*p: {}", *p);
-        assert_ne!(*e, [1u8; 16]);
-        println!("*e: {:?}", *e);
-    }
-}
-
-#[test]
-fn test_mnemonic_consume() {
-    let p: *const String;
-    {
-        let m = <Mnemonic>::from_entropy([1u8; 16]).unwrap();
-        p = &*m.phrase;
-        unsafe {
-            println!("*p: {} ({:p})", *p, p);
+    #[test]
+    fn test_mnemonic_consume() {
+        let p: *const String;
+        {
+            let m = <Mnemonic>::from_entropy([1u8; 16]).unwrap();
+            p = &*m.phrase;
+            unsafe {
+                println!("*p: {} ({:p})", *p, p);
+            }
+            let phrase = m.into_phrase();
+            assert_ne!(p, &phrase);
+            println!("phrase: {} ({:p})", phrase, &phrase);
         }
-        let phrase = m.into_phrase();
-        assert_ne!(p, &phrase);
-        println!("phrase: {} ({:p})", phrase, &phrase);
-    }
-    // error
-    // unsafe {
-    //     println!("*p: {} ({:p})", (*p), p);
-    // }
+        // error
+        // unsafe {
+        //     println!("*p: {} ({:p})", (*p), p);
+        // }
 
-    let e: *const Vec<u8>;
-    {
-        let m = <Mnemonic>::from_entropy([1u8; 16]).unwrap();
-        e = &*m.entropy;
-        unsafe {
-            println!("*e: {:?} ({:p})", *e, e);
+        let e: *const Vec<u8>;
+        {
+            let m = <Mnemonic>::from_entropy([1u8; 16]).unwrap();
+            e = &*m.entropy;
+            unsafe {
+                println!("*e: {:?} ({:p})", *e, e);
+            }
+            let entropy = m.into_entropy();
+            assert_ne!(e, &entropy);
+            println!("entropy: {:?} ({:p})", entropy, &entropy);
         }
-        let entropy = m.into_entropy();
-        assert_ne!(e, &entropy);
-        println!("entropy: {:?} ({:p})", entropy, &entropy);
+        // error
+        // unsafe {
+        //     println!("*e: {:?} ({:p})", (*e), e);
+        // }
     }
-    // error
-    // unsafe {
-    //     println!("*e: {:?} ({:p})", (*e), e);
-    // }
 }

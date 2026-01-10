@@ -39,7 +39,6 @@ extern crate alloc;
 mod error;
 pub mod language;
 mod mnemonic;
-mod wordlist;
 
 #[cfg(feature = "chinese-simplified")]
 pub use self::language::ChineseSimplified;

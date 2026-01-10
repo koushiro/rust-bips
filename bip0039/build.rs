@@ -6,7 +6,7 @@
 //! Each generated file defines:
 //! - `pub static WORDS: [&'static str; 2048]` (BIP-0039 order)
 //! - `pub static INDEX: phf::Map<&'static str, u16>` (word -> index)
-//! - `pub static WORDLIST: crate::wordlist::Wordlist` (stores a reference to `INDEX`)
+//! - `pub static WORDLIST: crate::language::wordlist::Wordlist` (stores a reference to `INDEX`)
 
 use std::{
     collections::HashSet,
@@ -121,7 +121,7 @@ fn generate_one(out_dir: &Path, lang: &str, input_path: &Path) -> Result<()> {
     // WORDLIST
     writeln!(
         f,
-        "pub static WORDLIST: crate::wordlist::Wordlist = crate::wordlist::Wordlist {{\n\
+        "pub static WORDLIST: crate::language::wordlist::Wordlist = crate::language::wordlist::Wordlist {{\n\
          \twords: &WORDS,\n\
          \tindex: &INDEX,\n\
          }};\n"
