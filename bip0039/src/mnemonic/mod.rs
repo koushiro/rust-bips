@@ -317,9 +317,10 @@ let phrase = mnemonic.phrase();
 
     /// Creates a [`Mnemonic`] from a phrase that is already normalized.
     ///
-    /// Use this when you can guarantee the input is already normalized to UTF-8 NFKD
+    /// Use this when you can guarantee the input is already normalized to UTF-8 NFKD.
     ///
-    /// This avoids constructing a normalized phrase string during decoding.
+    /// This avoids the UTF-8 NFKD normalization step during decoding, since the input is already
+    /// normalized.
     ///
     /// # Examples
     ///
@@ -331,7 +332,7 @@ let phrase = mnemonic.phrase();
     /// assert_eq!(mnemonic.phrase(), phrase);
     ///
     /// let phrase = "bottom drive obey lake curtain smoke basket hold race lonely fit shit";
-    /// let mnemonic = <Mnemonic>::from_phrase(phrase);
+    /// let mnemonic = <Mnemonic>::from_normalized_phrase(phrase);
     /// assert_eq!(mnemonic.unwrap_err(), Error::UnknownWord("shit".into()));
     /// ```
     pub fn from_normalized_phrase<'a, P: Into<Cow<'a, str>>>(phrase: P) -> Result<Self, Error> {
