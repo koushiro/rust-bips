@@ -154,7 +154,7 @@ impl ParseState {
 
     fn finish(self) -> Result<Vec<u8>, Error> {
         // These conditions should be guaranteed by `Count::from_phrase` and correct decode logic.
-        // If they fail, it's a bug in this module (or in the wordlist/index mapping), not user input.
+        // If they fail, it's a bug in this library, not user input.
         debug_assert_eq!(
             self.entropy_out, self.params.entropy_byte_length,
             "decoded entropy length mismatch (bytes)"
