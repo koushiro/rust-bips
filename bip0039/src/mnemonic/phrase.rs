@@ -9,60 +9,41 @@
 
 #[cfg(not(feature = "std"))]
 use alloc::{
-    borrow::Cow,
     string::{String, ToString},
     vec,
     vec::Vec,
 };
-#[cfg(feature = "std")]
-use std::borrow::Cow;
 
 use sha2::{Digest, Sha256};
 
 use super::{BITS_PER_BYTE, BITS_PER_WORD, BitAccumulator, Count};
 use crate::{error::Error, language::Language};
 
-/// Ensure the content of the `s` is normalized UTF8.
-/// Avoid allocation for normalization when there are no special UTF8 characters in the string.
-#[inline]
-pub fn normalize_utf8(s: &mut Cow<'_, str>) {
-    use unicode_normalization::{IsNormalized, UnicodeNormalization, is_nfkd_quick};
-    if is_nfkd_quick(s.as_ref().chars()) != IsNormalized::Yes {
-        *s = Cow::Owned(s.as_ref().nfkd().to_string())
-    }
-}
-
 /// Controls whether decoding also constructs a normalized phrase (single ASCII spaces).
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
-pub enum ParseMode {
+pub enum DecodeMode {
     /// Only validate / decode entropy. Do not allocate a normalized phrase.
     ValidateOnly,
     /// Also build a normalized phrase (single ASCII spaces).
     BuildNormalizedPhrase,
 }
 
-/// Internal parse result used by `Mnemonic`.
-pub struct ParsedPhrase {
+/// Internal decoded result used by `Mnemonic`.
+pub struct DecodedPhrase {
     pub entropy: Vec<u8>,
     pub normalized_phrase: Option<String>,
 }
 
 /// Decode a phrase into entropy and (optionally) a normalized phrase.
 ///
-/// The input is normalized to UTF-8 NFKD prior to processing (same behavior as the
-/// rest of this crate).
-pub fn decode_phrase<'a, L: Language, P: Into<Cow<'a, str>>>(
-    phrase: P,
-    mode: ParseMode,
-) -> Result<ParsedPhrase, Error> {
-    let mut phrase = phrase.into();
-    normalize_utf8(&mut phrase);
-
-    let params = parse_params_from_phrase(&phrase)?;
+/// Note:
+/// - This function assumes the input has already been normalized to UTF-8 NFKD by the caller.
+pub fn decode_phrase<L: Language>(phrase: &str, mode: DecodeMode) -> Result<DecodedPhrase, Error> {
+    let params = parse_params_from_phrase(phrase)?;
 
     let mut normalized_phrase = match mode {
-        ParseMode::ValidateOnly => None,
-        ParseMode::BuildNormalizedPhrase => {
+        DecodeMode::ValidateOnly => None,
+        DecodeMode::BuildNormalizedPhrase => {
             let words = params.count.word_count();
             // Rough capacity: avg word len ~8 bytes + spaces.
             let rough_phrase_cap = words * 8 + (words.saturating_sub(1));
@@ -70,9 +51,9 @@ pub fn decode_phrase<'a, L: Language, P: Into<Cow<'a, str>>>(
         },
     };
 
-    let mut state = ParseState::new(params);
+    let mut state = DecodeState::new(params);
 
-    for word in phrase.as_ref().split_whitespace() {
+    for word in phrase.split_whitespace() {
         if let Some(out) = normalized_phrase.as_mut() {
             if !out.is_empty() {
                 out.push(' ');
@@ -90,25 +71,25 @@ pub fn decode_phrase<'a, L: Language, P: Into<Cow<'a, str>>>(
 
     let entropy = state.finish()?;
 
-    Ok(ParsedPhrase { entropy, normalized_phrase })
+    Ok(DecodedPhrase { entropy, normalized_phrase })
 }
 
-struct ParseParams {
+struct DecodeParams {
     entropy_byte_length: usize,
     checksum_bit_length: usize,
     count: Count,
 }
 
-fn parse_params_from_phrase(phrase: &str) -> Result<ParseParams, Error> {
+fn parse_params_from_phrase(phrase: &str) -> Result<DecodeParams, Error> {
     let count = Count::from_phrase(phrase)?;
     let entropy_byte_length = count.entropy_bit_length() / BITS_PER_BYTE;
     let checksum_bit_length = count.checksum_bit_length();
 
-    Ok(ParseParams { entropy_byte_length, checksum_bit_length, count })
+    Ok(DecodeParams { entropy_byte_length, checksum_bit_length, count })
 }
 
-struct ParseState {
-    params: ParseParams,
+struct DecodeState {
+    params: DecodeParams,
     entropy: Vec<u8>,
     entropy_out: usize,
     accumulator: BitAccumulator,
@@ -116,8 +97,8 @@ struct ParseState {
     actual_checksum_filled: usize,
 }
 
-impl ParseState {
-    fn new(params: ParseParams) -> Self {
+impl DecodeState {
+    fn new(params: DecodeParams) -> Self {
         let entropy_byte_length = params.entropy_byte_length;
         Self {
             params,

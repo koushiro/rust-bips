@@ -11,6 +11,8 @@ pub enum Error {
     BadEntropyBitCount(usize),
     /// Mnemonic contains an unknown word.
     UnknownWord(String),
+    /// The input phrase is not normalized to UTF-8 NFKD.
+    NotNormalized,
     /// The mnemonic has an invalid checksum.
     InvalidChecksum,
 }
@@ -26,6 +28,7 @@ impl fmt::Display for Error {
                 "entropy was not between 128-256 bits or not a multiple of 32 bits: {count} bits"
             ),
             Error::UnknownWord(word) => write!(f, "mnemonic contains an unknown word: {word}"),
+            Error::NotNormalized => write!(f, "mnemonic phrase is not normalized to UTF-8 NFKD"),
             Error::InvalidChecksum => write!(f, "mnemonic has an invalid checksum"),
         }
     }
