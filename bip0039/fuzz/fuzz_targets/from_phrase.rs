@@ -74,7 +74,7 @@ fn flip_checksum_like(phrase: &str) -> String {
         return phrase.to_string();
     }
 
-    // mutate the last word deterministically to another valid english word.
+    // mutate the last word deterministically to another valid English word.
     let last = words.len() - 1;
     let orig = words[last];
 
@@ -103,7 +103,7 @@ fuzz_target!(|input: Input<'_>| {
     // We don't assert on success/failure because that's input-dependent.
     let _ = <Mnemonic<English>>::validate(phrase.as_str());
 
-    // Now exercise parsing. If it succeeds, we verify some invariants and run seed derivation.
+    // Now exercise parsing. If it succeeds, we verify some invariants.
     match <Mnemonic<English>>::from_phrase(phrase.as_str()) {
         Ok(m) => {
             // `phrase()` is normalized to single ASCII spaces (per docs).
