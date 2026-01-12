@@ -1,5 +1,9 @@
+# NOTE: This repo is not a Cargo workspace; cargo-release won't auto-read this file
+# unless you pass it explicitly. Before releasing, confirm config like below:
+# `cargo release config --manifest-path bip0039/Cargo.toml -c release.toml`
+push-remote = "upstream"
 allow-branch = ["main"]
 consolidate-commits = false
 pre-release-commit-message = "chore: release {{crate_name}}-v{{version}}"
-tag-message = "{{crate_name}} version {{version}}"
+tag-message = "chore: release {{crate_name}}-v{{version}}"
 tag-name = "{{prefix}}v{{version}}"
