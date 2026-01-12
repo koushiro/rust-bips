@@ -121,10 +121,10 @@ fn generate_one(out_dir: &Path, lang: &str, input_path: &Path) -> Result<()> {
     // WORDLIST
     writeln!(
         f,
-        "pub static WORDLIST: crate::language::wordlist::Wordlist = crate::language::wordlist::Wordlist {{\n\
+        "pub static WORDLIST: crate::language::Wordlist = crate::language::Wordlist {{\n\
          \twords: &WORDS,\n\
          \tindex: &INDEX,\n\
-         }};\n"
+         }};"
     )
     .context("failed writing WORDLIST")?;
 

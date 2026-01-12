@@ -16,7 +16,7 @@ use self::wordlist::*;
 /// - [`Language::word_of`]
 /// - [`Language::index_of`]
 ///
-/// Built-in languages implement a crate-private [`WordlistProvider`] and automatically
+/// Built-in languages implement a crate-private `WordlistProvider` and automatically
 /// get this trait via the blanket impl below.
 ///
 /// # Requirements
