@@ -7,7 +7,7 @@
 //! Each generated file defines:
 //! - `WORDS`: `&'static str` array in BIP-0039 order (index -> word)
 //! - `INDEX`: `phf::Map<&'static str, u16>` (word -> index)
-//! - `WORDLIST`: `crate::wordlist::Wordlist`
+//! - `WORDLIST`: `crate::language::wordlist::Wordlist`
 
 /// A generated word list + fast lookup index for a language.
 ///
