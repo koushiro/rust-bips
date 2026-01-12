@@ -35,3 +35,11 @@
 - Do not log or print mnemonic phrases, seeds, or passphrases in tests or examples.
 - Keep test data non-sensitive; use the published BIP-39 vectors in `tests/`.
 - Prefer `zeroize`-aware types and avoid cloning secret material unnecessarily.
+
+## Release Notes
+
+Generate GitHub Release notes that cover these sections:
+
+- Breaking Changes
+- New Features
+- Performance & Behavior Improvements.
