@@ -16,6 +16,21 @@ rand = "0.9"
 tiny_bip39 = { package = "tiny-bip39", version = "2.0", features = ["rand"] }
 
 [[bench]]
-name = "bip0039"
-path = "bip0039.rs"
+name = "generate"
+path = "src/generate.rs"
+harness = false
+
+[[bench]]
+name = "from_entropy"
+path = "src/from_entropy.rs"
+harness = false
+
+[[bench]]
+name = "from_phrase"
+path = "src/from_phrase.rs"
+harness = false
+
+[[bench]]
+name = "to_seed"
+path = "src/to_seed.rs"
 harness = false
