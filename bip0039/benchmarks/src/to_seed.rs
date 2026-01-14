@@ -25,7 +25,7 @@ fn bench_to_seed(c: &mut Criterion) {
                 |mnemonic| {
                     let _seed = black_box(Seed::new(&mnemonic, ""));
                 },
-                BatchSize::SmallInput,
+                BatchSize::PerIteration,
             )
         });
 
@@ -37,7 +37,7 @@ fn bench_to_seed(c: &mut Criterion) {
                 |mnemonic| {
                     let _seed = black_box(mnemonic.to_seed(""));
                 },
-                BatchSize::SmallInput,
+                BatchSize::PerIteration,
             )
         });
 
@@ -52,7 +52,7 @@ fn bench_to_seed(c: &mut Criterion) {
                 |mnemonic| {
                     let _key = black_box(mnemonic.to_seed(None).unwrap());
                 },
-                BatchSize::SmallInput,
+                BatchSize::PerIteration,
             )
         });
 
@@ -73,7 +73,7 @@ fn bench_to_seed(c: &mut Criterion) {
                 |mnemonic| {
                     let _seed = black_box(mnemonic.to_seed(""));
                 },
-                BatchSize::SmallInput,
+                BatchSize::PerIteration,
             )
         });
 

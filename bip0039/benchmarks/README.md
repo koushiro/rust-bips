@@ -167,38 +167,38 @@ cargo bench --bench to_seed -- --quiet
 
 ```text
 to_seed/tiny-bip39 (12 words)
-                        time:   [979.68 µs 981.33 µs 983.30 µs]
+                        time:   [976.59 µs 987.81 µs 1.0060 ms]
 to_seed/bip39 (12 words)
-                        time:   [1.0811 ms 1.0822 ms 1.0833 ms]
+                        time:   [1.0816 ms 1.0826 ms 1.0835 ms]
 to_seed/coins-bip39 (12 words)
-                        time:   [979.75 µs 1.0194 ms 1.0817 ms]
+                        time:   [977.50 µs 978.55 µs 979.77 µs]
 to_seed/bip0039 (12 words)
-                        time:   [982.47 µs 984.38 µs 986.42 µs]
+                        time:   [979.98 µs 981.89 µs 984.49 µs]
 
 to_seed/tiny-bip39 (15 words)
-                        time:   [975.73 µs 976.73 µs 977.81 µs]
+                        time:   [977.02 µs 978.18 µs 979.20 µs]
 to_seed/bip39 (15 words)
-                        time:   [1.0820 ms 1.1107 ms 1.1797 ms]
+                        time:   [1.0823 ms 1.0838 ms 1.0855 ms]
 to_seed/coins-bip39 (15 words)
-                        time:   [978.64 µs 979.87 µs 981.01 µs]
+                        time:   [979.52 µs 981.10 µs 983.00 µs]
 to_seed/bip0039 (15 words)
-                        time:   [981.15 µs 982.27 µs 983.46 µs]
+                        time:   [982.92 µs 994.37 µs 1.0123 ms]
 
 to_seed/tiny-bip39 (18 words)
-                        time:   [975.32 µs 976.78 µs 978.38 µs]
+                        time:   [975.39 µs 977.23 µs 979.30 µs]
 to_seed/bip39 (18 words)
-                        time:   [1.0810 ms 1.0830 ms 1.0853 ms]
+                        time:   [1.0847 ms 1.0867 ms 1.0892 ms]
 to_seed/coins-bip39 (18 words)
-                        time:   [980.98 µs 982.00 µs 982.96 µs]
+                        time:   [976.24 µs 977.18 µs 978.15 µs]
 to_seed/bip0039 (18 words)
-                        time:   [979.88 µs 980.75 µs 981.58 µs]
+                        time:   [983.08 µs 993.13 µs 1.0064 ms]
 
 to_seed/tiny-bip39 (24 words)
-                        time:   [981.85 µs 998.12 µs 1.0257 ms]
+                        time:   [987.41 µs 992.07 µs 998.69 µs]
 to_seed/bip39 (24 words)
-                        time:   [1.0839 ms 1.0885 ms 1.0946 ms]
+                        time:   [1.1047 ms 1.1120 ms 1.1226 ms]
 to_seed/coins-bip39 (24 words)
-                        time:   [982.40 µs 986.82 µs 994.32 µs]
+                        time:   [989.70 µs 991.79 µs 993.79 µs]
 to_seed/bip0039 (24 words)
-                        time:   [983.57 µs 1.0238 ms 1.0846 ms]
+                        time:   [1.0205 ms 1.0289 ms 1.0396 ms]
 ```
