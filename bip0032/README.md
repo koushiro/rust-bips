@@ -26,7 +26,7 @@ See documentation and examples at https://docs.rs/bip0032.
 
 - [bip32](https://github.com/iqlusioninc/crates/tree/main/bip32)
 - [coins-bip32](https://github.com/summa-tx/bitcoins-rs/tree/main/bip32)
-- [tiny-hderive](https://github.com/maciejhirsz/tiny-hderive)
+- [bitcoin](https://github.com/rust-bitcoin/rust-bitcoin/blob/master/bitcoin/src/bip32.rs)
 
 ## License
 
