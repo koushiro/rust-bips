@@ -1,13 +1,11 @@
 use std::hint::black_box;
 
-use criterion::{
-    BatchSize, BenchmarkGroup, Criterion, criterion_group, criterion_main, measurement::WallTime,
-};
+use criterion::{BatchSize, Criterion, criterion_group, criterion_main};
 
 mod common;
-use common::random_seed;
+use common::{BenchmarkGroup, random_seed};
 
-fn bench_derive_bitcoin(group: &mut BenchmarkGroup<'_, WallTime>) {
+fn bench_derive_bitcoin(group: &mut BenchmarkGroup<'_>) {
     use bitcoin::{
         Network,
         bip32::{DerivationPath, Xpriv},
@@ -32,7 +30,7 @@ fn bench_derive_bitcoin(group: &mut BenchmarkGroup<'_, WallTime>) {
     });
 }
 
-fn bench_derive_coins_bip32(group: &mut BenchmarkGroup<'_, WallTime>) {
+fn bench_derive_coins_bip32(group: &mut BenchmarkGroup<'_>) {
     use coins_bip32::prelude::{Hint, XPriv};
 
     group.bench_function("coins-bip32 (k256::ecdsa)", |b| {
@@ -52,13 +50,13 @@ fn bench_derive_coins_bip32(group: &mut BenchmarkGroup<'_, WallTime>) {
     });
 }
 
-fn bench_derive_bip32(group: &mut BenchmarkGroup<'_, WallTime>) {
+fn bench_derive_bip32(group: &mut BenchmarkGroup<'_>) {
     use bip32::{
         DerivationPath, ExtendedPrivateKey, PrivateKey,
         secp256k1::{self, ecdsa},
     };
 
-    fn bench_impl<P: PrivateKey>(group: &mut BenchmarkGroup<'_, WallTime>, name: &str) {
+    fn bench_impl<P: PrivateKey>(group: &mut BenchmarkGroup<'_>, name: &str) {
         group.bench_function(name, |b| {
             let path = "m/0'/1/2'/2/1000000000".parse::<DerivationPath>().unwrap();
 
@@ -84,10 +82,10 @@ fn bench_derive_bip32(group: &mut BenchmarkGroup<'_, WallTime>) {
 }
 
 /*
-fn bench_derive_bip0032(group: &mut BenchmarkGroup<'_, WallTime>) {
+fn bench_derive_bip0032(group: &mut BenchmarkGroup<'_>) {
     use bip0032::{DerivationPath, ExtendedPrivateKey, backend::*};
 
-    fn bench_impl<B: Secp256k1Backend>(group: &mut BenchmarkGroup<'_, WallTime>, name: &str) {
+    fn bench_impl<B: Secp256k1Backend>(group: &mut BenchmarkGroup<'_>, name: &str) {
         group.bench_function(name, |b| {
             let path = "m/0H/1/2H/2/1000000000".parse::<DerivationPath>().unwrap();
 

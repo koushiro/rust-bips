@@ -1,13 +1,11 @@
 use std::hint::black_box;
 
-use criterion::{
-    BatchSize, BenchmarkGroup, Criterion, criterion_group, criterion_main, measurement::WallTime,
-};
+use criterion::{BatchSize, Criterion, criterion_group, criterion_main};
 
 mod common;
-use common::random_seed;
+use common::{BenchmarkGroup, random_seed};
 
-fn bench_keygen_bitcoin(group: &mut BenchmarkGroup<'_, WallTime>) {
+fn bench_keygen_bitcoin(group: &mut BenchmarkGroup<'_>) {
     use bitcoin::{Network, bip32::Xpriv};
 
     group.bench_function("bitcoin (secp256k1)", |b| {
@@ -22,7 +20,7 @@ fn bench_keygen_bitcoin(group: &mut BenchmarkGroup<'_, WallTime>) {
     });
 }
 
-fn bench_keygen_coins_bip32(group: &mut BenchmarkGroup<'_, WallTime>) {
+fn bench_keygen_coins_bip32(group: &mut BenchmarkGroup<'_>) {
     use coins_bip32::prelude::{Hint, XPriv};
 
     group.bench_function("coins-bip32 (k256)", |b| {
@@ -37,13 +35,13 @@ fn bench_keygen_coins_bip32(group: &mut BenchmarkGroup<'_, WallTime>) {
     });
 }
 
-fn bench_keygen_bip32(group: &mut BenchmarkGroup<'_, WallTime>) {
+fn bench_keygen_bip32(group: &mut BenchmarkGroup<'_>) {
     use bip32::{
         ExtendedPrivateKey, PrivateKey,
         secp256k1::{self, ecdsa},
     };
 
-    fn bench_impl<P: PrivateKey>(group: &mut BenchmarkGroup<WallTime>, name: &str) {
+    fn bench_impl<P: PrivateKey>(group: &mut BenchmarkGroup<'_>, name: &str) {
         group.bench_function(name, |b| {
             b.iter_batched(
                 random_seed,
@@ -61,10 +59,10 @@ fn bench_keygen_bip32(group: &mut BenchmarkGroup<'_, WallTime>) {
 }
 
 /*
-fn bench_keygen_bip0032(group: &mut BenchmarkGroup<'_, WallTime>) {
+fn bench_keygen_bip0032(group: &mut BenchmarkGroup<'_>) {
     use bip0032::{ExtendedPrivateKey, backend::*};
 
-    fn bench_impl<B: Secp256k1Backend>(group: &mut BenchmarkGroup<'_, WallTime>, name: &str) {
+    fn bench_impl<B: Secp256k1Backend>(group: &mut BenchmarkGroup<'_>, name: &str) {
         group.bench_function(name, |b| {
             b.iter_batched(
                 random_seed,

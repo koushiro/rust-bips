@@ -1,14 +1,12 @@
 use std::hint::black_box;
 
-use criterion::{
-    BatchSize, BenchmarkGroup, Criterion, criterion_group, criterion_main, measurement::WallTime,
-};
+use criterion::{BatchSize, Criterion, criterion_group, criterion_main};
 
 #[path = "../common.rs"]
 mod common;
-use common::random_seed;
+use common::{BenchmarkGroup, random_seed};
 
-fn bench_bitcoin(group: &mut BenchmarkGroup<'_, WallTime>) {
+fn bench_bitcoin(group: &mut BenchmarkGroup<'_>) {
     use bitcoin::{Network, bip32::Xpriv};
 
     group.bench_function("bitcoin (secp256k1)", |b| {
@@ -27,7 +25,7 @@ fn bench_bitcoin(group: &mut BenchmarkGroup<'_, WallTime>) {
     });
 }
 
-fn bench_coins_bip32(group: &mut BenchmarkGroup<'_, WallTime>) {
+fn bench_coins_bip32(group: &mut BenchmarkGroup<'_>) {
     use coins_bip32::prelude::{Hint, MainnetEncoder, XKeyEncoder, XPriv};
 
     group.bench_function("coins-bip32 (k256::ecdsa)", |b| {
@@ -46,13 +44,13 @@ fn bench_coins_bip32(group: &mut BenchmarkGroup<'_, WallTime>) {
     });
 }
 
-fn bench_bip32(group: &mut BenchmarkGroup<'_, WallTime>) {
+fn bench_bip32(group: &mut BenchmarkGroup<'_>) {
     use bip32::{
         ExtendedPrivateKey, Prefix, PrivateKey,
         secp256k1::{self, ecdsa},
     };
 
-    fn bench_impl<P: PrivateKey>(group: &mut BenchmarkGroup<'_, WallTime>, name: &str) {
+    fn bench_impl<P: PrivateKey>(group: &mut BenchmarkGroup<'_>, name: &str) {
         group.bench_function(format!("bip32 ({name})"), |b| {
             b.iter_batched(
                 || {
@@ -72,6 +70,7 @@ fn bench_bip32(group: &mut BenchmarkGroup<'_, WallTime>) {
     bench_impl::<secp256k1::SecretKey>(group, "k256");
     bench_impl::<ecdsa::SigningKey>(group, "k256::ecdsa");
 }
+
 /*
 fn bench_bip0032(group: &mut BenchmarkGroup<'_, WallTime>) {
     use bip0032::{ExtendedKey, ExtendedPrivateKey, Version, backend::*};
