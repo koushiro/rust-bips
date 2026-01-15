@@ -1,0 +1,47 @@
+[package]
+name = "bip0032-benchmarks"
+version = "0.0.0"
+authors = ["koushiro <koushiro.cqx@gmail.com>"]
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish = false
+
+[dev-dependencies]
+bip0032 = { path = "..", features = ["k256", "k256ecdsa", "secp256k1", "libsecp256k1"] }
+bip32 = "0.5"
+bitcoin = "0.32"
+coins-bip32 = "0.13"
+const-hex = "1.12.0"
+criterion = "0.8"
+rand = "0.9"
+
+[[bench]]
+name = "keygen"
+path = "keygen.rs"
+harness = false
+
+[[bench]]
+name = "derive"
+path = "derive.rs"
+harness = false
+
+[[bench]]
+name = "xprv_decode"
+path = "serialize/xprv_decode.rs"
+harness = false
+
+[[bench]]
+name = "xprv_encode"
+path = "serialize/xprv_encode.rs"
+harness = false
+
+[[bench]]
+name = "xpub_decode"
+path = "serialize/xpub_decode.rs"
+harness = false
+
+[[bench]]
+name = "xpub_encode"
+path = "serialize/xpub_encode.rs"
+harness = false
