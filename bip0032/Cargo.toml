@@ -54,9 +54,11 @@ ripemd = { version = "0.1", default-features = false }
 sha2 = { version = "0.10", default-features = false }
 
 # Different secp256k1 libraries
-k256 = { version = "0.13.4", default-features = false, optional = true }
-libsecp256k1 = { version = "0.7.2", default-features = false, features = ["static-context"], optional = true }
-secp256k1 = { version = "0.31.0", default-features = false, features = ["alloc"], optional = true }
+k256 = { version = "0.13", default-features = false, optional = true }
+libsecp256k1 = { version = "0.7", default-features = false, features = [
+    "static-context",
+], optional = true }
+secp256k1 = { version = "0.31", default-features = false, features = ["alloc"], optional = true }
 
 [dev-dependencies]
 const-hex = "1.12.0"

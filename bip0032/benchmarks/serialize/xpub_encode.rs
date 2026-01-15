@@ -54,7 +54,7 @@ fn bench_coins_bip32(group: &mut BenchmarkGroup<'_, WallTime>) {
 fn bench_bip32(group: &mut BenchmarkGroup<'_, WallTime>) {
     use bip32::{
         ExtendedPrivateKey, Prefix, PrivateKey,
-        secp256k1::{SecretKey, ecdsa::SigningKey},
+        secp256k1::{self, ecdsa},
     };
 
     fn bench_impl<P: PrivateKey>(group: &mut BenchmarkGroup<'_, WallTime>, name: &str) {
@@ -74,8 +74,8 @@ fn bench_bip32(group: &mut BenchmarkGroup<'_, WallTime>) {
         });
     }
 
-    bench_impl::<SecretKey>(group, "k256");
-    bench_impl::<SigningKey>(group, "k256::ecdsa");
+    bench_impl::<secp256k1::SecretKey>(group, "k256");
+    bench_impl::<ecdsa::SigningKey>(group, "k256::ecdsa");
 }
 
 /*

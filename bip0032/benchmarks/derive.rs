@@ -55,7 +55,7 @@ fn bench_derive_coins_bip32(group: &mut BenchmarkGroup<'_, WallTime>) {
 fn bench_derive_bip32(group: &mut BenchmarkGroup<'_, WallTime>) {
     use bip32::{
         DerivationPath, ExtendedPrivateKey, PrivateKey,
-        secp256k1::{SecretKey, ecdsa::SigningKey},
+        secp256k1::{self, ecdsa},
     };
 
     fn bench_impl<P: PrivateKey>(group: &mut BenchmarkGroup<'_, WallTime>, name: &str) {
@@ -79,8 +79,8 @@ fn bench_derive_bip32(group: &mut BenchmarkGroup<'_, WallTime>) {
         });
     }
 
-    bench_impl::<SecretKey>(group, "bip32 (k256)");
-    bench_impl::<SigningKey>(group, "bip32 (k256::ecdsa)");
+    bench_impl::<secp256k1::SecretKey>(group, "bip32 (k256)");
+    bench_impl::<ecdsa::SigningKey>(group, "bip32 (k256::ecdsa)");
 }
 
 /*

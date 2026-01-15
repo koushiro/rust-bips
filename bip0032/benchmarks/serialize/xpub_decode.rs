@@ -1,6 +1,5 @@
 use std::hint::black_box;
 
-use bip32::PrivateKey;
 use criterion::{
     BatchSize, BenchmarkGroup, Criterion, criterion_group, criterion_main, measurement::WallTime,
 };
@@ -56,21 +55,24 @@ fn bench_coins_bip32(group: &mut BenchmarkGroup<'_, WallTime>) {
 
 fn bench_bip32(group: &mut BenchmarkGroup<'_, WallTime>) {
     use bip32::{
-        ExtendedPrivateKey, Prefix, XPub,
-        secp256k1::{SecretKey, ecdsa::SigningKey},
+        ExtendedPrivateKey, ExtendedPublicKey, Prefix, PrivateKey, PublicKey,
+        secp256k1::{self, ecdsa},
     };
 
-    fn bench_impl<P: PrivateKey>(group: &mut BenchmarkGroup<'_, WallTime>, name: &str) {
+    fn bench_impl<Prv: PrivateKey, Pub: PublicKey>(
+        group: &mut BenchmarkGroup<'_, WallTime>,
+        name: &str,
+    ) {
         group.bench_function(format!("bip32 ({name})"), |b| {
             b.iter_batched(
                 || {
                     let seed = random_seed();
-                    let xprv = <ExtendedPrivateKey<P>>::new(&seed).unwrap();
+                    let xprv = <ExtendedPrivateKey<Prv>>::new(&seed).unwrap();
                     let xpub = xprv.public_key();
                     xpub.to_string(Prefix::XPUB)
                 },
                 |encoded| {
-                    let xpub = encoded.parse::<XPub>().unwrap();
+                    let xpub = encoded.parse::<ExtendedPublicKey<Pub>>().unwrap();
                     black_box(xpub);
                 },
                 BatchSize::SmallInput,
@@ -78,8 +80,8 @@ fn bench_bip32(group: &mut BenchmarkGroup<'_, WallTime>) {
         });
     }
 
-    bench_impl::<SecretKey>(group, "k256");
-    bench_impl::<SigningKey>(group, "k256::ecdsa");
+    bench_impl::<secp256k1::SecretKey, secp256k1::PublicKey>(group, "k256");
+    bench_impl::<ecdsa::SigningKey, ecdsa::VerifyingKey>(group, "k256::ecdsa");
 }
 
 /*
