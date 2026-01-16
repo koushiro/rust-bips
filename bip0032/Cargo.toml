@@ -47,8 +47,8 @@ secp256k1 = ["dep:secp256k1"]
 libsecp256k1 = ["dep:libsecp256k1"]
 
 [dependencies]
-anyhow = { version = "1", default-features = false }
-bs58 = { version = "0.5", default-features = false, features = ["check"] }
+anyhow = { version = "1.0", default-features = false }
+bs58 = { version = "0.5", default-features = false, features = ["alloc", "check"] }
 hmac = { version = "0.12", default-features = false }
 ripemd = { version = "0.1", default-features = false }
 sha2 = { version = "0.10", default-features = false }

@@ -79,9 +79,8 @@ fn bench_bip32(group: &mut BenchmarkGroup<'_>) {
     bench_impl::<ecdsa::SigningKey, ecdsa::VerifyingKey>(group, "k256::ecdsa");
 }
 
-/*
 fn bench_bip0032(group: &mut BenchmarkGroup<'_>) {
-    use bip0032::{ExtendedKey, ExtendedPrivateKey, Version, backend::*};
+    use bip0032::{ExtendedKeyPayload, ExtendedPrivateKey, ExtendedPublicKey, Version, backend::*};
 
     fn bench_impl<B: Secp256k1Backend>(group: &mut BenchmarkGroup<'_>, name: &str) {
         group.bench_function(format!("bip0032 ({name})"), |b| {
@@ -89,14 +88,12 @@ fn bench_bip0032(group: &mut BenchmarkGroup<'_>) {
                 || {
                     let seed = random_seed();
                     let master = <ExtendedPrivateKey<B>>::new(&seed).unwrap();
-                    master.public_key().encode_with(Version::XPUB).to_string()
+                    let version = Version::XPUB;
+                    master.public_key().encode_with_unchecked(version).to_string()
                 },
                 |encoded| {
-                    let xpub = encoded
-                        .parse::<ExtendedKey>()
-                        .unwrap()
-                        .into_public::<B>()
-                        .unwrap();
+                    let payload = encoded.parse::<ExtendedKeyPayload>().unwrap();
+                    let xpub = ExtendedPublicKey::<B>::try_from(payload).unwrap();
                     black_box(xpub);
                 },
                 BatchSize::SmallInput,
@@ -109,7 +106,6 @@ fn bench_bip0032(group: &mut BenchmarkGroup<'_>) {
     bench_impl::<Secp256k1CoreBackend>(group, "secp256k1");
     bench_impl::<Libsecp256k1Backend>(group, "libsecp256k1");
 }
-*/
 
 fn bench_xpub_decode(c: &mut Criterion) {
     let mut group = c.benchmark_group("xpub_decode");
@@ -117,7 +113,7 @@ fn bench_xpub_decode(c: &mut Criterion) {
     bench_bitcoin(&mut group);
     bench_coins_bip32(&mut group);
     bench_bip32(&mut group);
-    // bench_bip0032(&mut group);
+    bench_bip0032(&mut group);
 
     group.finish();
 }

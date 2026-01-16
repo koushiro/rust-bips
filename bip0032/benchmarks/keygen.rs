@@ -23,7 +23,7 @@ fn bench_keygen_bitcoin(group: &mut BenchmarkGroup<'_>) {
 fn bench_keygen_coins_bip32(group: &mut BenchmarkGroup<'_>) {
     use coins_bip32::prelude::{Hint, XPriv};
 
-    group.bench_function("coins-bip32 (k256)", |b| {
+    group.bench_function("coins-bip32 (k256::ecdsa)", |b| {
         b.iter_batched(
             random_seed,
             |seed| {
@@ -58,7 +58,6 @@ fn bench_keygen_bip32(group: &mut BenchmarkGroup<'_>) {
     bench_impl::<ecdsa::SigningKey>(group, "bip32 (k256::ecdsa)");
 }
 
-/*
 fn bench_keygen_bip0032(group: &mut BenchmarkGroup<'_>) {
     use bip0032::{ExtendedPrivateKey, backend::*};
 
@@ -80,7 +79,6 @@ fn bench_keygen_bip0032(group: &mut BenchmarkGroup<'_>) {
     bench_impl::<Secp256k1CoreBackend>(group, "bip0032 (secp256k1)");
     bench_impl::<Libsecp256k1Backend>(group, "bip0032 (libsecp256k1)");
 }
-*/
 
 fn bench_keygen(c: &mut Criterion) {
     let mut group = c.benchmark_group("keygen");
@@ -88,7 +86,7 @@ fn bench_keygen(c: &mut Criterion) {
     bench_keygen_bitcoin(&mut group);
     bench_keygen_coins_bip32(&mut group);
     bench_keygen_bip32(&mut group);
-    // bench_keygen_bip0032(&mut group);
+    bench_keygen_bip0032(&mut group);
 
     group.finish();
 }
