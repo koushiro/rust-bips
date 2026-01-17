@@ -2,6 +2,7 @@
 
 use hmac::{Hmac, Mac};
 use sha2::Sha512;
+use zeroize::Zeroize;
 
 mod payload;
 mod private;
@@ -14,12 +15,27 @@ pub use self::{
 };
 
 /// Common metadata for extended keys (depth, parent link, and chain code).
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub(crate) struct ExtendedKeyMetadata {
     pub(crate) depth: u8,
     pub(crate) parent_fingerprint: [u8; 4],
     pub(crate) child_number: u32,
     pub(crate) chain_code: [u8; 32],
+}
+
+impl Zeroize for ExtendedKeyMetadata {
+    fn zeroize(&mut self) {
+        self.depth = 0;
+        self.parent_fingerprint = [0u8; 4];
+        self.child_number = 0;
+        self.chain_code.zeroize();
+    }
+}
+
+impl Drop for ExtendedKeyMetadata {
+    fn drop(&mut self) {
+        self.zeroize();
+    }
 }
 
 pub(crate) fn key_fingerprint(public_key_bytes: &[u8; 33]) -> [u8; 4] {
@@ -52,5 +68,6 @@ pub(crate) fn hmac_sha512_split(
     let mut right = [0u8; 32];
     left.copy_from_slice(&output[..32]);
     right.copy_from_slice(&output[32..]);
+
     (left, right)
 }

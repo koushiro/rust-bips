@@ -103,7 +103,7 @@ fn bench_bip0032(group: &mut BenchmarkGroup<'_>) {
 
     bench_impl::<K256Backend>(group, "k256");
     bench_impl::<K256EcdsaBackend>(group, "k256::ecdsa");
-    bench_impl::<Secp256k1CoreBackend>(group, "secp256k1");
+    bench_impl::<Secp256k1FfiBackend>(group, "secp256k1");
     bench_impl::<Libsecp256k1Backend>(group, "libsecp256k1");
 }
 

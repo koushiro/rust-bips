@@ -1,5 +1,6 @@
 use anyhow::{Result, anyhow};
 use hmac::Mac;
+use zeroize::Zeroizing;
 
 use super::{
     ExtendedKeyMetadata, hmac_sha512_split, key_fingerprint,
@@ -20,7 +21,7 @@ pub struct ExtendedPublicKey<B: Secp256k1Backend> {
 
 impl<B: Secp256k1Backend> Clone for ExtendedPublicKey<B> {
     fn clone(&self) -> Self {
-        Self { meta: self.meta, public_key: self.public_key.clone() }
+        Self { meta: self.meta.clone(), public_key: self.public_key.clone() }
     }
 }
 
@@ -37,7 +38,8 @@ impl<B: Secp256k1Backend> ExtendedPublicKey<B> {
             mac.update(&child.to_bytes());
         });
 
-        let child_public = self.public_key.add_tweak(left)?;
+        let left = Zeroizing::new(left);
+        let child_public = self.public_key.add_tweak(&left)?;
 
         Ok(Self {
             meta: ExtendedKeyMetadata {
@@ -70,7 +72,11 @@ impl<B: Secp256k1Backend> ExtendedPublicKey<B> {
 
     /// Encodes this key with the specified version bytes without validation.
     pub fn encode_with_unchecked(&self, version: Version) -> ExtendedKeyPayload {
-        ExtendedKeyPayload { version, meta: self.meta, key_data: self.public_key.to_bytes() }
+        ExtendedKeyPayload {
+            version,
+            meta: self.meta.clone(),
+            key_data: self.public_key.to_bytes(),
+        }
     }
 }
 
@@ -82,9 +88,9 @@ impl<B: Secp256k1Backend> TryFrom<ExtendedKeyPayload> for ExtendedPublicKey<B> {
             return Err(anyhow!("extended key is not public"));
         }
 
-        let public_key = <PublicKey<B> as Secp256k1PublicKey>::from_bytes(payload.key_data)
+        let public_key = <PublicKey<B> as Secp256k1PublicKey>::from_bytes(&payload.key_data)
             .map_err(|_| anyhow!("invalid public key data"))?;
 
-        Ok(Self { meta: payload.meta, public_key })
+        Ok(Self { meta: payload.meta.clone(), public_key })
     }
 }

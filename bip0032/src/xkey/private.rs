@@ -1,5 +1,6 @@
 use anyhow::{Result, anyhow};
 use hmac::Mac;
+use zeroize::Zeroizing;
 
 use super::{
     ExtendedKeyMetadata, hmac_sha512_split, key_fingerprint,
@@ -21,7 +22,7 @@ pub struct ExtendedPrivateKey<B: Secp256k1Backend> {
 
 impl<B: Secp256k1Backend> Clone for ExtendedPrivateKey<B> {
     fn clone(&self) -> Self {
-        Self { meta: self.meta, private_key: self.private_key.clone() }
+        Self { meta: self.meta.clone(), private_key: self.private_key.clone() }
     }
 }
 
@@ -35,7 +36,8 @@ impl<B: Secp256k1Backend> ExtendedPrivateKey<B> {
     pub fn new(seed: &[u8]) -> Result<Self> {
         let (master_key, chain_code) = derive_master_key_parts(seed);
 
-        let private_key = <PrivateKey<B> as Secp256k1PrivateKey>::from_bytes(master_key)
+        let master_key = Zeroizing::new(master_key);
+        let private_key = <PrivateKey<B> as Secp256k1PrivateKey>::from_bytes(&master_key)
             .map_err(|_| anyhow!("invalid master key derived from seed"))?;
 
         Ok(Self {
@@ -56,17 +58,18 @@ impl<B: Secp256k1Backend> ExtendedPrivateKey<B> {
 
         let (left, right) = hmac_sha512_split(&self.meta.chain_code, |mac| {
             if child.is_hardened() {
-                let mut data = [0u8; 1 + 32 + 4];
+                let mut data = Zeroizing::new([0u8; 1 + 32 + 4]);
                 data[1..33].copy_from_slice(&self.private_key.to_bytes());
                 data[33..].copy_from_slice(&child.to_bytes());
-                mac.update(&data);
+                mac.update(data.as_ref());
             } else {
                 mac.update(&parent_public_bytes);
                 mac.update(&child.to_bytes());
             }
         });
 
-        let child_key = self.private_key.add_tweak(left)?;
+        let left = Zeroizing::new(left);
+        let child_key = self.private_key.add_tweak(&left)?;
 
         Ok(Self {
             meta: ExtendedKeyMetadata {
@@ -90,7 +93,7 @@ impl<B: Secp256k1Backend> ExtendedPrivateKey<B> {
 
     /// Returns the corresponding extended public key.
     pub fn public_key(&self) -> ExtendedPublicKey<B> {
-        ExtendedPublicKey { meta: self.meta, public_key: self.private_key.to_public() }
+        ExtendedPublicKey { meta: self.meta.clone(), public_key: self.private_key.to_public() }
     }
 
     /// Encodes this key with the specified version bytes.
@@ -106,7 +109,7 @@ impl<B: Secp256k1Backend> ExtendedPrivateKey<B> {
     pub fn encode_with_unchecked(&self, version: Version) -> ExtendedKeyPayload {
         ExtendedKeyPayload {
             version,
-            meta: self.meta,
+            meta: self.meta.clone(),
             key_data: {
                 let mut key_data = [0u8; 33];
                 key_data[1..].copy_from_slice(&self.private_key.to_bytes());
@@ -124,11 +127,18 @@ impl<B: Secp256k1Backend> TryFrom<ExtendedKeyPayload> for ExtendedPrivateKey<B> 
             return Err(anyhow!("extended key is not private"));
         }
 
-        let mut raw = [0u8; 32];
+        let mut raw = Zeroizing::new([0u8; 32]);
         raw.copy_from_slice(&payload.key_data[1..]);
-        let private_key = <PrivateKey<B> as Secp256k1PrivateKey>::from_bytes(raw)
+
+        let private_key = <PrivateKey<B> as Secp256k1PrivateKey>::from_bytes(&raw)
             .map_err(|_| anyhow!("invalid private key data"))?;
 
-        Ok(Self { meta: payload.meta, private_key })
+        Ok(Self { meta: payload.meta.clone(), private_key })
+    }
+}
+
+impl<B: Secp256k1Backend> Drop for ExtendedPrivateKey<B> {
+    fn drop(&mut self) {
+        Secp256k1PrivateKey::zeroize(&mut self.private_key);
     }
 }

@@ -4,6 +4,7 @@
 use alloc::string::String;
 
 use anyhow::{Result, anyhow};
+use zeroize::{Zeroize, Zeroizing};
 
 mod version;
 
@@ -18,6 +19,12 @@ pub struct ExtendedKeyPayload {
     pub(crate) meta: ExtendedKeyMetadata,
     /// 33 bytes: the extended public/private key data
     pub(crate) key_data: [u8; 33],
+}
+
+impl Drop for ExtendedKeyPayload {
+    fn drop(&mut self) {
+        self.key_data.zeroize();
+    }
 }
 
 impl ExtendedKeyPayload {
@@ -49,9 +56,9 @@ impl ExtendedKeyPayload {
 
 impl core::fmt::Display for ExtendedKeyPayload {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        let serialized = self.serialize();
+        let serialized = Zeroizing::new(self.serialize());
         let mut encoded = String::with_capacity(Self::MAX_KEY_PAYLOAD_STRING_LENGTH);
-        bs58::encode(&serialized)
+        bs58::encode(&serialized[..])
             .with_check()
             .onto(&mut encoded)
             .expect("base58 encoding should fit the fixed buffer");
@@ -63,10 +70,10 @@ impl core::str::FromStr for ExtendedKeyPayload {
     type Err = anyhow::Error;
 
     fn from_str(encoded: &str) -> Result<Self> {
-        let mut data = [0u8; Self::KEY_PAYLOAD_WITH_CHECKSUM_LENGTH];
+        let mut data = Zeroizing::new([0u8; Self::KEY_PAYLOAD_WITH_CHECKSUM_LENGTH]);
         let len = bs58::decode(encoded)
             .with_check(None)
-            .onto(&mut data)
+            .onto(&mut data[..])
             .map_err(|_| anyhow!("invalid base58check encoding"))?;
 
         if len != Self::KEY_PAYLOAD_LENGTH {
