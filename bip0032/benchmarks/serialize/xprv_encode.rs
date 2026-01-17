@@ -68,7 +68,6 @@ fn bench_bip32(group: &mut BenchmarkGroup<'_>) {
     bench_impl::<ecdsa::SigningKey>(group, "k256::ecdsa");
 }
 
-/*
 fn bench_bip0032(group: &mut BenchmarkGroup<'_>) {
     use bip0032::{ExtendedPrivateKey, Version, backend::*};
 
@@ -80,7 +79,7 @@ fn bench_bip0032(group: &mut BenchmarkGroup<'_>) {
                     <ExtendedPrivateKey<B>>::new(&seed).unwrap()
                 },
                 |xprv| {
-                    let encoded = xprv.encode_with(Version::XPRV).to_string();
+                    let encoded = xprv.encode_with_unchecked(Version::XPRV).to_string();
                     black_box(encoded);
                 },
                 BatchSize::SmallInput,
@@ -90,10 +89,9 @@ fn bench_bip0032(group: &mut BenchmarkGroup<'_>) {
 
     bench_impl::<K256Backend>(group, "k256");
     bench_impl::<K256EcdsaBackend>(group, "k256::ecdsa");
-    bench_impl::<Secp256k1CoreBackend>(group, "secp256k1");
+    bench_impl::<Secp256k1FfiBackend>(group, "secp256k1");
     bench_impl::<Libsecp256k1Backend>(group, "libsecp256k1");
 }
-*/
 
 fn bench_xprv_encode(c: &mut Criterion) {
     let mut group = c.benchmark_group("xprv_encode");
@@ -101,7 +99,7 @@ fn bench_xprv_encode(c: &mut Criterion) {
     bench_bitcoin(&mut group);
     bench_coins_bip32(&mut group);
     bench_bip32(&mut group);
-    // bench_bip0032(&mut group);
+    bench_bip0032(&mut group);
 
     group.finish();
 }

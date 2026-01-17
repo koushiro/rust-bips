@@ -37,9 +37,10 @@ std = [
     "hmac/std",
     "ripemd/std",
     "sha2/std",
+    "zeroize/std",
     "k256?/std",
-    "libsecp256k1?/std",
     "secp256k1?/std",
+    "libsecp256k1?/std",
 ]
 k256 = ["k256/arithmetic"]
 k256ecdsa = ["k256/ecdsa"]
@@ -47,18 +48,34 @@ secp256k1 = ["dep:secp256k1"]
 libsecp256k1 = ["dep:libsecp256k1"]
 
 [dependencies]
-anyhow = { version = "1", default-features = false }
-bs58 = { version = "0.5", default-features = false, features = ["check"] }
+anyhow = { version = "1.0", default-features = false }
+bs58 = { version = "0.5", default-features = false, features = ["alloc", "check"] }
 hmac = { version = "0.12", default-features = false }
 ripemd = { version = "0.1", default-features = false }
 sha2 = { version = "0.10", default-features = false }
+zeroize = { version = "1.8", default-features = false }
 
 # Different secp256k1 libraries
-k256 = { version = "0.13", default-features = false, optional = true }
-libsecp256k1 = { version = "0.7", default-features = false, features = [
-    "static-context",
-], optional = true }
-secp256k1 = { version = "0.31", default-features = false, features = ["alloc"], optional = true }
+# https://github.com/RustCrypto/elliptic-curves/tree/master/k256
+[dependencies.k256]
+default-features = false
+optional = true
+version = "0.13"
+
+# https://github.com/bitcoin-core/secp256k1
+[dependencies.secp256k1]
+default-features = false
+features = ["alloc"]
+optional = true
+version = "0.31"
+
+# https://github.com/paritytech/libsecp256k1
+# NOTE: libsecp256k1 crate is no longer maintained
+[dependencies.libsecp256k1]
+default-features = false
+features = ["static-context"]
+optional = true
+version = "0.7"
 
 [dev-dependencies]
 const-hex = "1.12.0"

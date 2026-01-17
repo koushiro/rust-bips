@@ -30,6 +30,12 @@
 - Prefer deterministic test vectors over randomness when possible.
 - Run `cargo test` before submitting changes that touch mnemonic generation or word lists.
 
+## Commit & Pull Request Guidelines
+
+- Recent commits often follow a conventional style like `feat(bip0039): ...` or `chore(bip0039): ...`; use this format when practical.
+- Keep messages short and imperative; mention word lists/features if relevant.
+- PRs should include a brief summary, the test/bench commands run, and a linked issue if applicable.
+
 ## Security Notes
 
 - Do not log or print mnemonic phrases, seeds, or passphrases in tests or examples.

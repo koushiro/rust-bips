@@ -81,13 +81,12 @@ fn bench_derive_bip32(group: &mut BenchmarkGroup<'_>) {
     bench_impl::<ecdsa::SigningKey>(group, "bip32 (k256::ecdsa)");
 }
 
-/*
 fn bench_derive_bip0032(group: &mut BenchmarkGroup<'_>) {
     use bip0032::{DerivationPath, ExtendedPrivateKey, backend::*};
 
     fn bench_impl<B: Secp256k1Backend>(group: &mut BenchmarkGroup<'_>, name: &str) {
         group.bench_function(name, |b| {
-            let path = "m/0H/1/2H/2/1000000000".parse::<DerivationPath>().unwrap();
+            let path = "m/0'/1/2'/2/1000000000".parse::<DerivationPath>().unwrap();
 
             b.iter_batched(
                 || {
@@ -105,10 +104,9 @@ fn bench_derive_bip0032(group: &mut BenchmarkGroup<'_>) {
 
     bench_impl::<K256Backend>(group, "bip0032 (k256)");
     bench_impl::<K256EcdsaBackend>(group, "bip0032 (k256::ecdsa)");
-    bench_impl::<Secp256k1CoreBackend>(group, "bip0032 (secp256k1)");
+    bench_impl::<Secp256k1FfiBackend>(group, "bip0032 (secp256k1)");
     bench_impl::<Libsecp256k1Backend>(group, "bip0032 (libsecp256k1)");
 }
-*/
 
 fn bench_derive(c: &mut Criterion) {
     let mut group = c.benchmark_group("derive");
@@ -116,7 +114,7 @@ fn bench_derive(c: &mut Criterion) {
     bench_derive_bitcoin(&mut group);
     bench_derive_coins_bip32(&mut group);
     bench_derive_bip32(&mut group);
-    // bench_derive_bip0032(&mut group);
+    bench_derive_bip0032(&mut group);
 
     group.finish();
 }
