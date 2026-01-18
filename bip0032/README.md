@@ -60,13 +60,10 @@ let xpub = child
 3. Public parent key -> public child key (non-hardened only).
 
 ```rust
-use bip0032::{
-    DerivationPath, ExtendedKeyPayload, ExtendedPublicKey, Version, backend::K256Backend,
-};
+use bip0032::{DerivationPath, ExtendedPublicKey, Version, backend::K256Backend};
 
 let parent_xpub = "xpub661MyMwAqRbcFtXgS5sYJABqqG9YLmC4Q1Rdap9gSE8NqtwybGhePY2gZ29ESFjqJoCu1Rupje8YtGqsefD265TMg7usUDFdp6W1EGMcet8";
-let payload = parent_xpub.parse::<ExtendedKeyPayload>().unwrap();
-let parent = ExtendedPublicKey::<K256Backend>::try_from(payload).unwrap();
+let parent: ExtendedPublicKey<K256Backend> = parent_xpub.parse().unwrap();
 let path: DerivationPath = "m/0/1".parse().unwrap();
 let child = parent.derive_path(&path).unwrap();
 let xpub = child
