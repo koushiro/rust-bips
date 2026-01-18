@@ -28,7 +28,7 @@ let seed = mnemonic.to_seed("");
 
 The examples below assume the `seed` from above.
 
-1) Private parent key -> private child key (supports hardened).
+1. Private parent key -> private child key (supports hardened).
 
 ```rust
 use bip0032::{DerivationPath, ExtendedPrivateKey, Version, backend::K256Backend};
@@ -42,7 +42,7 @@ let xprv = child
     .to_string();
 ```
 
-2) Private parent key -> public child key.
+2. Private parent key -> public child key.
 
 ```rust
 use bip0032::{DerivationPath, ExtendedPrivateKey, Version, backend::K256Backend};
@@ -57,7 +57,7 @@ let xpub = child
     .to_string();
 ```
 
-3) Public parent key -> public child key (non-hardened only).
+3. Public parent key -> public child key (non-hardened only).
 
 ```rust
 use bip0032::{
@@ -75,7 +75,7 @@ let xpub = child
     .to_string();
 ```
 
-4) Public parent key -> private child key: impossible (BIP-0032 does not allow it).
+4. Public parent key -> private child key: impossible (BIP-0032 does not allow it).
 
 ## Documentation
 
@@ -87,6 +87,10 @@ See documentation and examples at https://docs.rs/bip0032.
 - [x] Extended key Base58Check encoding/decoding (xpub/xprv)
 - [x] Multiple secp256k1 backends (`k256` default, `k256ecdsa`, `secp256k1`, `libsecp256k1`)
 - [x] Support `no_std` environment
+
+## Performance
+
+See [benchmarks](https://github.com/koushiro/rust-bips/blob/main/bip0032/benchmarks/README.md) for more details
 
 ## Alternatives
 

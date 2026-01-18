@@ -14,7 +14,7 @@
 //!
 //! The examples below assume the `seed` from above.
 //!
-//! 1) Private parent key -> private child key (supports hardened).
+//! 1. Private parent key -> private child key (supports hardened).
 //!
 //! ```rust
 //! use bip0032::{DerivationPath, ExtendedPrivateKey, Version, backend::K256Backend};
@@ -29,7 +29,7 @@
 //!     .to_string();
 //! ```
 //!
-//! 2) Private parent key -> public child key.
+//! 2. Private parent key -> public child key.
 //!
 //! ```rust
 //! use bip0032::{DerivationPath, ExtendedPrivateKey, Version, backend::K256Backend};
@@ -45,7 +45,7 @@
 //!     .to_string();
 //! ```
 //!
-//! 3) Public parent key -> public child key (non-hardened only).
+//! 3. Public parent key -> public child key (non-hardened only).
 //!
 //! ```rust
 //! use bip0032::{
@@ -63,7 +63,7 @@
 //!     .to_string();
 //! ```
 //!
-//! 4) Public parent key -> private child key: impossible (BIP-0032 does not allow it).
+//! 4. Public parent key -> private child key: impossible (BIP-0032 does not allow it).
 
 #![deny(unused_imports)]
 #![deny(missing_docs)]

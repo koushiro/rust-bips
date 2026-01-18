@@ -50,6 +50,10 @@ See documentation and examples at https://docs.rs/bip0039.
   - [x] Portuguese
 - [x] Support `no_std` environment
 
+## Performance
+
+See [benchmarks](https://github.com/koushiro/rust-bips/blob/main/bip0039/benchmarks/README.md) for more details
+
 ## Alternatives
 
 - [bip39](https://github.com/rust-bitcoin/rust-bip39)
