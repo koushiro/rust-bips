@@ -1,3 +1,5 @@
+use core::str::FromStr;
+
 use anyhow::{Result, anyhow};
 use hmac::Mac;
 use zeroize::Zeroizing;
@@ -92,5 +94,14 @@ impl<B: Secp256k1Backend> TryFrom<ExtendedKeyPayload> for ExtendedPublicKey<B> {
             .map_err(|_| anyhow!("invalid public key data"))?;
 
         Ok(Self { meta: payload.meta.clone(), public_key })
+    }
+}
+
+impl<B: Secp256k1Backend> FromStr for ExtendedPublicKey<B> {
+    type Err = anyhow::Error;
+
+    fn from_str(encoded: &str) -> Result<Self> {
+        let payload = encoded.parse::<ExtendedKeyPayload>()?;
+        Self::try_from(payload)
     }
 }
