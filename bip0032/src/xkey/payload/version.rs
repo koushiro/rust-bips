@@ -1,5 +1,7 @@
 //! Version bytes for extended key payloads.
 
+use core::fmt;
+
 /// Extended key version bytes.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Version {
@@ -7,6 +9,12 @@ pub enum Version {
     Public(u32),
     /// Private key version bytes.
     Private(u32),
+}
+
+impl fmt::Display for Version {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "0x{:08X}", self.as_u32())
+    }
 }
 
 impl Version {
