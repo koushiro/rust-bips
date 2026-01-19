@@ -6,7 +6,7 @@ use core::{fmt, slice, str::FromStr};
 #[cfg(feature = "std")]
 use std::vec;
 
-use anyhow::{Result, anyhow};
+use crate::{Error, ErrorKind, Result};
 
 /// A BIP32 child number with optional hardened flag.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -20,7 +20,8 @@ impl ChildNumber {
     /// Creates a child number from an index and hardened flag.
     pub fn new(index: u32, hardened: bool) -> Result<Self> {
         if index >= Self::HARDENED_OFFSET {
-            return Err(anyhow!("child index must be less than 2^31"));
+            return Err(Error::new(ErrorKind::InvalidPath, "child index must be less than 2^31")
+                .with_context("child_index", index));
         }
         let value = if hardened { index + Self::HARDENED_OFFSET } else { index };
         Ok(Self(value))
@@ -66,7 +67,7 @@ impl fmt::Display for ChildNumber {
 }
 
 impl FromStr for ChildNumber {
-    type Err = anyhow::Error;
+    type Err = Error;
 
     fn from_str(component: &str) -> Result<Self> {
         parse_child_component(component)
@@ -145,11 +146,12 @@ impl fmt::Display for DerivationPath {
 }
 
 impl FromStr for DerivationPath {
-    type Err = anyhow::Error;
+    type Err = Error;
 
     fn from_str(path: &str) -> Result<Self> {
         if path.is_empty() {
-            return Err(anyhow!("derivation path is empty"));
+            return Err(Error::new(ErrorKind::InvalidPath, "derivation path is empty")
+                .with_context("path", path));
         }
 
         if path == "m" || path == "M" {
@@ -165,7 +167,8 @@ impl FromStr for DerivationPath {
         };
 
         if rest.is_empty() {
-            return Err(anyhow!("empty path component"));
+            return Err(Error::new(ErrorKind::InvalidPath, "empty path component")
+                .with_context("path", path));
         }
 
         let mut children =
@@ -173,7 +176,8 @@ impl FromStr for DerivationPath {
 
         for part in rest.split('/') {
             if part.is_empty() {
-                return Err(anyhow!("empty path component"));
+                return Err(Error::new(ErrorKind::InvalidPath, "empty path component")
+                    .with_context("path", path));
             }
             children.push(part.parse()?);
         }
@@ -194,10 +198,14 @@ fn parse_child_component(component: &str) -> Result<ChildNumber> {
     };
 
     if number.is_empty() {
-        return Err(anyhow!("missing child index"));
+        return Err(Error::new(ErrorKind::InvalidPath, "missing child index")
+            .with_context("component", component));
     }
 
-    let index = number.parse::<u32>().map_err(|_| anyhow!("invalid child index: {component}"))?;
+    let index = number.parse::<u32>().map_err(|_| {
+        Error::new(ErrorKind::InvalidPath, "invalid child index")
+            .with_context("component", component)
+    })?;
     ChildNumber::new(index, hardened)
 }
 
@@ -248,30 +256,35 @@ mod tests {
     #[test]
     fn error_empty_path() {
         let err = "".parse::<DerivationPath>().unwrap_err();
-        assert_eq!(err.to_string(), "derivation path is empty");
+        assert_eq!(err.kind(), ErrorKind::InvalidPath);
+        assert_eq!(err.message(), "derivation path is empty");
     }
 
     #[test]
     fn error_empty_component() {
         let err = "m//1".parse::<DerivationPath>().unwrap_err();
-        assert_eq!(err.to_string(), "empty path component");
+        assert_eq!(err.kind(), ErrorKind::InvalidPath);
+        assert_eq!(err.message(), "empty path component");
     }
 
     #[test]
     fn error_trailing_slash() {
         let err = "m/".parse::<DerivationPath>().unwrap_err();
-        assert_eq!(err.to_string(), "empty path component");
+        assert_eq!(err.kind(), ErrorKind::InvalidPath);
+        assert_eq!(err.message(), "empty path component");
     }
 
     #[test]
     fn error_missing_child_index() {
         let err = "m/'".parse::<DerivationPath>().unwrap_err();
-        assert_eq!(err.to_string(), "missing child index");
+        assert_eq!(err.kind(), ErrorKind::InvalidPath);
+        assert_eq!(err.message(), "missing child index");
     }
 
     #[test]
     fn error_child_index_too_large() {
         let err = "m/2147483648".parse::<DerivationPath>().unwrap_err();
-        assert_eq!(err.to_string(), "child index must be less than 2^31");
+        assert_eq!(err.kind(), ErrorKind::InvalidPath);
+        assert_eq!(err.message(), "child index must be less than 2^31");
     }
 }

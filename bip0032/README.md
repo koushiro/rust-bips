@@ -82,7 +82,11 @@ See documentation and examples at https://docs.rs/bip0032.
 
 - [x] Derivation path parsing with hardened suffixes (`'`, `h`, `H`)
 - [x] Extended key Base58Check encoding/decoding (xpub/xprv)
-- [x] Multiple secp256k1 backends (`k256` default, `k256ecdsa`, `secp256k1`, `libsecp256k1`)
+- [x] Multiple secp256k1 backends
+  - [`k256`](https://github.com/RustCrypto/elliptic-curves/tree/master/k256) (by default)
+  - [`k256::ecdsa`](https://github.com/RustCrypto/elliptic-curves/tree/master/k256)
+  - [`secp256k1`](https://github.com/rust-bitcoin/rust-secp256k1)
+  - [`libsecp256k1`](https://github.com/paritytech/libsecp256k1)
 - [x] Support `no_std` environment
 
 ## Performance
