@@ -1,6 +1,5 @@
 use k256::{
-    NonZeroScalar, ProjectivePoint, PublicKey, SecretKey,
-    elliptic_curve::{Group, sec1::ToEncodedPoint},
+    NonZeroScalar, ProjectivePoint, PublicKey, SecretKey, elliptic_curve::sec1::ToEncodedPoint,
 };
 use zeroize::Zeroizing;
 
@@ -28,11 +27,8 @@ impl Secp256k1PublicKey for PublicKey {
         let parent_point = self.to_projective();
 
         let child_point = ProjectivePoint::GENERATOR * tweak_scalar.as_ref() + parent_point;
-        if child_point.is_identity().into() {
-            return Err(BackendError::from("invalid derived public key"));
-        }
-
         let child_affine = child_point.to_affine();
+
         PublicKey::from_affine(child_affine).map_err(BackendError::new)
     }
 }
@@ -54,10 +50,6 @@ impl Secp256k1PrivateKey for SecretKey {
         let key_scalar = Zeroizing::new(self.to_nonzero_scalar());
 
         let child = tweak_scalar.as_ref() + key_scalar.as_ref();
-
-        if child.is_zero().into() {
-            return Err(BackendError::from("invalid derived private key"));
-        }
 
         SecretKey::from_bytes(&child.to_bytes()).map_err(BackendError::new)
     }

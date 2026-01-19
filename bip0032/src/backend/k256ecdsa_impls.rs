@@ -1,7 +1,6 @@
 use k256::{
     NonZeroScalar, ProjectivePoint,
     ecdsa::{SigningKey, VerifyingKey},
-    elliptic_curve::Group,
 };
 use zeroize::Zeroizing;
 
@@ -30,11 +29,8 @@ impl Secp256k1PublicKey for VerifyingKey {
         let parent_point: ProjectivePoint = self.as_affine().into();
 
         let child_point = ProjectivePoint::GENERATOR * tweak_scalar.as_ref() + parent_point;
-        if child_point.is_identity().into() {
-            return Err(BackendError::from("invalid derived public key"));
-        }
-
         let child_affine = child_point.to_affine();
+
         VerifyingKey::from_affine(child_affine).map_err(BackendError::new)
     }
 }
@@ -57,11 +53,8 @@ impl Secp256k1PrivateKey for SigningKey {
         let key_scalar = Zeroizing::new(*self.as_nonzero_scalar());
 
         let child = tweak_scalar.as_ref() + key_scalar.as_ref();
-        if child.is_zero().into() {
-            return Err(BackendError::from("invalid derived private key"));
-        }
-
         let child_bytes = child.to_bytes();
+
         SigningKey::from_bytes(&child_bytes).map_err(BackendError::new)
     }
 
