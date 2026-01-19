@@ -1,0 +1,26 @@
+name-template: "bip0039 draft"
+tag-template: "bip0039-draft"
+include-labels:
+  - bip0039
+categories:
+  - title: Added
+    labels:
+      - release-note/feat
+  - title: Changed
+    labels:
+      - release-note/refactor
+  - title: Fixed
+    labels:
+      - release-note/fix
+  - title: Docs
+    labels:
+      - release-note/docs
+  - title: CI
+    labels:
+      - release-note/ci
+  - title: Chore
+    labels:
+      - release-note/chore
+change-template: "- $TITLE (#$NUMBER)"
+template: |
+  $CHANGES
