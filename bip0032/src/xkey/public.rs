@@ -1,6 +1,7 @@
+#[cfg(not(feature = "std"))]
+use alloc::format;
 use core::str::FromStr;
 
-use anyhow::{Result, anyhow};
 use hmac::Mac;
 use zeroize::Zeroizing;
 
@@ -10,6 +11,7 @@ use super::{
 };
 use crate::{
     backend::*,
+    error::{Error, ErrorKind, Result},
     path::{ChildNumber, DerivationPath},
 };
 
@@ -31,7 +33,12 @@ impl<B: Secp256k1Backend> ExtendedPublicKey<B> {
     /// Derives a child extended public key (non-hardened only).
     pub fn derive_child(&self, child: ChildNumber) -> Result<Self> {
         if child.is_hardened() {
-            return Err(anyhow!("cannot derive hardened child from public key"));
+            return Err(Error::new(
+                ErrorKind::InvalidDerivation,
+                "cannot derive hardened child from public key",
+            )
+            .with_context("child_index", child.index())
+            .with_context("hardened", true));
         }
 
         let public_key_bytes = self.public_key.to_bytes();
@@ -41,7 +48,12 @@ impl<B: Secp256k1Backend> ExtendedPublicKey<B> {
         });
 
         let left = Zeroizing::new(left);
-        let child_public = self.public_key.add_tweak(&left)?;
+        let child_public = self.public_key.add_tweak(&left).map_err(|err| {
+            Error::new(ErrorKind::InvalidDerivation, "invalid child public key")
+                .with_context("child_index", child.index())
+                .with_context("hardened", false)
+                .set_source(err)
+        })?;
 
         Ok(Self {
             meta: ExtendedKeyMetadata {
@@ -66,7 +78,8 @@ impl<B: Secp256k1Backend> ExtendedPublicKey<B> {
     /// Encodes this key with the specified version bytes.
     pub fn encode_with(&self, version: Version) -> Result<ExtendedKeyPayload> {
         if !version.is_public() {
-            return Err(anyhow!("expected public version bytes"));
+            return Err(Error::new(ErrorKind::InvalidVersion, "expected public version bytes")
+                .with_context("version", version));
         }
 
         Ok(self.encode_with_unchecked(version))
@@ -83,22 +96,27 @@ impl<B: Secp256k1Backend> ExtendedPublicKey<B> {
 }
 
 impl<B: Secp256k1Backend> TryFrom<ExtendedKeyPayload> for ExtendedPublicKey<B> {
-    type Error = anyhow::Error;
+    type Error = Error;
 
     fn try_from(payload: ExtendedKeyPayload) -> Result<Self> {
         if !payload.version.is_public() {
-            return Err(anyhow!("extended key is not public"));
+            return Err(Error::new(ErrorKind::InvalidVersion, "extended key is not public")
+                .with_context("version", payload.version));
         }
 
         let public_key = <PublicKey<B> as Secp256k1PublicKey>::from_bytes(&payload.key_data)
-            .map_err(|_| anyhow!("invalid public key data"))?;
+            .map_err(|err| {
+                Error::new(ErrorKind::InvalidKeyData, "invalid secp256k1 public key data")
+                    .with_context("key_prefix", format!("0x{:02x}", payload.key_data[0]))
+                    .set_source(err)
+            })?;
 
         Ok(Self { meta: payload.meta.clone(), public_key })
     }
 }
 
 impl<B: Secp256k1Backend> FromStr for ExtendedPublicKey<B> {
-    type Err = anyhow::Error;
+    type Err = Error;
 
     fn from_str(encoded: &str) -> Result<Self> {
         let payload = encoded.parse::<ExtendedKeyPayload>()?;

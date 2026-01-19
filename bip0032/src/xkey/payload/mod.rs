@@ -1,15 +1,15 @@
 //! Extended key payload serialization and deserialization.
 
 #[cfg(not(feature = "std"))]
-use alloc::string::String;
+use alloc::{format, string::String};
 
-use anyhow::{Result, anyhow};
 use zeroize::{Zeroize, Zeroizing};
 
 mod version;
 
 pub use self::version::{KnownVersion, Version};
 use super::ExtendedKeyMetadata;
+use crate::error::{Error, ErrorKind, Result};
 
 /// Base58Check-encoded extended key payload plus version metadata.
 pub struct ExtendedKeyPayload {
@@ -67,17 +67,29 @@ impl core::fmt::Display for ExtendedKeyPayload {
 }
 
 impl core::str::FromStr for ExtendedKeyPayload {
-    type Err = anyhow::Error;
+    type Err = Error;
 
     fn from_str(encoded: &str) -> Result<Self> {
         let mut data = Zeroizing::new([0u8; Self::KEY_PAYLOAD_WITH_CHECKSUM_LENGTH]);
-        let len = bs58::decode(encoded)
-            .with_check(None)
-            .onto(&mut data[..])
-            .map_err(|_| anyhow!("invalid base58check encoding"))?;
+        let len = bs58::decode(encoded).with_check(None).onto(&mut data[..]).map_err(|err| {
+            Error::new(ErrorKind::InvalidPayload, "invalid base58check encoding")
+                .with_context("encoded_len", encoded.len())
+                .set_source({
+                    #[cfg(feature = "std")]
+                    {
+                        anyhow::Error::new(err)
+                    }
+                    #[cfg(not(feature = "std"))]
+                    {
+                        anyhow::Error::msg(err)
+                    }
+                })
+        })?;
 
         if len != Self::KEY_PAYLOAD_LENGTH {
-            return Err(anyhow!("invalid extended key length"));
+            return Err(Error::new(ErrorKind::InvalidPayload, "invalid extended key length")
+                .with_context("decoded_len", len)
+                .with_context("expected_len", Self::KEY_PAYLOAD_LENGTH));
         }
 
         parse_payload(&data[..len])
@@ -85,19 +97,56 @@ impl core::str::FromStr for ExtendedKeyPayload {
 }
 
 pub(crate) fn parse_payload(data: &[u8]) -> Result<ExtendedKeyPayload> {
-    let raw_version = u32::from_be_bytes(data[0..4].try_into()?);
+    if data.len() != ExtendedKeyPayload::KEY_PAYLOAD_LENGTH {
+        return Err(Error::new(ErrorKind::InvalidPayload, "invalid extended key length")
+            .with_context("decoded_len", data.len())
+            .with_context("expected_len", ExtendedKeyPayload::KEY_PAYLOAD_LENGTH));
+    }
+
+    let mut raw_version_bytes = [0u8; 4];
+    raw_version_bytes.copy_from_slice(&data[0..4]);
+    let raw_version = u32::from_be_bytes(raw_version_bytes);
+
     let depth = data[4];
-    let parent_fingerprint = data[5..9].try_into()?;
-    let child_number = u32::from_be_bytes(data[9..13].try_into()?);
-    let chain_code = data[13..45].try_into()?;
-    let key_data: [u8; 33] = data[45..78].try_into()?;
+
+    let mut parent_fingerprint = [0u8; 4];
+    parent_fingerprint.copy_from_slice(&data[5..9]);
+
+    let mut child_number_bytes = [0u8; 4];
+    child_number_bytes.copy_from_slice(&data[9..13]);
+    let child_number = u32::from_be_bytes(child_number_bytes);
+
+    let mut chain_code = [0u8; 32];
+    chain_code.copy_from_slice(&data[13..45]);
+
+    let mut key_data = [0u8; 33];
+    key_data.copy_from_slice(&data[45..78]);
 
     if depth == 0 {
         if parent_fingerprint != [0u8; 4] {
-            return Err(anyhow!("zero depth with non-zero parent fingerprint"));
+            return Err(Error::new(
+                ErrorKind::InvalidPayload,
+                "zero depth with non-zero parent fingerprint",
+            )
+            .with_context("depth", depth)
+            .with_context(
+                "parent_fingerprint",
+                format!(
+                    "0x{:02X}{:02X}{:02X}{:02X}",
+                    parent_fingerprint[0],
+                    parent_fingerprint[1],
+                    parent_fingerprint[2],
+                    parent_fingerprint[3],
+                ),
+            ));
         }
         if child_number != 0 {
-            return Err(anyhow!("zero depth with non-zero child number"));
+            return Err(Error::new(
+                ErrorKind::InvalidPayload,
+                "zero depth with non-zero child number",
+            )
+            .with_context("depth", depth)
+            .with_context("child_number", child_number));
         }
     }
 
@@ -106,12 +155,17 @@ pub(crate) fn parse_payload(data: &[u8]) -> Result<ExtendedKeyPayload> {
         match version {
             Version::Public(_) => {
                 if !matches!(key_data[0], 0x02 | 0x03) {
-                    return Err(anyhow!("invalid public key prefix"));
+                    return Err(Error::new(ErrorKind::InvalidKeyData, "invalid public key prefix")
+                        .with_context("key_prefix", format!("0x{:02X}", key_data[0])));
                 }
             },
             Version::Private(_) => {
                 if key_data[0] != 0x00 {
-                    return Err(anyhow!("invalid private key prefix"));
+                    return Err(Error::new(
+                        ErrorKind::InvalidKeyData,
+                        "invalid private key prefix",
+                    )
+                    .with_context("key_prefix", format!("0x{:02X}", key_data[0])));
                 }
             },
         }
@@ -123,7 +177,13 @@ pub(crate) fn parse_payload(data: &[u8]) -> Result<ExtendedKeyPayload> {
             // xpub: compressed secp256k1 key prefix
             0x02 | 0x03 => Version::public(raw_version),
             // reject non-BIP32 key data
-            _ => return Err(anyhow!("invalid key data prefix")),
+            _ => {
+                return Err(Error::new(
+                    ErrorKind::InvalidKeyData,
+                    "invalid private/public key data prefix",
+                )
+                .with_context("key_prefix", format!("0x{:02X}", key_data[0])));
+            },
         }
     };
 

@@ -1,8 +1,7 @@
-use anyhow::{Result, anyhow};
 use secp256k1::{PublicKey, Scalar, Secp256k1, SecretKey, SignOnly, VerifyOnly};
 use zeroize::Zeroizing;
 
-use super::{Secp256k1Backend, Secp256k1PrivateKey, Secp256k1PublicKey};
+use super::*;
 
 /// Secp256k1 FFI backend powered by the [`secp256k1`](https://github.com/rust-bitcoin/rust-secp256k1) crate.
 pub struct Secp256k1FfiBackend;
@@ -11,9 +10,9 @@ pub struct Secp256k1FfiBackend;
 struct ScalarGuard(Scalar);
 
 impl ScalarGuard {
-    fn from_bytes(bytes: &[u8; 32]) -> Result<Self> {
+    fn from_bytes(bytes: &[u8; 32]) -> Result<Self, BackendError> {
         let bytes = Zeroizing::new(*bytes);
-        Scalar::from_be_bytes(*bytes).map(Self).map_err(|_| anyhow!("invalid scalar"))
+        Scalar::from_be_bytes(*bytes).map(Self).map_err(BackendError::new)
     }
 }
 
@@ -69,42 +68,41 @@ fn with_verification_context<R>(f: impl FnOnce(&Secp256k1<VerifyOnly>) -> R) -> 
 }
 
 impl Secp256k1PublicKey for PublicKey {
-    fn from_bytes(bytes: &[u8; 33]) -> Result<Self> {
-        PublicKey::from_byte_array_compressed(*bytes).map_err(|_| anyhow!("invalid public key"))
+    type Error = BackendError;
+
+    fn from_bytes(bytes: &[u8; 33]) -> Result<Self, Self::Error> {
+        PublicKey::from_byte_array_compressed(*bytes).map_err(BackendError::new)
     }
 
     fn to_bytes(&self) -> [u8; 33] {
         self.serialize()
     }
 
-    fn add_tweak(&self, tweak: &[u8; 32]) -> Result<Self> {
+    fn add_tweak(&self, tweak: &[u8; 32]) -> Result<Self, Self::Error> {
         let scalar = ScalarGuard::from_bytes(tweak)?;
 
         with_verification_context(|secp| {
-            (*self)
-                .add_exp_tweak(secp, scalar.as_ref())
-                .map_err(|_| anyhow!("derived public key is invalid"))
+            (*self).add_exp_tweak(secp, scalar.as_ref()).map_err(BackendError::new)
         })
     }
 }
 
 impl Secp256k1PrivateKey for SecretKey {
+    type Error = BackendError;
     type PublicKey = PublicKey;
 
-    fn from_bytes(bytes: &[u8; 32]) -> Result<Self> {
-        SecretKey::from_byte_array(*bytes).map_err(|_| anyhow!("invalid secret key"))
+    fn from_bytes(bytes: &[u8; 32]) -> Result<Self, Self::Error> {
+        SecretKey::from_byte_array(*bytes).map_err(BackendError::new)
     }
 
     fn to_bytes(&self) -> [u8; 32] {
         self.secret_bytes()
     }
 
-    fn add_tweak(&self, tweak: &[u8; 32]) -> Result<Self> {
+    fn add_tweak(&self, tweak: &[u8; 32]) -> Result<Self, Self::Error> {
         let scalar = ScalarGuard::from_bytes(tweak)?;
 
-        (*self)
-            .add_tweak(scalar.as_ref())
-            .map_err(|_| anyhow!("derived secret key is invalid"))
+        (*self).add_tweak(scalar.as_ref()).map_err(BackendError::new)
     }
 
     fn to_public(&self) -> Self::PublicKey {

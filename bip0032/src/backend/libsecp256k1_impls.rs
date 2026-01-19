@@ -1,7 +1,6 @@
-use anyhow::{Result, anyhow};
 use libsecp256k1::{PublicKey, PublicKeyFormat, SecretKey};
 
-use super::{Secp256k1Backend, Secp256k1PrivateKey, Secp256k1PublicKey};
+use super::*;
 
 /// Secp256k1 backend powered by the [`libsecp256k1`](https://github.com/paritytech/libsecp256k1) crate.
 ///
@@ -12,8 +11,8 @@ pub struct Libsecp256k1Backend;
 struct SecretKeyGuard(SecretKey);
 
 impl SecretKeyGuard {
-    fn parse(bytes: &[u8; 32]) -> Result<Self> {
-        SecretKey::parse(bytes).map(Self).map_err(|_| anyhow!("invalid scalar"))
+    fn parse(bytes: &[u8; 32]) -> Result<Self, BackendError> {
+        SecretKey::parse(bytes).map(Self).map_err(BackendError::new)
     }
 }
 
@@ -30,43 +29,43 @@ impl Drop for SecretKeyGuard {
 }
 
 impl Secp256k1PublicKey for PublicKey {
-    fn from_bytes(bytes: &[u8; 33]) -> Result<Self> {
-        PublicKey::parse_slice(bytes, Some(PublicKeyFormat::Compressed))
-            .map_err(|_| anyhow!("invalid public key"))
+    type Error = BackendError;
+
+    fn from_bytes(bytes: &[u8; 33]) -> Result<Self, Self::Error> {
+        PublicKey::parse_slice(bytes, Some(PublicKeyFormat::Compressed)).map_err(BackendError::new)
     }
 
     fn to_bytes(&self) -> [u8; 33] {
         self.serialize_compressed()
     }
 
-    fn add_tweak(&self, tweak: &[u8; 32]) -> Result<Self> {
+    fn add_tweak(&self, tweak: &[u8; 32]) -> Result<Self, Self::Error> {
         let tweak_key = SecretKeyGuard::parse(tweak)?;
         let mut out = *self;
 
-        out.tweak_add_assign(tweak_key.as_ref())
-            .map_err(|_| anyhow!("derived public key is invalid"))?;
+        out.tweak_add_assign(tweak_key.as_ref()).map_err(BackendError::new)?;
 
         Ok(out)
     }
 }
 
 impl Secp256k1PrivateKey for SecretKey {
+    type Error = BackendError;
     type PublicKey = PublicKey;
 
-    fn from_bytes(bytes: &[u8; 32]) -> Result<Self> {
-        SecretKey::parse(bytes).map_err(|_| anyhow!("invalid secret key"))
+    fn from_bytes(bytes: &[u8; 32]) -> Result<Self, Self::Error> {
+        SecretKey::parse(bytes).map_err(BackendError::new)
     }
 
     fn to_bytes(&self) -> [u8; 32] {
         self.serialize()
     }
 
-    fn add_tweak(&self, tweak: &[u8; 32]) -> Result<Self> {
+    fn add_tweak(&self, tweak: &[u8; 32]) -> Result<Self, Self::Error> {
         let tweak_key = SecretKeyGuard::parse(tweak)?;
         let mut out = *self;
 
-        out.tweak_add_assign(tweak_key.as_ref())
-            .map_err(|_| anyhow!("derived secret key is invalid"))?;
+        out.tweak_add_assign(tweak_key.as_ref()).map_err(BackendError::new)?;
 
         Ok(out)
     }

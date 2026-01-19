@@ -1,6 +1,7 @@
+#[cfg(not(feature = "std"))]
+use alloc::format;
 use core::str::FromStr;
 
-use anyhow::{Result, anyhow};
 use hmac::Mac;
 use zeroize::Zeroizing;
 
@@ -11,6 +12,7 @@ use super::{
 };
 use crate::{
     backend::*,
+    error::{Error, ErrorKind, Result},
     path::{ChildNumber, DerivationPath},
 };
 
@@ -39,8 +41,15 @@ impl<B: Secp256k1Backend> ExtendedPrivateKey<B> {
         let (master_key, chain_code) = derive_master_key_parts(seed);
 
         let master_key = Zeroizing::new(master_key);
-        let private_key = <PrivateKey<B> as Secp256k1PrivateKey>::from_bytes(&master_key)
-            .map_err(|_| anyhow!("invalid master key derived from seed"))?;
+        let private_key =
+            <PrivateKey<B> as Secp256k1PrivateKey>::from_bytes(&master_key).map_err(|err| {
+                Error::new(
+                    ErrorKind::InvalidKeyData,
+                    "invalid master key (secp256k1 private key) derived from seed",
+                )
+                .with_context("seed_len", seed.len())
+                .set_source(err)
+            })?;
 
         Ok(Self {
             meta: ExtendedKeyMetadata {
@@ -71,7 +80,12 @@ impl<B: Secp256k1Backend> ExtendedPrivateKey<B> {
         });
 
         let left = Zeroizing::new(left);
-        let child_key = self.private_key.add_tweak(&left)?;
+        let child_key = self.private_key.add_tweak(&left).map_err(|err| {
+            Error::new(ErrorKind::InvalidDerivation, "invalid child private key")
+                .with_context("child_index", child.index())
+                .with_context("hardened", child.is_hardened())
+                .set_source(err)
+        })?;
 
         Ok(Self {
             meta: ExtendedKeyMetadata {
@@ -101,7 +115,8 @@ impl<B: Secp256k1Backend> ExtendedPrivateKey<B> {
     /// Encodes this key with the specified version bytes.
     pub fn encode_with(&self, version: Version) -> Result<ExtendedKeyPayload> {
         if !version.is_private() {
-            return Err(anyhow!("expected private version bytes"));
+            return Err(Error::new(ErrorKind::InvalidVersion, "expected private version bytes")
+                .with_context("version", version));
         }
 
         Ok(self.encode_with_unchecked(version))
@@ -122,25 +137,30 @@ impl<B: Secp256k1Backend> ExtendedPrivateKey<B> {
 }
 
 impl<B: Secp256k1Backend> TryFrom<ExtendedKeyPayload> for ExtendedPrivateKey<B> {
-    type Error = anyhow::Error;
+    type Error = Error;
 
     fn try_from(payload: ExtendedKeyPayload) -> Result<Self> {
         if !payload.version.is_private() {
-            return Err(anyhow!("extended key is not private"));
+            return Err(Error::new(ErrorKind::InvalidVersion, "extended key is not private")
+                .with_context("version", payload.version));
         }
 
         let mut raw = Zeroizing::new([0u8; 32]);
         raw.copy_from_slice(&payload.key_data[1..]);
 
-        let private_key = <PrivateKey<B> as Secp256k1PrivateKey>::from_bytes(&raw)
-            .map_err(|_| anyhow!("invalid private key data"))?;
+        let private_key =
+            <PrivateKey<B> as Secp256k1PrivateKey>::from_bytes(&raw).map_err(|err| {
+                Error::new(ErrorKind::InvalidKeyData, "invalid secp256k1 private key data")
+                    .with_context("key_prefix", format!("0x{:02x}", payload.key_data[0]))
+                    .set_source(err)
+            })?;
 
         Ok(Self { meta: payload.meta.clone(), private_key })
     }
 }
 
 impl<B: Secp256k1Backend> FromStr for ExtendedPrivateKey<B> {
-    type Err = anyhow::Error;
+    type Err = Error;
 
     fn from_str(encoded: &str) -> Result<Self> {
         let payload = encoded.parse::<ExtendedKeyPayload>()?;

@@ -1,32 +1,102 @@
 //! Backend selection for secp256k1 operations.
 
-use anyhow::Result;
+#[cfg(not(feature = "std"))]
+use alloc::string::String;
+use core::{error, fmt};
+
+use crate::error::{ErrorSource, IntoErrorSource};
+
+/// Common backend error.
+pub struct BackendError(ErrorSource);
+
+impl BackendError {
+    /// Creates a backend error from a source error.
+    #[cfg(feature = "std")]
+    pub fn new<E>(error: E) -> Self
+    where
+        E: IntoErrorSource,
+    {
+        Self(error.into_error_source())
+    }
+
+    /// Creates a backend error from a source error.
+    #[cfg(not(feature = "std"))]
+    pub fn new<E>(error: E) -> BackendError
+    where
+        E: fmt::Display + fmt::Debug + Send + Sync + 'static,
+    {
+        let error = anyhow::Error::msg(error);
+        Self(error.into_error_source())
+    }
+}
+
+impl fmt::Debug for BackendError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        fmt::Debug::fmt(&self.0, f)
+    }
+}
+
+impl fmt::Display for BackendError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        fmt::Display::fmt(&self.0, f)
+    }
+}
+
+impl From<ErrorSource> for BackendError {
+    fn from(error: ErrorSource) -> Self {
+        Self(error)
+    }
+}
+
+impl From<String> for BackendError {
+    fn from(message: String) -> Self {
+        Self(ErrorSource::from(message))
+    }
+}
+
+impl From<&'static str> for BackendError {
+    fn from(message: &'static str) -> Self {
+        Self(ErrorSource::from(message))
+    }
+}
+
+impl error::Error for BackendError {
+    fn source(&self) -> Option<&(dyn error::Error + 'static)> {
+        Some(self.0.as_error())
+    }
+}
 
 /// Byte serialization for secp256k1 public key.
 pub trait Secp256k1PublicKey: Clone {
+    /// Backend-specific error type.
+    type Error: IntoErrorSource + Send + Sync + 'static;
+
     /// Parses a 33-byte compressed public key representation.
-    fn from_bytes(bytes: &[u8; 33]) -> Result<Self>;
+    fn from_bytes(bytes: &[u8; 33]) -> core::result::Result<Self, Self::Error>;
 
     /// Returns the 33-byte compressed public key representation.
     fn to_bytes(&self) -> [u8; 33];
 
     /// Returns a tweaked public key.
-    fn add_tweak(&self, tweak: &[u8; 32]) -> Result<Self>;
+    fn add_tweak(&self, tweak: &[u8; 32]) -> core::result::Result<Self, Self::Error>;
 }
 
 /// Byte serialization for secp256k1 private key.
 pub trait Secp256k1PrivateKey: Clone {
+    /// Backend-specific error type.
+    type Error: IntoErrorSource + Send + Sync + 'static;
+
     /// Corresponding public key type.
-    type PublicKey: Secp256k1PublicKey;
+    type PublicKey: Secp256k1PublicKey<Error = Self::Error>;
 
     /// Parses a 32-byte private key representation.
-    fn from_bytes(bytes: &[u8; 32]) -> Result<Self>;
+    fn from_bytes(bytes: &[u8; 32]) -> core::result::Result<Self, Self::Error>;
 
     /// Returns the 32-byte private key representation.
     fn to_bytes(&self) -> [u8; 32];
 
     /// Returns a tweaked private key.
-    fn add_tweak(&self, tweak: &[u8; 32]) -> Result<Self>;
+    fn add_tweak(&self, tweak: &[u8; 32]) -> core::result::Result<Self, Self::Error>;
 
     /// Returns the corresponding public key.
     fn to_public(&self) -> Self::PublicKey;
