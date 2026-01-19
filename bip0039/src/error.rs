@@ -1,6 +1,6 @@
 #[cfg(not(feature = "std"))]
 use alloc::string::String;
-use core::fmt;
+use core::{error, fmt};
 
 /// The BIP-0039 error.
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -31,5 +31,4 @@ impl fmt::Display for Error {
     }
 }
 
-#[cfg(feature = "std")]
-impl std::error::Error for Error {}
+impl error::Error for Error {}
