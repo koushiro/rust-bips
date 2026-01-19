@@ -11,12 +11,6 @@ pub enum Version {
     Private(u32),
 }
 
-impl fmt::Display for Version {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "0x{:08X}", self.as_u32())
-    }
-}
-
 impl Version {
     /// Creates a public version from raw version bytes.
     pub const fn public(value: u32) -> Self {
