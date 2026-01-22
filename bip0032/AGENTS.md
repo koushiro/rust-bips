@@ -8,6 +8,7 @@
 - `src/backend/` holds backend-specific secp256k1 implementations (k256, secp256k1, libsecp256k1).
 - Tests live in `src/tests.rs` (BIP-32 vectors and invalid key cases).
 - Benchmarks are a workspace member under `benchmarks/`, with bench targets in `benchmarks/*.rs` and `benchmarks/serialize/`.
+- Auxiliary tooling: `benchmarks/` for benches and `fuzz/` for fuzz targets.
 
 ## Build, Test, and Development Commands
 
@@ -16,6 +17,8 @@
 - `cargo test` runs unit tests for the enabled backend.
 - `cargo test --features secp256k1` or `cargo test --features k256ecdsa` runs tests against specific backends.
 - `just bench keygen` or `just benches` runs benchmarks (uses `benchmarks/` as the working dir); equivalent: `cargo bench --bench keygen -- --quiet` from `benchmarks/`.
+- `just fuzz <target> [runs]` runs fuzzing with nightly (`cargo +nightly fuzz`).
+- `just fuzz-clean` removes fuzz artifacts (`fuzz/artifacts`, `fuzz/corpus`).
 
 ## Coding Style & Naming Conventions
 
