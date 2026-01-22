@@ -46,11 +46,7 @@ fn mutate_path(s: String, bytes: &[u8], ops: usize) -> String {
     for i in 0..ops {
         let b = bytes[i % len];
         let action = b % 3;
-        let pos = if buf.is_empty() {
-            0
-        } else {
-            (bytes[(i + 1) % len] as usize) % buf.len()
-        };
+        let pos = if buf.is_empty() { 0 } else { (bytes[(i + 1) % len] as usize) % buf.len() };
         let ch = alphabet[(bytes[(i + 2) % len] as usize) % alphabet.len()];
 
         match action {
