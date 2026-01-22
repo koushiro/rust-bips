@@ -74,8 +74,6 @@ extern crate alloc;
 pub mod backend;
 mod error;
 mod path;
-#[cfg(test)]
-mod tests;
 mod xkey;
 
 pub use crate::{
