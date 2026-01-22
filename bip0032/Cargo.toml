@@ -1,5 +1,5 @@
 [workspace]
-members = ["benchmarks"]
+members = ["benchmarks", "fuzz"]
 resolver = "3"
 
 [workspace.package]

@@ -58,3 +58,19 @@ benches *args:
         echo "Running all benchmarks"; \
         cargo bench -- --quiet; \
     fi
+
+# Run fuzz: `just fuzz <target> [runs]`
+[positional-arguments]
+[working-directory('fuzz')]
+fuzz target runs='1000':
+    #!/usr/bin/env bash
+    set -eo pipefail
+    echo "Running fuzzer on target \"{{ target }}\" with {{ runs }} runs"
+    cargo +nightly fuzz run {{ target }} -- -runs={{ runs }}
+
+# Cleanup fuzz artifacts
+[working-directory('fuzz')]
+fuzz-clean:
+    #!/usr/bin/env bash
+    set -eo pipefail
+    rm -rf artifacts corpus
