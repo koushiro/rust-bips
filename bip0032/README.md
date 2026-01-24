@@ -31,7 +31,7 @@ The examples below assume the `seed` from above.
 1. Private parent key -> private child key (supports hardened).
 
 ```rust
-use bip0032::{DerivationPath, ExtendedPrivateKey, Version, curve::{K256Backend, Secp256k1Curve}};
+use bip0032::{DerivationPath, ExtendedPrivateKey, Version, curve::secp256k1::*};
 
 let master = ExtendedPrivateKey::<Secp256k1Curve<K256Backend>>::new(&seed).unwrap();
 let path: DerivationPath = "m/0H/1".parse().unwrap();
@@ -45,7 +45,7 @@ let xprv = child
 2. Private parent key -> public child key.
 
 ```rust
-use bip0032::{DerivationPath, ExtendedPrivateKey, Version, curve::{K256Backend, Secp256k1Curve}};
+use bip0032::{DerivationPath, ExtendedPrivateKey, Version, curve::secp256k1::*};
 
 let master = ExtendedPrivateKey::<Secp256k1Curve<K256Backend>>::new(&seed).unwrap();
 let path: DerivationPath = "m/0H/1".parse().unwrap();
@@ -60,7 +60,7 @@ let xpub = child
 3. Public parent key -> public child key (non-hardened only).
 
 ```rust
-use bip0032::{DerivationPath, ExtendedPublicKey, Version, curve::{K256Backend, Secp256k1Curve}};
+use bip0032::{DerivationPath, ExtendedPublicKey, Version, curve::secp256k1::*};
 
 let parent_xpub = "xpub661MyMwAqRbcFtXgS5sYJABqqG9YLmC4Q1Rdap9gSE8NqtwybGhePY2gZ29ESFjqJoCu1Rupje8YtGqsefD265TMg7usUDFdp6W1EGMcet8";
 let parent: ExtendedPublicKey<Secp256k1Curve<K256Backend>> = parent_xpub.parse().unwrap();
