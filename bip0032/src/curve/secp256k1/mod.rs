@@ -5,7 +5,7 @@ use core::marker::PhantomData;
 use super::*;
 
 mod backends;
-pub use self::backends::{BackendError, K256Backend, Libsecp256k1Backend, Secp256k1FfiBackend};
+pub use self::backends::*;
 
 /// Secp256k1 backend interface.
 pub trait Secp256k1Backend {
