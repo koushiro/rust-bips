@@ -1,4 +1,4 @@
-//! secp256k1 curve support and backend selection.
+//! secp256k1 curve implementation.
 
 use core::marker::PhantomData;
 
