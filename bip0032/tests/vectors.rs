@@ -1,6 +1,6 @@
 use bip0032::{
     DerivationPath, ExtendedKeyPayload, ExtendedPrivateKey, ExtendedPublicKey, KnownVersion,
-    backend::*,
+    curve::secp256k1::*,
 };
 
 struct Case {
@@ -10,9 +10,11 @@ struct Case {
     xprv: &'static str,
 }
 
+type Curve<B> = Secp256k1Curve<B>;
+
 fn run_case<B: Secp256k1Backend>(case: &Case) {
     let seed = const_hex::decode(case.seed).unwrap();
-    let master = ExtendedPrivateKey::<B>::new(&seed).unwrap();
+    let master = ExtendedPrivateKey::<Curve<B>>::new(&seed).unwrap();
 
     let path = case.path.parse::<DerivationPath>().unwrap();
     let derived = master.derive_path(&path).unwrap();
@@ -36,8 +38,6 @@ fn run_cases<B: Secp256k1Backend>(cases: &[Case]) {
 fn run_cases_for_all_backends(cases: &[Case]) {
     #[cfg(feature = "k256")]
     run_cases::<K256Backend>(cases);
-    #[cfg(feature = "k256ecdsa")]
-    run_cases::<K256EcdsaBackend>(cases);
     #[cfg(feature = "secp256k1")]
     run_cases::<Secp256k1FfiBackend>(cases);
     #[cfg(feature = "libsecp256k1")]
@@ -182,7 +182,7 @@ fn assert_invalid_xpub<B: Secp256k1Backend>(keys: &[&str]) {
     for &key in keys {
         let parsed = key.parse::<ExtendedKeyPayload>();
         let is_invalid = match parsed {
-            Ok(parsed) => ExtendedPublicKey::<B>::try_from(parsed).is_err(),
+            Ok(parsed) => ExtendedPublicKey::<Curve<B>>::try_from(parsed).is_err(),
             Err(_) => true,
         };
         assert!(is_invalid);
@@ -193,7 +193,7 @@ fn assert_invalid_xprv<B: Secp256k1Backend>(keys: &[&str]) {
     for &key in keys {
         let parsed = key.parse::<ExtendedKeyPayload>();
         let is_invalid = match parsed {
-            Ok(parsed) => ExtendedPrivateKey::<B>::try_from(parsed).is_err(),
+            Ok(parsed) => ExtendedPrivateKey::<Curve<B>>::try_from(parsed).is_err(),
             Err(_) => true,
         };
         assert!(is_invalid);
@@ -205,11 +205,6 @@ fn assert_invalid_case_for_all_backends(xpub_keys: &[&str], xprv_keys: &[&str]) 
     {
         assert_invalid_xpub::<K256Backend>(xpub_keys);
         assert_invalid_xprv::<K256Backend>(xprv_keys);
-    }
-    #[cfg(feature = "k256ecdsa")]
-    {
-        assert_invalid_xpub::<K256EcdsaBackend>(xpub_keys);
-        assert_invalid_xprv::<K256EcdsaBackend>(xprv_keys);
     }
     #[cfg(feature = "secp256k1")]
     {

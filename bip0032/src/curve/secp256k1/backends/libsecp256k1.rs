@@ -1,6 +1,7 @@
 use libsecp256k1::{PublicKey, PublicKeyFormat, SecretKey};
 
-use super::*;
+use super::BackendError;
+use crate::curve::{CurvePrivateKey, CurvePublicKey, TweakableKey, secp256k1::Secp256k1Backend};
 
 /// Secp256k1 backend powered by the [`libsecp256k1`](https://github.com/paritytech/libsecp256k1) crate.
 ///
@@ -28,16 +29,21 @@ impl Drop for SecretKeyGuard {
     }
 }
 
-impl Secp256k1PublicKey for PublicKey {
+impl CurvePublicKey for PublicKey {
     type Error = BackendError;
+    type Bytes = [u8; 33];
 
-    fn from_bytes(bytes: &[u8; 33]) -> Result<Self, Self::Error> {
+    fn from_bytes(bytes: &Self::Bytes) -> Result<Self, Self::Error> {
         PublicKey::parse_slice(bytes, Some(PublicKeyFormat::Compressed)).map_err(BackendError::new)
     }
 
-    fn to_bytes(&self) -> [u8; 33] {
+    fn to_bytes(&self) -> Self::Bytes {
         self.serialize_compressed()
     }
+}
+
+impl TweakableKey for PublicKey {
+    type Error = BackendError;
 
     fn add_tweak(&self, tweak: &[u8; 32]) -> Result<Self, Self::Error> {
         let tweak_key = SecretKeyGuard::parse(tweak)?;
@@ -49,25 +55,17 @@ impl Secp256k1PublicKey for PublicKey {
     }
 }
 
-impl Secp256k1PrivateKey for SecretKey {
+impl CurvePrivateKey for SecretKey {
     type Error = BackendError;
     type PublicKey = PublicKey;
+    type Bytes = [u8; 32];
 
-    fn from_bytes(bytes: &[u8; 32]) -> Result<Self, Self::Error> {
+    fn from_bytes(bytes: &Self::Bytes) -> Result<Self, Self::Error> {
         SecretKey::parse(bytes).map_err(BackendError::new)
     }
 
-    fn to_bytes(&self) -> [u8; 32] {
+    fn to_bytes(&self) -> Self::Bytes {
         self.serialize()
-    }
-
-    fn add_tweak(&self, tweak: &[u8; 32]) -> Result<Self, Self::Error> {
-        let tweak_key = SecretKeyGuard::parse(tweak)?;
-        let mut out = *self;
-
-        out.tweak_add_assign(tweak_key.as_ref()).map_err(BackendError::new)?;
-
-        Ok(out)
     }
 
     fn to_public(&self) -> Self::PublicKey {
@@ -76,6 +74,19 @@ impl Secp256k1PrivateKey for SecretKey {
 
     fn zeroize(&mut self) {
         self.clear();
+    }
+}
+
+impl TweakableKey for SecretKey {
+    type Error = BackendError;
+
+    fn add_tweak(&self, tweak: &[u8; 32]) -> Result<Self, Self::Error> {
+        let tweak_key = SecretKeyGuard::parse(tweak)?;
+        let mut out = *self;
+
+        out.tweak_add_assign(tweak_key.as_ref()).map_err(BackendError::new)?;
+
+        Ok(out)
     }
 }
 

@@ -31,9 +31,9 @@ The examples below assume the `seed` from above.
 1. Private parent key -> private child key (supports hardened).
 
 ```rust
-use bip0032::{DerivationPath, ExtendedPrivateKey, Version, backend::K256Backend};
+use bip0032::{DerivationPath, ExtendedPrivateKey, Version, curve::secp256k1::*};
 
-let master = ExtendedPrivateKey::<K256Backend>::new(&seed).unwrap();
+let master = ExtendedPrivateKey::<Secp256k1Curve<K256Backend>>::new(&seed).unwrap();
 let path: DerivationPath = "m/0H/1".parse().unwrap();
 let child = master.derive_path(&path).unwrap();
 let xprv = child
@@ -45,9 +45,9 @@ let xprv = child
 2. Private parent key -> public child key.
 
 ```rust
-use bip0032::{DerivationPath, ExtendedPrivateKey, Version, backend::K256Backend};
+use bip0032::{DerivationPath, ExtendedPrivateKey, Version, curve::secp256k1::*};
 
-let master = ExtendedPrivateKey::<K256Backend>::new(&seed).unwrap();
+let master = ExtendedPrivateKey::<Secp256k1Curve<K256Backend>>::new(&seed).unwrap();
 let path: DerivationPath = "m/0H/1".parse().unwrap();
 let child = master.derive_path(&path).unwrap();
 let xpub = child
@@ -60,10 +60,10 @@ let xpub = child
 3. Public parent key -> public child key (non-hardened only).
 
 ```rust
-use bip0032::{DerivationPath, ExtendedPublicKey, Version, backend::K256Backend};
+use bip0032::{DerivationPath, ExtendedPublicKey, Version, curve::secp256k1::*};
 
 let parent_xpub = "xpub661MyMwAqRbcFtXgS5sYJABqqG9YLmC4Q1Rdap9gSE8NqtwybGhePY2gZ29ESFjqJoCu1Rupje8YtGqsefD265TMg7usUDFdp6W1EGMcet8";
-let parent: ExtendedPublicKey<K256Backend> = parent_xpub.parse().unwrap();
+let parent: ExtendedPublicKey<Secp256k1Curve<K256Backend>> = parent_xpub.parse().unwrap();
 let path: DerivationPath = "m/0/1".parse().unwrap();
 let child = parent.derive_path(&path).unwrap();
 let xpub = child
@@ -84,7 +84,6 @@ See documentation and examples at https://docs.rs/bip0032.
 - [x] Extended key Base58Check encoding/decoding (xpub/xprv)
 - [x] Multiple secp256k1 backends
   - [`k256`](https://github.com/RustCrypto/elliptic-curves/tree/master/k256) (by default)
-  - [`k256::ecdsa`](https://github.com/RustCrypto/elliptic-curves/tree/master/k256)
   - [`secp256k1`](https://github.com/rust-bitcoin/rust-secp256k1)
   - [`libsecp256k1`](https://github.com/paritytech/libsecp256k1)
 - [x] Support `no_std` environment

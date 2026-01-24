@@ -43,7 +43,6 @@ std = [
     "libsecp256k1?/std",
 ]
 k256 = ["k256/arithmetic"]
-k256ecdsa = ["k256/ecdsa"]
 secp256k1 = ["dep:secp256k1"]
 libsecp256k1 = ["dep:libsecp256k1"]
 

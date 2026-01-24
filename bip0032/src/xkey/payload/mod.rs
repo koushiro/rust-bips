@@ -8,8 +8,10 @@ use zeroize::{Zeroize, Zeroizing};
 mod version;
 
 pub use self::version::{KnownVersion, Version};
-use super::ExtendedKeyMetadata;
-use crate::error::{Error, ErrorKind, Result};
+use crate::{
+    error::{Error, ErrorKind, Result},
+    xkey::core::ExtendedKeyMetadata,
+};
 
 /// Base58Check-encoded extended key payload plus version metadata.
 pub struct ExtendedKeyPayload {
@@ -46,7 +48,11 @@ impl ExtendedKeyPayload {
         let mut out = [0u8; Self::KEY_PAYLOAD_LENGTH];
         out[..4].copy_from_slice(&self.version.to_bytes());
         out[4] = self.meta.depth;
-        out[5..9].copy_from_slice(&self.meta.parent_fingerprint);
+        let parent_fingerprint = self
+            .meta
+            .parent_fingerprint
+            .expect("BIP32 serialization requires parent fingerprint");
+        out[5..9].copy_from_slice(&parent_fingerprint);
         out[9..13].copy_from_slice(&self.meta.child_number.to_be_bytes());
         out[13..45].copy_from_slice(&self.meta.chain_code);
         out[45..78].copy_from_slice(&self.key_data);
@@ -109,8 +115,8 @@ pub(crate) fn parse_payload(data: &[u8]) -> Result<ExtendedKeyPayload> {
 
     let depth = data[4];
 
-    let mut parent_fingerprint = [0u8; 4];
-    parent_fingerprint.copy_from_slice(&data[5..9]);
+    let mut raw_parent_fingerprint = [0u8; 4];
+    raw_parent_fingerprint.copy_from_slice(&data[5..9]);
 
     let mut child_number_bytes = [0u8; 4];
     child_number_bytes.copy_from_slice(&data[9..13]);
@@ -123,7 +129,7 @@ pub(crate) fn parse_payload(data: &[u8]) -> Result<ExtendedKeyPayload> {
     key_data.copy_from_slice(&data[45..78]);
 
     if depth == 0 {
-        if parent_fingerprint != [0u8; 4] {
+        if raw_parent_fingerprint != [0u8; 4] {
             return Err(Error::new(
                 ErrorKind::InvalidPayload,
                 "zero depth with non-zero parent fingerprint",
@@ -133,10 +139,10 @@ pub(crate) fn parse_payload(data: &[u8]) -> Result<ExtendedKeyPayload> {
                 "parent_fingerprint",
                 format!(
                     "0x{:02X}{:02X}{:02X}{:02X}",
-                    parent_fingerprint[0],
-                    parent_fingerprint[1],
-                    parent_fingerprint[2],
-                    parent_fingerprint[3],
+                    raw_parent_fingerprint[0],
+                    raw_parent_fingerprint[1],
+                    raw_parent_fingerprint[2],
+                    raw_parent_fingerprint[3],
                 ),
             ));
         }
@@ -189,7 +195,12 @@ pub(crate) fn parse_payload(data: &[u8]) -> Result<ExtendedKeyPayload> {
 
     Ok(ExtendedKeyPayload {
         version,
-        meta: ExtendedKeyMetadata { depth, parent_fingerprint, child_number, chain_code },
+        meta: ExtendedKeyMetadata {
+            depth,
+            parent_fingerprint: Some(raw_parent_fingerprint),
+            child_number,
+            chain_code,
+        },
         key_data,
     })
 }
