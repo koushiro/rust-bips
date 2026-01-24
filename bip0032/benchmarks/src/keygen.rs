@@ -36,10 +36,7 @@ fn bench_keygen_coins_bip32(group: &mut BenchmarkGroup<'_>) {
 }
 
 fn bench_keygen_bip32(group: &mut BenchmarkGroup<'_>) {
-    use bip32::{
-        ExtendedPrivateKey, PrivateKey,
-        secp256k1::{self, ecdsa},
-    };
+    use bip32::{ExtendedPrivateKey, PrivateKey, secp256k1};
 
     fn bench_impl<P: PrivateKey>(group: &mut BenchmarkGroup<'_>, name: &str) {
         group.bench_function(name, |b| {
@@ -55,18 +52,18 @@ fn bench_keygen_bip32(group: &mut BenchmarkGroup<'_>) {
     }
 
     bench_impl::<secp256k1::SecretKey>(group, "bip32 (k256)");
-    bench_impl::<ecdsa::SigningKey>(group, "bip32 (k256::ecdsa)");
+    bench_impl::<secp256k1::ecdsa::SigningKey>(group, "bip32 (k256::ecdsa)");
 }
 
 fn bench_keygen_bip0032(group: &mut BenchmarkGroup<'_>) {
-    use bip0032::{ExtendedPrivateKey, backend::*};
+    use bip0032::{ExtendedPrivateKey, curve::secp256k1::*};
 
     fn bench_impl<B: Secp256k1Backend>(group: &mut BenchmarkGroup<'_>, name: &str) {
         group.bench_function(name, |b| {
             b.iter_batched(
                 random_seed,
                 |seed| {
-                    let key = <ExtendedPrivateKey<B>>::new(&seed).unwrap();
+                    let key = <ExtendedPrivateKey<Secp256k1Curve<B>>>::new(&seed).unwrap();
                     black_box(key);
                 },
                 BatchSize::SmallInput,
@@ -75,7 +72,6 @@ fn bench_keygen_bip0032(group: &mut BenchmarkGroup<'_>) {
     }
 
     bench_impl::<K256Backend>(group, "bip0032 (k256)");
-    bench_impl::<K256EcdsaBackend>(group, "bip0032 (k256::ecdsa)");
     bench_impl::<Secp256k1FfiBackend>(group, "bip0032 (secp256k1)");
     bench_impl::<Libsecp256k1Backend>(group, "bip0032 (libsecp256k1)");
 }

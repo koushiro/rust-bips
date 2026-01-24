@@ -3,7 +3,7 @@
 use arbitrary::Arbitrary;
 use bip0032::{
     ChildNumber, DerivationPath, ExtendedKeyPayload, ExtendedPrivateKey, ExtendedPublicKey,
-    KnownVersion, Version, backend::K256Backend,
+    KnownVersion, Version, curve::secp256k1::*,
 };
 use libfuzzer_sys::fuzz_target;
 
@@ -140,6 +140,8 @@ fn encode_payload(data: &[u8]) -> Option<String> {
     Some(out)
 }
 
+type Secp256k1 = Secp256k1Curve<K256Backend>;
+
 fuzz_target!(|input: Input<'_>| {
     let seed_len = (input.max_seed_len as usize).min(64);
     let seed = bounded_slice(input.seed, seed_len);
@@ -147,7 +149,7 @@ fuzz_target!(|input: Input<'_>| {
     let max_children = (input.max_children as usize).min(32);
     let path = build_path(input.path_bytes, max_children);
 
-    let master = match ExtendedPrivateKey::<K256Backend>::new(seed) {
+    let master = match ExtendedPrivateKey::<Secp256k1>::new(seed) {
         Ok(master) => master,
         Err(_) => return,
     };
@@ -173,13 +175,13 @@ fuzz_target!(|input: Input<'_>| {
     assert_eq!(payload2.version(), payload_version);
 
     if payload2.version().is_private() {
-        if let Ok(key) = ExtendedPrivateKey::<K256Backend>::try_from(payload2) {
+        if let Ok(key) = ExtendedPrivateKey::<Secp256k1>::try_from(payload2) {
             let encoded_key = key.encode_with(version).unwrap().to_string();
             let payload3 = encoded_key.parse::<ExtendedKeyPayload>().unwrap();
             assert!(payload3.version().is_private());
         }
     } else if payload2.version().is_public() {
-        if let Ok(key) = ExtendedPublicKey::<K256Backend>::try_from(payload2) {
+        if let Ok(key) = ExtendedPublicKey::<Secp256k1>::try_from(payload2) {
             let encoded_key = key.encode_with(version).unwrap().to_string();
             let payload3 = encoded_key.parse::<ExtendedKeyPayload>().unwrap();
             assert!(payload3.version().is_public());

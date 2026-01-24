@@ -3,24 +3,30 @@ use k256::{
 };
 use zeroize::Zeroizing;
 
-use super::*;
+use super::BackendError;
+use crate::curve::{CurvePrivateKey, CurvePublicKey, TweakableKey, secp256k1::Secp256k1Backend};
 
 /// Secp256k1 backend powered by the [`k256`](https://github.com/RustCrypto/elliptic-curves/tree/master/k256) crate.
 pub struct K256Backend;
 
-impl Secp256k1PublicKey for PublicKey {
+impl CurvePublicKey for PublicKey {
     type Error = BackendError;
+    type Bytes = [u8; 33];
 
-    fn from_bytes(bytes: &[u8; 33]) -> Result<Self, Self::Error> {
+    fn from_bytes(bytes: &Self::Bytes) -> Result<Self, Self::Error> {
         PublicKey::from_sec1_bytes(bytes).map_err(BackendError::new)
     }
 
-    fn to_bytes(&self) -> [u8; 33] {
+    fn to_bytes(&self) -> Self::Bytes {
         let encoded = self.to_encoded_point(true);
         let mut out = [0u8; 33];
         out.copy_from_slice(encoded.as_bytes());
         out
     }
+}
+
+impl TweakableKey for PublicKey {
+    type Error = BackendError;
 
     fn add_tweak(&self, tweak: &[u8; 32]) -> Result<Self, Self::Error> {
         let tweak_scalar = Zeroizing::new(nonzero_scalar_from_bytes(tweak)?);
@@ -33,25 +39,17 @@ impl Secp256k1PublicKey for PublicKey {
     }
 }
 
-impl Secp256k1PrivateKey for SecretKey {
+impl CurvePrivateKey for SecretKey {
     type Error = BackendError;
     type PublicKey = PublicKey;
+    type Bytes = [u8; 32];
 
-    fn from_bytes(bytes: &[u8; 32]) -> Result<Self, Self::Error> {
+    fn from_bytes(bytes: &Self::Bytes) -> Result<Self, Self::Error> {
         SecretKey::from_slice(bytes).map_err(BackendError::new)
     }
 
-    fn to_bytes(&self) -> [u8; 32] {
+    fn to_bytes(&self) -> Self::Bytes {
         self.to_bytes().into()
-    }
-
-    fn add_tweak(&self, tweak: &[u8; 32]) -> Result<Self, Self::Error> {
-        let tweak_scalar = Zeroizing::new(nonzero_scalar_from_bytes(tweak)?);
-        let key_scalar = Zeroizing::new(self.to_nonzero_scalar());
-
-        let child = tweak_scalar.as_ref() + key_scalar.as_ref();
-
-        SecretKey::from_bytes(&child.to_bytes()).map_err(BackendError::new)
     }
 
     fn to_public(&self) -> Self::PublicKey {
@@ -60,6 +58,19 @@ impl Secp256k1PrivateKey for SecretKey {
 
     fn zeroize(&mut self) {
         // `k256::SecretKey` implements `ZeroizeOnDrop`, so `Drop` handles cleanup.
+    }
+}
+
+impl TweakableKey for SecretKey {
+    type Error = BackendError;
+
+    fn add_tweak(&self, tweak: &[u8; 32]) -> Result<Self, Self::Error> {
+        let tweak_scalar = Zeroizing::new(nonzero_scalar_from_bytes(tweak)?);
+        let key_scalar = Zeroizing::new(self.to_nonzero_scalar());
+
+        let child = tweak_scalar.as_ref() + key_scalar.as_ref();
+
+        SecretKey::from_bytes(&child.to_bytes()).map_err(BackendError::new)
     }
 }
 

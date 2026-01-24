@@ -17,10 +17,10 @@
 //! 1. Private parent key -> private child key (supports hardened).
 //!
 //! ```rust
-//! use bip0032::{DerivationPath, ExtendedPrivateKey, Version, backend::K256Backend};
+//! use bip0032::{DerivationPath, ExtendedPrivateKey, Version, curve::secp256k1::*};
 //!
 //! # let seed = [0u8; 64];
-//! let master = ExtendedPrivateKey::<K256Backend>::new(&seed).unwrap();
+//! let master = ExtendedPrivateKey::<Secp256k1Curve<K256Backend>>::new(&seed).unwrap();
 //! let path: DerivationPath = "m/0H/1".parse().unwrap();
 //! let child = master.derive_path(&path).unwrap();
 //! let xprv = child
@@ -32,10 +32,10 @@
 //! 2. Private parent key -> public child key.
 //!
 //! ```rust
-//! use bip0032::{DerivationPath, ExtendedPrivateKey, Version, backend::K256Backend};
+//! use bip0032::{DerivationPath, ExtendedPrivateKey, Version, curve::secp256k1::*};
 //!
 //! # let seed = [0u8; 64];
-//! let master = ExtendedPrivateKey::<K256Backend>::new(&seed).unwrap();
+//! let master = ExtendedPrivateKey::<Secp256k1Curve<K256Backend>>::new(&seed).unwrap();
 //! let path: DerivationPath = "m/0H/1".parse().unwrap();
 //! let child = master.derive_path(&path).unwrap();
 //! let xpub = child
@@ -48,10 +48,10 @@
 //! 3. Public parent key -> public child key (non-hardened only).
 //!
 //! ```rust
-//! use bip0032::{DerivationPath, ExtendedPublicKey, Version, backend::K256Backend};
+//! use bip0032::{DerivationPath, ExtendedPublicKey, Version, curve::secp256k1::*};
 //!
 //! let parent_xpub = "xpub661MyMwAqRbcFtXgS5sYJABqqG9YLmC4Q1Rdap9gSE8NqtwybGhePY2gZ29ESFjqJoCu1Rupje8YtGqsefD265TMg7usUDFdp6W1EGMcet8";
-//! let parent: ExtendedPublicKey<K256Backend> = parent_xpub.parse().unwrap();
+//! let parent: ExtendedPublicKey<Secp256k1Curve<K256Backend>> = parent_xpub.parse().unwrap();
 //! let path: DerivationPath = "m/0/1".parse().unwrap();
 //! let child = parent.derive_path(&path).unwrap();
 //! let xpub = child
@@ -71,13 +71,13 @@
 #[cfg(not(feature = "std"))]
 extern crate alloc;
 
-pub mod backend;
+pub mod curve;
 mod error;
 mod path;
 mod xkey;
 
 pub use crate::{
     error::*,
-    path::{ChildNumber, DerivationPath},
+    path::{ChildNumber, DerivationPath, HardenedChildNumber, HardenedDerivationPath},
     xkey::{ExtendedKeyPayload, ExtendedPrivateKey, ExtendedPublicKey, KnownVersion, Version},
 };

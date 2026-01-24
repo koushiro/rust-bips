@@ -3,10 +3,10 @@
 ## Project Structure & Module Organization
 
 - `src/lib.rs` is the crate entry and re-exports the public API.
-- `src/path.rs` defines derivation paths and child numbers.
+- `src/path/` defines derivation paths and child numbers.
 - `src/xkey/` contains extended key types and payload/version handling.
-- `src/backend/` holds backend-specific secp256k1 implementations (k256, secp256k1, libsecp256k1).
-- Tests live in `src/tests.rs` (BIP-32 vectors and invalid key cases).
+- `src/curve/secp256k1/` holds backend-specific secp256k1 implementations (k256, secp256k1, libsecp256k1).
+- Tests live in `tests/` (BIP-32 vectors and invalid key cases).
 - Benchmarks are a workspace member under `benchmarks/`, with bench targets in `benchmarks/*.rs` and `benchmarks/serialize/`.
 - Auxiliary tooling: `benchmarks/` for benches and `fuzz/` for fuzz targets.
 
@@ -15,7 +15,7 @@
 - `cargo build` builds with default features (`std`, `k256`).
 - `cargo build --no-default-features` checks `no_std` compatibility.
 - `cargo test` runs unit tests for the enabled backend.
-- `cargo test --features secp256k1` or `cargo test --features k256ecdsa` runs tests against specific backends.
+- `cargo test --features secp256k1` runs tests against specific backends.
 - `just bench keygen` or `just benches` runs benchmarks (uses `benchmarks/` as the working dir); equivalent: `cargo bench --bench keygen -- --quiet` from `benchmarks/`.
 - `just fuzz <target> [runs]` runs fuzzing with nightly (`cargo +nightly fuzz`).
 - `just fuzz-clean` removes fuzz artifacts (`fuzz/artifacts`, `fuzz/corpus`).
@@ -37,7 +37,7 @@
 ## Feature Flags & Backends
 
 - `std` enables standard library support; `k256` is the default backend.
-- Optional backends: `k256ecdsa`, `secp256k1`, and `libsecp256k1` (note: libsecp256k1 is unmaintained).
+- Optional backends: `secp256k1` and `libsecp256k1` (note: libsecp256k1 is unmaintained).
 - When modifying backend code, validate the affected feature set with explicit `--features` flags.
 
 ## Commit & Pull Request Guidelines

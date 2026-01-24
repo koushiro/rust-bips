@@ -5,31 +5,33 @@ use core::str::FromStr;
 use hmac::Mac;
 use zeroize::Zeroizing;
 
-use super::{
-    ExtendedKeyMetadata, hmac_sha512_split, key_fingerprint,
-    payload::{ExtendedKeyPayload, Version},
-};
+use super::{ExtendedKeyMetadata, hmac_sha512_split, key_fingerprint};
 use crate::{
-    backend::*,
+    curve::{Bip32Curve, Curve, CurvePublicKey, TweakableKey},
     error::{Error, ErrorKind, Result},
     path::{ChildNumber, DerivationPath},
+    xkey::{Version, payload::ExtendedKeyPayload},
 };
 
 /// A BIP32 extended public key.
-pub struct ExtendedPublicKey<B: Secp256k1Backend> {
+pub struct ExtendedPublicKey<C: Curve> {
     /// 41 bytes: the metadata for extended key (depth, parent link, and chain code).
     pub(crate) meta: ExtendedKeyMetadata,
-    /// 33 bytes: the public key data
-    pub(crate) public_key: PublicKey<B>,
+    /// Public key data.
+    pub(crate) public_key: C::PublicKey,
 }
 
-impl<B: Secp256k1Backend> Clone for ExtendedPublicKey<B> {
+impl<C: Curve> Clone for ExtendedPublicKey<C> {
     fn clone(&self) -> Self {
         Self { meta: self.meta.clone(), public_key: self.public_key.clone() }
     }
 }
 
-impl<B: Secp256k1Backend> ExtendedPublicKey<B> {
+impl<C> ExtendedPublicKey<C>
+where
+    C: Bip32Curve,
+    C::PublicKey: TweakableKey,
+{
     /// Derives a child extended public key (non-hardened only).
     pub fn derive_child(&self, child: ChildNumber) -> Result<Self> {
         if child.is_hardened() {
@@ -41,9 +43,9 @@ impl<B: Secp256k1Backend> ExtendedPublicKey<B> {
             .with_context("hardened", true));
         }
 
-        let public_key_bytes = self.public_key.to_bytes();
+        let public_key_bytes = CurvePublicKey::to_bytes(&self.public_key);
         let (left, right) = hmac_sha512_split(&self.meta.chain_code, |mac| {
-            mac.update(&public_key_bytes);
+            mac.update(public_key_bytes.as_ref());
             mac.update(&child.to_bytes());
         });
 
@@ -58,7 +60,7 @@ impl<B: Secp256k1Backend> ExtendedPublicKey<B> {
         Ok(Self {
             meta: ExtendedKeyMetadata {
                 depth: self.meta.depth.saturating_add(1),
-                parent_fingerprint: key_fingerprint(&public_key_bytes),
+                parent_fingerprint: Some(key_fingerprint(public_key_bytes.as_ref())),
                 child_number: child.into(),
                 chain_code: right,
             },
@@ -74,12 +76,23 @@ impl<B: Secp256k1Backend> ExtendedPublicKey<B> {
         }
         Ok(key)
     }
+}
 
+impl<C> ExtendedPublicKey<C>
+where
+    C: Bip32Curve,
+    C::PublicKey: CurvePublicKey<Bytes = [u8; 33]>,
+{
     /// Encodes this key with the specified version bytes.
     pub fn encode_with(&self, version: Version) -> Result<ExtendedKeyPayload> {
         if !version.is_public() {
             return Err(Error::new(ErrorKind::InvalidVersion, "expected public version bytes")
                 .with_context("version", version));
+        }
+
+        if self.meta.parent_fingerprint.is_none() {
+            return Err(Error::new(ErrorKind::InvalidPayload, "missing parent fingerprint")
+                .with_context("depth", self.meta.depth));
         }
 
         Ok(self.encode_with_unchecked(version))
@@ -90,12 +103,16 @@ impl<B: Secp256k1Backend> ExtendedPublicKey<B> {
         ExtendedKeyPayload {
             version,
             meta: self.meta.clone(),
-            key_data: self.public_key.to_bytes(),
+            key_data: CurvePublicKey::to_bytes(&self.public_key),
         }
     }
 }
 
-impl<B: Secp256k1Backend> TryFrom<ExtendedKeyPayload> for ExtendedPublicKey<B> {
+impl<C> TryFrom<ExtendedKeyPayload> for ExtendedPublicKey<C>
+where
+    C: Bip32Curve,
+    C::PublicKey: CurvePublicKey<Bytes = [u8; 33]>,
+{
     type Error = Error;
 
     fn try_from(payload: ExtendedKeyPayload) -> Result<Self> {
@@ -104,9 +121,9 @@ impl<B: Secp256k1Backend> TryFrom<ExtendedKeyPayload> for ExtendedPublicKey<B> {
                 .with_context("version", payload.version));
         }
 
-        let public_key = <PublicKey<B> as Secp256k1PublicKey>::from_bytes(&payload.key_data)
-            .map_err(|err| {
-                Error::new(ErrorKind::InvalidKeyData, "invalid secp256k1 public key data")
+        let public_key =
+            <C::PublicKey as CurvePublicKey>::from_bytes(&payload.key_data).map_err(|err| {
+                Error::new(ErrorKind::InvalidKeyData, "invalid public key data")
                     .with_context("key_prefix", format!("0x{:02x}", payload.key_data[0]))
                     .set_source(err)
             })?;
@@ -115,7 +132,11 @@ impl<B: Secp256k1Backend> TryFrom<ExtendedKeyPayload> for ExtendedPublicKey<B> {
     }
 }
 
-impl<B: Secp256k1Backend> FromStr for ExtendedPublicKey<B> {
+impl<C> FromStr for ExtendedPublicKey<C>
+where
+    C: Bip32Curve,
+    C::PublicKey: CurvePublicKey<Bytes = [u8; 33]>,
+{
     type Err = Error;
 
     fn from_str(encoded: &str) -> Result<Self> {

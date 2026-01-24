@@ -8,7 +8,7 @@ license.workspace = true
 publish = false
 
 [dev-dependencies]
-bip0032 = { path = "..", features = ["k256", "k256ecdsa", "secp256k1", "libsecp256k1"] }
+bip0032 = { path = "..", features = ["k256", "secp256k1", "libsecp256k1"] }
 bip32 = "0.5"
 bitcoin = "0.32"
 coins-bip32 = "0.13"
@@ -18,30 +18,30 @@ rand = "0.9"
 
 [[bench]]
 name = "keygen"
-path = "keygen.rs"
+path = "src/keygen.rs"
 harness = false
 
 [[bench]]
 name = "derive"
-path = "derive.rs"
+path = "src/derive.rs"
 harness = false
 
 [[bench]]
 name = "xprv_decode"
-path = "serialize/xprv_decode.rs"
+path = "src/serialize/xprv_decode.rs"
 harness = false
 
 [[bench]]
 name = "xprv_encode"
-path = "serialize/xprv_encode.rs"
+path = "src/serialize/xprv_encode.rs"
 harness = false
 
 [[bench]]
 name = "xpub_decode"
-path = "serialize/xpub_decode.rs"
+path = "src/serialize/xpub_decode.rs"
 harness = false
 
 [[bench]]
 name = "xpub_encode"
-path = "serialize/xpub_encode.rs"
+path = "src/serialize/xpub_encode.rs"
 harness = false

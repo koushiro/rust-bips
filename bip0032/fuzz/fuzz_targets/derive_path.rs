@@ -3,7 +3,7 @@
 use arbitrary::Arbitrary;
 use bip0032::{
     ChildNumber, DerivationPath, ExtendedKeyPayload, ExtendedPrivateKey, ExtendedPublicKey,
-    KnownVersion, backend::K256Backend,
+    KnownVersion, curve::secp256k1::*,
 };
 use libfuzzer_sys::fuzz_target;
 
@@ -43,19 +43,21 @@ fn build_path(bytes: &[u8], max_children: usize) -> (DerivationPath, bool) {
     (DerivationPath::from(children), has_hardened)
 }
 
-fn roundtrip_xprv(key: &ExtendedPrivateKey<K256Backend>) -> String {
+type Secp256k1 = Secp256k1Curve<K256Backend>;
+
+fn roundtrip_xprv(key: &ExtendedPrivateKey<Secp256k1>) -> String {
     let encoded = key.encode_with(KnownVersion::Xprv.version()).unwrap().to_string();
     let payload = encoded.parse::<ExtendedKeyPayload>().unwrap();
-    let decoded = ExtendedPrivateKey::<K256Backend>::try_from(payload).unwrap();
+    let decoded = ExtendedPrivateKey::<Secp256k1>::try_from(payload).unwrap();
     let encoded2 = decoded.encode_with(KnownVersion::Xprv.version()).unwrap().to_string();
     assert_eq!(encoded2, encoded);
     encoded
 }
 
-fn roundtrip_xpub(key: &ExtendedPublicKey<K256Backend>) -> String {
+fn roundtrip_xpub(key: &ExtendedPublicKey<Secp256k1>) -> String {
     let encoded = key.encode_with(KnownVersion::Xpub.version()).unwrap().to_string();
     let payload = encoded.parse::<ExtendedKeyPayload>().unwrap();
-    let decoded = ExtendedPublicKey::<K256Backend>::try_from(payload).unwrap();
+    let decoded = ExtendedPublicKey::<Secp256k1>::try_from(payload).unwrap();
     let encoded2 = decoded.encode_with(KnownVersion::Xpub.version()).unwrap().to_string();
     assert_eq!(encoded2, encoded);
     encoded
@@ -68,7 +70,7 @@ fuzz_target!(|input: Input<'_>| {
     let max_children = (input.max_path_len as usize).min(32);
     let (path, has_hardened) = build_path(input.path_bytes, max_children);
 
-    let master = match ExtendedPrivateKey::<K256Backend>::new(seed) {
+    let master = match ExtendedPrivateKey::<Secp256k1>::new(seed) {
         Ok(master) => master,
         Err(_) => return,
     };
