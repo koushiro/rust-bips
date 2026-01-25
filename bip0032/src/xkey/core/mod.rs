@@ -13,7 +13,7 @@ pub use self::{private::ExtendedPrivateKey, public::ExtendedPublicKey};
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub(crate) struct ExtendedKeyMetadata {
     pub(crate) depth: u8,
-    pub(crate) parent_fingerprint: Option<[u8; 4]>,
+    pub(crate) parent_fingerprint: [u8; 4],
     pub(crate) child_number: u32,
     pub(crate) chain_code: [u8; 32],
 }
@@ -21,7 +21,7 @@ pub(crate) struct ExtendedKeyMetadata {
 impl Zeroize for ExtendedKeyMetadata {
     fn zeroize(&mut self) {
         self.depth = 0;
-        self.parent_fingerprint = None;
+        self.parent_fingerprint = [0u8; 4];
         self.child_number = 0;
         self.chain_code.zeroize();
     }
@@ -47,14 +47,18 @@ pub(crate) fn key_fingerprint(public_key_bytes: &[u8]) -> [u8; 4] {
     out
 }
 
+pub(crate) fn derive_master_key_parts(seed: &[u8], domain: &[u8]) -> ([u8; 32], [u8; 32]) {
+    hmac_sha512_split(domain, |mac| mac.update(seed))
+}
+
 pub(crate) fn hmac_sha512_split(
     key: &[u8],
-    update: impl FnOnce(&mut Hmac<Sha512>),
+    f: impl FnOnce(&mut Hmac<Sha512>),
 ) -> ([u8; 32], [u8; 32]) {
     let mut mac = Hmac::<Sha512>::new_from_slice(key)
         .expect("HMAC-SHA512 must accept the provided key length");
 
-    update(&mut mac);
+    f(&mut mac);
 
     let output = mac.finalize().into_bytes();
     debug_assert_eq!(output.len(), 64, "HMAC-SHA512 should produce a 64-byte output");

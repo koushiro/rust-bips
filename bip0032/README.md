@@ -14,10 +14,16 @@
 
 Another Rust implementation of [BIP-0032](https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki) standard.
 
+## Support curves and features
+
+| Curve     | Feature                                 | Backends                      | Hardened | Non-hardened (private) | Non-hardened (public) | Serialization |
+| --------- | --------------------------------------- | ----------------------------- | -------- | ---------------------- | --------------------- | ------------- |
+| secp256k1 | `k256` \| `secp256k1` \| `libsecp256k1` | k256, secp256k1, libsecp256k1 | yes      | yes                    | yes                   | yes           |
+
 ## Usage
 
-Seed material is typically derived from a BIP-0039 mnemonic (for example, via
-[bip0039](https://crates.io/crates/bip0039)).
+Seed material is typically derived from a [BIP-0039](https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki) mnemonic
+(for example, via [bip0039](https://crates.io/crates/bip0039)).
 
 ```rust
 use bip0039::{Count, English, Mnemonic};
@@ -74,6 +80,11 @@ let xpub = child
 
 4. Public parent key -> private child key: impossible (BIP-0032 does not allow it).
 
+## SLIP-0010 (optional)
+
+[SLIP-0010](https://github.com/satoshilabs/slips/blob/master/slip-0010.md) support is available behind the `slip10` feature.
+See [SLIP-0010.md](SLIP-0010.md) for details, examples, and the feature matrix.
+
 ## Documentation
 
 See documentation and examples at https://docs.rs/bip0032.
@@ -86,6 +97,10 @@ See documentation and examples at https://docs.rs/bip0032.
   - [`k256`](https://github.com/RustCrypto/elliptic-curves/tree/master/k256) (by default)
   - [`secp256k1`](https://github.com/rust-bitcoin/rust-secp256k1)
   - [`libsecp256k1`](https://github.com/paritytech/libsecp256k1)
+- [x] Optional SLIP-0010 support
+  - secp256k1 ([compatible with BIP32](https://github.com/satoshilabs/slips/blob/master/slip-0010.md#compatibility-with-bip-0032))
+  - NIST P-256 (a.k.a. secp256r1, prime256v1) ([`p256`](https://github.com/RustCrypto/elliptic-curves/tree/master/p256))
+  - ed25519 ([`ed25519-dalek`](https://github.com/dalek-cryptography/curve25519-dalek/tree/main/ed25519-dalek))
 - [x] Support `no_std` environment
 
 ## Performance

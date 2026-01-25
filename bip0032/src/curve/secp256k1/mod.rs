@@ -7,14 +7,6 @@ use super::*;
 mod backends;
 pub use self::backends::*;
 
-/// Secp256k1 backend interface.
-pub trait Secp256k1Backend {
-    /// Backend-specific public key type.
-    type PublicKey: CurvePublicKey<Bytes = [u8; 33]> + TweakableKey;
-    /// Backend-specific private key type.
-    type PrivateKey: CurvePrivateKey<Bytes = [u8; 32], PublicKey = Self::PublicKey> + TweakableKey;
-}
-
 /// A secp256k1 curve parameterization for a specific backend.
 pub struct Secp256k1Curve<B>(PhantomData<B>);
 
@@ -26,3 +18,9 @@ impl<B: Secp256k1Backend> Curve for Secp256k1Curve<B> {
 }
 
 impl<B: Secp256k1Backend> Bip32Curve for Secp256k1Curve<B> {}
+
+#[cfg(feature = "slip10")]
+impl<B: Secp256k1Backend> Slip10Curve for Secp256k1Curve<B> {}
+
+#[cfg(feature = "slip10")]
+impl<B: Secp256k1Backend> Slip10NonHardenedCurve for Secp256k1Curve<B> {}

@@ -1,6 +1,26 @@
+//! # bip0032
+//!
+//! [![](https://github.com/koushiro/rust-bips/actions/workflows/bip0032.yml/badge.svg)][actions]
+//! [![](https://img.shields.io/docsrs/bip0032)][docs.rs]
+//! [![](https://img.shields.io/crates/v/bip0032)][crates.io]
+//! [![](https://img.shields.io/crates/l/bip0032)][crates.io]
+//! [![](https://img.shields.io/crates/d/bip0032.svg)][crates.io]
+//! [![](https://img.shields.io/badge/MSRV-1.85.0-green?logo=rust)][whatrustisit]
+//!
+//! [actions]: https://github.com/koushiro/rust-bips/actions
+//! [docs.rs]: https://docs.rs/bip0032
+//! [crates.io]: https://crates.io/crates/bip0032
+//! [whatrustisit]: https://www.whatrustisit.com
+//!
 //! Another Rust implementation of [BIP-0032](https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki) standard.
 //!
-//! # Usage
+//! ## Support curves and features
+//!
+//! | Curve | Feature | Backends | Hardened | Non-hardened (private) | Non-hardened (public) | Serialization |
+//! | --- | --- | --- | --- | --- | --- | --- |
+//! | secp256k1 | `k256` \| `secp256k1` \| `libsecp256k1` | k256, secp256k1, libsecp256k1 | yes | yes | yes | yes |
+//!
+//! ## Usage
 //!
 //! Seed material is typically derived from a BIP-0039 mnemonic (for example, via
 //! [bip0039](https://crates.io/crates/bip0039)).
@@ -61,6 +81,12 @@
 //! ```
 //!
 //! 4. Public parent key -> private child key: impossible (BIP-0032 does not allow it).
+//!
+//! # SLIP-0010 (optional)
+//!
+//! SLIP-0010 support is available behind the `slip10` feature. It shares the same
+//! `ExtendedPrivateKey`/`ExtendedPublicKey` types but uses SLIP-0010 derivation
+//! rules.
 
 #![deny(unused_imports)]
 #![deny(missing_docs)]
@@ -76,7 +102,9 @@ mod error;
 mod path;
 mod xkey;
 
-pub use crate::{
+#[cfg(feature = "slip10")]
+pub use self::xkey::slip10;
+pub use self::{
     error::*,
     path::{ChildNumber, DerivationPath, HardenedChildNumber, HardenedDerivationPath},
     xkey::{ExtendedKeyPayload, ExtendedPrivateKey, ExtendedPublicKey, KnownVersion, Version},

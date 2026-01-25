@@ -1,14 +1,15 @@
-use k256::{
-    NonZeroScalar, ProjectivePoint, PublicKey, SecretKey, elliptic_curve::sec1::ToEncodedPoint,
+use p256::{
+    AffinePoint, NonZeroScalar, ProjectivePoint, PublicKey, SecretKey,
+    elliptic_curve::sec1::ToEncodedPoint,
 };
 use zeroize::Zeroizing;
 
 use crate::curve::{
-    CurveError, CurvePrivateKey, CurvePublicKey, TweakableKey, secp256k1::Secp256k1Backend,
+    CurveError, CurvePrivateKey, CurvePublicKey, TweakableKey, nist256p1::Nist256p1Backend,
 };
 
-/// Secp256k1 backend powered by the [`k256`](https://github.com/RustCrypto/elliptic-curves/tree/master/k256) crate.
-pub struct K256Backend;
+/// NIST P-256 backend powered by the [`p256`](https://github.com/RustCrypto/elliptic-curves/tree/master/p256) crate.
+pub struct P256Backend;
 
 impl CurvePublicKey for PublicKey {
     type Error = CurveError;
@@ -34,7 +35,7 @@ impl TweakableKey for PublicKey {
         let parent_point = self.to_projective();
 
         let child_point = ProjectivePoint::GENERATOR * tweak_scalar.as_ref() + parent_point;
-        let child_affine = child_point.to_affine();
+        let child_affine = AffinePoint::from(child_point);
 
         PublicKey::from_affine(child_affine).map_err(CurveError::new)
     }
@@ -58,7 +59,7 @@ impl CurvePrivateKey for SecretKey {
     }
 
     fn zeroize(&mut self) {
-        // `k256::SecretKey` implements `ZeroizeOnDrop`, so `Drop` handles cleanup.
+        // `p256::SecretKey` implements `ZeroizeOnDrop`, so `Drop` handles cleanup.
     }
 }
 
@@ -75,7 +76,7 @@ impl TweakableKey for SecretKey {
     }
 }
 
-impl Secp256k1Backend for K256Backend {
+impl Nist256p1Backend for P256Backend {
     type PublicKey = PublicKey;
     type PrivateKey = SecretKey;
 }

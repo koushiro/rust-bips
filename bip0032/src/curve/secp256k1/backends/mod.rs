@@ -1,69 +1,13 @@
 //! Backend implementations for secp256k1 curve.
 
-#[cfg(not(feature = "std"))]
-use alloc::string::String;
-use core::{error, fmt};
+use crate::curve::{CurvePrivateKey, CurvePublicKey, TweakableKey};
 
-use crate::error::{ErrorSource, IntoErrorSource};
-
-/// Common backend error.
-pub struct BackendError(ErrorSource);
-
-impl BackendError {
-    /// Creates a backend error from a source error.
-    #[cfg(feature = "std")]
-    pub fn new<E>(error: E) -> Self
-    where
-        E: IntoErrorSource,
-    {
-        Self(error.into_error_source())
-    }
-
-    /// Creates a backend error from a source error.
-    #[cfg(not(feature = "std"))]
-    pub fn new<E>(error: E) -> Self
-    where
-        E: fmt::Display + fmt::Debug + Send + Sync + 'static,
-    {
-        let error = anyhow::Error::msg(error);
-        Self(error.into_error_source())
-    }
-}
-
-impl fmt::Debug for BackendError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        fmt::Debug::fmt(&self.0, f)
-    }
-}
-
-impl fmt::Display for BackendError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        fmt::Display::fmt(&self.0, f)
-    }
-}
-
-impl From<ErrorSource> for BackendError {
-    fn from(error: ErrorSource) -> Self {
-        Self(error)
-    }
-}
-
-impl From<String> for BackendError {
-    fn from(message: String) -> Self {
-        Self(ErrorSource::from(message))
-    }
-}
-
-impl From<&'static str> for BackendError {
-    fn from(message: &'static str) -> Self {
-        Self(ErrorSource::from(message))
-    }
-}
-
-impl error::Error for BackendError {
-    fn source(&self) -> Option<&(dyn error::Error + 'static)> {
-        Some(self.0.as_error())
-    }
+/// Secp256k1 backend interface.
+pub trait Secp256k1Backend {
+    /// Backend-specific public key type.
+    type PublicKey: CurvePublicKey<Bytes = [u8; 33]> + TweakableKey;
+    /// Backend-specific private key type.
+    type PrivateKey: CurvePrivateKey<Bytes = [u8; 32], PublicKey = Self::PublicKey> + TweakableKey;
 }
 
 #[cfg(feature = "k256")]
