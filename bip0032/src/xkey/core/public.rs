@@ -27,6 +27,23 @@ impl<C: Curve> Clone for ExtendedPublicKey<C> {
     }
 }
 
+impl<C: Curve> ExtendedPublicKey<C> {
+    /// Returns the fingerprint of the parent's key.
+    pub fn parent_fingerprint(&self) -> [u8; 4] {
+        self.meta.parent_fingerprint
+    }
+
+    /// Returns the chain code for this key.
+    pub fn chain_code(&self) -> [u8; 32] {
+        self.meta.chain_code
+    }
+
+    /// Returns the public key bytes.
+    pub fn to_bytes(&self) -> <C::PublicKey as CurvePublicKey>::Bytes {
+        CurvePublicKey::to_bytes(&self.public_key)
+    }
+}
+
 impl<C> ExtendedPublicKey<C>
 where
     C: Bip32Curve,
@@ -60,7 +77,7 @@ where
         Ok(Self {
             meta: ExtendedKeyMetadata {
                 depth: self.meta.depth.saturating_add(1),
-                parent_fingerprint: Some(key_fingerprint(public_key_bytes.as_ref())),
+                parent_fingerprint: key_fingerprint(public_key_bytes.as_ref()),
                 child_number: child.into(),
                 chain_code: right,
             },
@@ -78,6 +95,7 @@ where
     }
 }
 
+// BIP32 encoding
 impl<C> ExtendedPublicKey<C>
 where
     C: Bip32Curve,
@@ -90,11 +108,6 @@ where
                 .with_context("version", version));
         }
 
-        if self.meta.parent_fingerprint.is_none() {
-            return Err(Error::new(ErrorKind::InvalidPayload, "missing parent fingerprint")
-                .with_context("depth", self.meta.depth));
-        }
-
         Ok(self.encode_with_unchecked(version))
     }
 
@@ -105,6 +118,20 @@ where
             meta: self.meta.clone(),
             key_data: CurvePublicKey::to_bytes(&self.public_key),
         }
+    }
+}
+
+// BIP32 decoding
+impl<C> FromStr for ExtendedPublicKey<C>
+where
+    C: Bip32Curve,
+    C::PublicKey: CurvePublicKey<Bytes = [u8; 33]>,
+{
+    type Err = Error;
+
+    fn from_str(encoded: &str) -> Result<Self> {
+        let payload = encoded.parse::<ExtendedKeyPayload>()?;
+        Self::try_from(payload)
     }
 }
 
@@ -129,18 +156,5 @@ where
             })?;
 
         Ok(Self { meta: payload.meta.clone(), public_key })
-    }
-}
-
-impl<C> FromStr for ExtendedPublicKey<C>
-where
-    C: Bip32Curve,
-    C::PublicKey: CurvePublicKey<Bytes = [u8; 33]>,
-{
-    type Err = Error;
-
-    fn from_str(encoded: &str) -> Result<Self> {
-        let payload = encoded.parse::<ExtendedKeyPayload>()?;
-        Self::try_from(payload)
     }
 }

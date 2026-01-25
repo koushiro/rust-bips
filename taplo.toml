@@ -24,7 +24,7 @@ inline_table_expand = true
 compact_entries = false
 ## Target maximum column width after which arrays are expanded into new lines.
 ## Note that this is not set in stone, and works on a best-effort basis.
-column_width = 100 # Default: 80
+column_width = 120 # Default: 80
 ## Indent subtables if they come in order.
 indent_tables = false
 ## Indent entries under tables.

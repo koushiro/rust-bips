@@ -58,7 +58,19 @@ pub trait TweakableKey: Sized {
     fn add_tweak(&self, tweak: &[u8; 32]) -> Result<Self, Self::Error>;
 }
 
-pub mod secp256k1;
-
 /// Marker trait for BIP32-encodable curves.
 pub trait Bip32Curve: Curve {}
+
+mod error;
+#[cfg(feature = "slip10")]
+mod slip10;
+
+pub use self::error::CurveError;
+#[cfg(feature = "slip10")]
+pub use self::slip10::*;
+
+#[cfg(feature = "slip10")]
+pub mod ed25519;
+#[cfg(feature = "slip10")]
+pub mod nist256p1;
+pub mod secp256k1;

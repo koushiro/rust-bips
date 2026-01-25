@@ -1,7 +1,8 @@
 use libsecp256k1::{PublicKey, PublicKeyFormat, SecretKey};
 
-use super::BackendError;
-use crate::curve::{CurvePrivateKey, CurvePublicKey, TweakableKey, secp256k1::Secp256k1Backend};
+use crate::curve::{
+    CurveError, CurvePrivateKey, CurvePublicKey, TweakableKey, secp256k1::Secp256k1Backend,
+};
 
 /// Secp256k1 backend powered by the [`libsecp256k1`](https://github.com/paritytech/libsecp256k1) crate.
 ///
@@ -12,8 +13,8 @@ pub struct Libsecp256k1Backend;
 struct SecretKeyGuard(SecretKey);
 
 impl SecretKeyGuard {
-    fn parse(bytes: &[u8; 32]) -> Result<Self, BackendError> {
-        SecretKey::parse(bytes).map(Self).map_err(BackendError::new)
+    fn parse(bytes: &[u8; 32]) -> Result<Self, CurveError> {
+        SecretKey::parse(bytes).map(Self).map_err(CurveError::new)
     }
 }
 
@@ -30,11 +31,11 @@ impl Drop for SecretKeyGuard {
 }
 
 impl CurvePublicKey for PublicKey {
-    type Error = BackendError;
+    type Error = CurveError;
     type Bytes = [u8; 33];
 
     fn from_bytes(bytes: &Self::Bytes) -> Result<Self, Self::Error> {
-        PublicKey::parse_slice(bytes, Some(PublicKeyFormat::Compressed)).map_err(BackendError::new)
+        PublicKey::parse_slice(bytes, Some(PublicKeyFormat::Compressed)).map_err(CurveError::new)
     }
 
     fn to_bytes(&self) -> Self::Bytes {
@@ -43,25 +44,25 @@ impl CurvePublicKey for PublicKey {
 }
 
 impl TweakableKey for PublicKey {
-    type Error = BackendError;
+    type Error = CurveError;
 
     fn add_tweak(&self, tweak: &[u8; 32]) -> Result<Self, Self::Error> {
         let tweak_key = SecretKeyGuard::parse(tweak)?;
         let mut out = *self;
 
-        out.tweak_add_assign(tweak_key.as_ref()).map_err(BackendError::new)?;
+        out.tweak_add_assign(tweak_key.as_ref()).map_err(CurveError::new)?;
 
         Ok(out)
     }
 }
 
 impl CurvePrivateKey for SecretKey {
-    type Error = BackendError;
+    type Error = CurveError;
     type PublicKey = PublicKey;
     type Bytes = [u8; 32];
 
     fn from_bytes(bytes: &Self::Bytes) -> Result<Self, Self::Error> {
-        SecretKey::parse(bytes).map_err(BackendError::new)
+        SecretKey::parse(bytes).map_err(CurveError::new)
     }
 
     fn to_bytes(&self) -> Self::Bytes {
@@ -78,13 +79,13 @@ impl CurvePrivateKey for SecretKey {
 }
 
 impl TweakableKey for SecretKey {
-    type Error = BackendError;
+    type Error = CurveError;
 
     fn add_tweak(&self, tweak: &[u8; 32]) -> Result<Self, Self::Error> {
         let tweak_key = SecretKeyGuard::parse(tweak)?;
         let mut out = *self;
 
-        out.tweak_add_assign(tweak_key.as_ref()).map_err(BackendError::new)?;
+        out.tweak_add_assign(tweak_key.as_ref()).map_err(CurveError::new)?;
 
         Ok(out)
     }

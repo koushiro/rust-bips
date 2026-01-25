@@ -5,12 +5,12 @@ use core::str::FromStr;
 use hmac::Mac;
 use zeroize::Zeroizing;
 
-use super::{ExtendedKeyMetadata, hmac_sha512_split, key_fingerprint, public::ExtendedPublicKey};
+use super::*;
 use crate::{
     curve::{Bip32Curve, Curve, CurvePrivateKey, CurvePublicKey, TweakableKey},
     error::{Error, ErrorKind, Result},
     path::{ChildNumber, DerivationPath},
-    xkey::{Version, payload::ExtendedKeyPayload},
+    xkey::payload::*,
 };
 
 /// A BIP32 extended private key.
@@ -25,10 +25,6 @@ impl<C: Curve> Clone for ExtendedPrivateKey<C> {
     fn clone(&self) -> Self {
         Self { meta: self.meta.clone(), private_key: self.private_key.clone() }
     }
-}
-
-fn derive_master_key_parts(seed: &[u8], domain: &[u8]) -> ([u8; 32], [u8; 32]) {
-    hmac_sha512_split(domain, |mac| mac.update(seed))
 }
 
 impl<C: Curve> ExtendedPrivateKey<C> {
@@ -50,7 +46,7 @@ impl<C: Curve> ExtendedPrivateKey<C> {
         Ok(Self {
             meta: ExtendedKeyMetadata {
                 depth: 0,
-                parent_fingerprint: Some([0u8; 4]),
+                parent_fingerprint: [0u8; 4],
                 child_number: 0,
                 chain_code,
             },
@@ -61,6 +57,30 @@ impl<C: Curve> ExtendedPrivateKey<C> {
     /// Returns the corresponding extended public key.
     pub fn public_key(&self) -> ExtendedPublicKey<C> {
         ExtendedPublicKey { meta: self.meta.clone(), public_key: self.private_key.to_public() }
+    }
+}
+
+impl<C: Curve> ExtendedPrivateKey<C> {
+    /// Returns the fingerprint of the parent's key.
+    pub fn parent_fingerprint(&self) -> [u8; 4] {
+        self.meta.parent_fingerprint
+    }
+
+    /// Returns the chain code for this key.
+    pub fn chain_code(&self) -> [u8; 32] {
+        self.meta.chain_code
+    }
+
+    /// Returns the private key bytes.
+    ///
+    /// # Warning
+    ///
+    /// Exposes raw private key material. Handle with care.
+    pub fn to_bytes(&self) -> Zeroizing<<C::PrivateKey as CurvePrivateKey>::Bytes>
+    where
+        <C::PrivateKey as CurvePrivateKey>::Bytes: zeroize::Zeroize,
+    {
+        Zeroizing::new(CurvePrivateKey::to_bytes(&self.private_key))
     }
 }
 
@@ -97,7 +117,7 @@ where
         Ok(Self {
             meta: ExtendedKeyMetadata {
                 depth: self.meta.depth.saturating_add(1),
-                parent_fingerprint: Some(key_fingerprint(parent_public_bytes.as_ref())),
+                parent_fingerprint: key_fingerprint(parent_public_bytes.as_ref()),
                 child_number: child.into(),
                 chain_code: right,
             },
@@ -115,6 +135,13 @@ where
     }
 }
 
+impl<C: Curve> Drop for ExtendedPrivateKey<C> {
+    fn drop(&mut self) {
+        CurvePrivateKey::zeroize(&mut self.private_key);
+    }
+}
+
+// BIP32 encoding
 impl<C> ExtendedPrivateKey<C>
 where
     C: Bip32Curve,
@@ -125,11 +152,6 @@ where
         if !version.is_private() {
             return Err(Error::new(ErrorKind::InvalidVersion, "expected private version bytes")
                 .with_context("version", version));
-        }
-
-        if self.meta.parent_fingerprint.is_none() {
-            return Err(Error::new(ErrorKind::InvalidPayload, "missing parent fingerprint")
-                .with_context("depth", self.meta.depth));
         }
 
         Ok(self.encode_with_unchecked(version))
@@ -147,6 +169,20 @@ where
                 key_data
             },
         }
+    }
+}
+
+// BIP32 decoding
+impl<C> FromStr for ExtendedPrivateKey<C>
+where
+    C: Bip32Curve,
+    C::PrivateKey: CurvePrivateKey<Bytes = [u8; 32]>,
+{
+    type Err = Error;
+
+    fn from_str(encoded: &str) -> Result<Self> {
+        let payload = encoded.parse::<ExtendedKeyPayload>()?;
+        Self::try_from(payload)
     }
 }
 
@@ -173,24 +209,5 @@ where
         })?;
 
         Ok(Self { meta: payload.meta.clone(), private_key })
-    }
-}
-
-impl<C> FromStr for ExtendedPrivateKey<C>
-where
-    C: Bip32Curve,
-    C::PrivateKey: CurvePrivateKey<Bytes = [u8; 32]>,
-{
-    type Err = Error;
-
-    fn from_str(encoded: &str) -> Result<Self> {
-        let payload = encoded.parse::<ExtendedKeyPayload>()?;
-        Self::try_from(payload)
-    }
-}
-
-impl<C: Curve> Drop for ExtendedPrivateKey<C> {
-    fn drop(&mut self) {
-        CurvePrivateKey::zeroize(&mut self.private_key);
     }
 }

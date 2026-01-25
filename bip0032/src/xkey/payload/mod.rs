@@ -48,11 +48,7 @@ impl ExtendedKeyPayload {
         let mut out = [0u8; Self::KEY_PAYLOAD_LENGTH];
         out[..4].copy_from_slice(&self.version.to_bytes());
         out[4] = self.meta.depth;
-        let parent_fingerprint = self
-            .meta
-            .parent_fingerprint
-            .expect("BIP32 serialization requires parent fingerprint");
-        out[5..9].copy_from_slice(&parent_fingerprint);
+        out[5..9].copy_from_slice(&self.meta.parent_fingerprint);
         out[9..13].copy_from_slice(&self.meta.child_number.to_be_bytes());
         out[13..45].copy_from_slice(&self.meta.chain_code);
         out[45..78].copy_from_slice(&self.key_data);
@@ -197,7 +193,7 @@ pub(crate) fn parse_payload(data: &[u8]) -> Result<ExtendedKeyPayload> {
         version,
         meta: ExtendedKeyMetadata {
             depth,
-            parent_fingerprint: Some(raw_parent_fingerprint),
+            parent_fingerprint: raw_parent_fingerprint,
             child_number,
             chain_code,
         },
