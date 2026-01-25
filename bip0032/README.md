@@ -25,7 +25,7 @@ Another Rust implementation of [BIP-0032](https://github.com/bitcoin/bips/blob/m
 Seed material is typically derived from a [BIP-0039](https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki) mnemonic
 (for example, via [bip0039](https://crates.io/crates/bip0039)).
 
-```rust
+```rust,ignore
 use bip0039::{Count, English, Mnemonic};
 
 let mnemonic = <Mnemonic<English>>::generate(Count::Words12);
