@@ -11,7 +11,7 @@ impl CurvePublicKey for VerifyingKey {
 
     fn from_bytes(bytes: &Self::Bytes) -> Result<Self, Self::Error> {
         if bytes[0] != 0 {
-            return Err(CurveError::from("invalid ed25519 public key prefix"));
+            return Err(CurveError::from("SLIP-0010 ed25519 public key needs a 0x00 prefix"));
         }
 
         let mut raw = [0u8; 32];
