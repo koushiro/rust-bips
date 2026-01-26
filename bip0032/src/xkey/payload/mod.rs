@@ -153,7 +153,7 @@ pub(crate) fn parse_payload(data: &[u8]) -> Result<ExtendedKeyPayload> {
     }
 
     let version = if let Some(known) = KnownVersion::from_raw(raw_version) {
-        let version = Version::from(known);
+        let version = known.into_version();
         match version {
             Version::Public(_) => {
                 if !matches!(key_data[0], 0x02 | 0x03) {

@@ -53,16 +53,6 @@ impl Version {
     pub const fn is_private(self) -> bool {
         matches!(self, Version::Private(_))
     }
-
-    /// Returns the known version descriptor for this version, if any.
-    pub fn known(self) -> Option<KnownVersion> {
-        for (known, version) in KNOWN_VERSIONS {
-            if *version == self {
-                return Some(*known);
-            }
-        }
-        None
-    }
 }
 
 impl fmt::Display for Version {
@@ -135,9 +125,42 @@ impl Version {
     /// Bitcoin testnet multi-signature **P2WSH** private key version.
     pub const VPRV_WSH: Version = Version::Private(0x0257_5048);
     // ========================================================================
+
+    /// Returns the known version descriptor for this version, if any.
+    pub const fn into_known_version(self) -> Option<KnownVersion> {
+        Some(match self {
+            Self::XPUB => KnownVersion::Xpub,
+            Self::XPRV => KnownVersion::Xprv,
+            Self::TPUB => KnownVersion::Tpub,
+            Self::TPRV => KnownVersion::Tprv,
+
+            Self::YPUB => KnownVersion::Ypub,
+            Self::YPRV => KnownVersion::Yprv,
+            Self::YPUB_SHWSH => KnownVersion::YpubShWsh,
+            Self::YPRV_SHWSH => KnownVersion::YprvShWsh,
+
+            Self::UPUB => KnownVersion::Upub,
+            Self::UPRV => KnownVersion::Uprv,
+            Self::UPRV_SHWSH => KnownVersion::UprvShWsh,
+            Self::UPUB_SHWSH => KnownVersion::UpubShWsh,
+
+            Self::ZPUB => KnownVersion::Zpub,
+            Self::ZPRV => KnownVersion::Zprv,
+            Self::ZPUB_WSH => KnownVersion::ZpubWsh,
+            Self::ZPRV_WSH => KnownVersion::ZprvWsh,
+
+            Self::VPUB => KnownVersion::Vpub,
+            Self::VPRV => KnownVersion::Vprv,
+            Self::VPUB_WSH => KnownVersion::VpubWsh,
+            Self::VPRV_WSH => KnownVersion::VprvWsh,
+
+            _ => return None,
+        })
+    }
 }
 
 /// Standard extended key versions (BIP32 and common extensions).
+#[non_exhaustive]
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum KnownVersion {
     /// Bitcoin mainnet **P2PKH** or **P2SH** public key version.
@@ -193,72 +216,97 @@ pub enum KnownVersion {
 
 impl KnownVersion {
     /// Returns the version bytes for this known version.
-    pub fn version(self) -> Version {
-        for (known, version) in KNOWN_VERSIONS {
-            if *known == self {
-                return *version;
-            }
+    pub const fn into_version(self) -> Version {
+        match self {
+            Self::Xpub => Version::XPUB,
+            Self::Xprv => Version::XPRV,
+            Self::Tpub => Version::TPUB,
+            Self::Tprv => Version::TPRV,
+
+            Self::Ypub => Version::YPUB,
+            Self::Yprv => Version::YPRV,
+            Self::YpubShWsh => Version::YPUB_SHWSH,
+            Self::YprvShWsh => Version::YPRV_SHWSH,
+
+            Self::Upub => Version::UPUB,
+            Self::Uprv => Version::UPRV,
+            Self::UpubShWsh => Version::UPUB_SHWSH,
+            Self::UprvShWsh => Version::UPRV_SHWSH,
+
+            Self::Zpub => Version::ZPUB,
+            Self::Zprv => Version::ZPRV,
+            Self::ZpubWsh => Version::ZPUB_WSH,
+            Self::ZprvWsh => Version::ZPRV_WSH,
+
+            Self::Vpub => Version::VPUB,
+            Self::Vprv => Version::VPRV,
+            Self::VpubWsh => Version::VPUB_WSH,
+            Self::VprvWsh => Version::VPRV_WSH,
         }
-        unreachable!("known version not found in table");
     }
 
     /// Returns the known version descriptor for raw version bytes, if any.
     pub fn from_raw(raw: u32) -> Option<Self> {
-        for (known, version) in KNOWN_VERSIONS {
-            if version.as_u32() == raw {
-                return Some(*known);
-            }
+        Version::Public(raw)
+            .into_known_version()
+            .or_else(|| Version::Private(raw).into_known_version())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{KnownVersion, Version};
+
+    const CASES: &[(KnownVersion, Version)] = &[
+        // ========================================================================
+        // https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki
+        // https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki
+        // https://github.com/bitcoin/bips/blob/master/bip-0086.mediawiki
+        // ========================================================================
+        (KnownVersion::Xpub, Version::XPUB),
+        (KnownVersion::Xprv, Version::XPRV),
+        (KnownVersion::Tpub, Version::TPUB),
+        (KnownVersion::Tprv, Version::TPRV),
+        // ========================================================================
+
+        // ========================================================================
+        // https://github.com/bitcoin/bips/blob/master/bip-0049.mediawiki
+        // ========================================================================
+        (KnownVersion::Ypub, Version::YPUB),
+        (KnownVersion::Yprv, Version::YPRV),
+        (KnownVersion::YpubShWsh, Version::YPUB_SHWSH),
+        (KnownVersion::YprvShWsh, Version::YPRV_SHWSH),
+        (KnownVersion::Upub, Version::UPUB),
+        (KnownVersion::Uprv, Version::UPRV),
+        (KnownVersion::UpubShWsh, Version::UPUB_SHWSH),
+        (KnownVersion::UprvShWsh, Version::UPRV_SHWSH),
+        // ========================================================================
+
+        // ========================================================================
+        // https://github.com/bitcoin/bips/blob/master/bip-0084.mediawiki
+        // ========================================================================
+        (KnownVersion::Zpub, Version::ZPUB),
+        (KnownVersion::Zprv, Version::ZPRV),
+        (KnownVersion::ZpubWsh, Version::ZPUB_WSH),
+        (KnownVersion::ZprvWsh, Version::ZPRV_WSH),
+        (KnownVersion::Vpub, Version::VPUB),
+        (KnownVersion::Vprv, Version::VPRV),
+        (KnownVersion::VpubWsh, Version::VPUB_WSH),
+        (KnownVersion::VprvWsh, Version::VPRV_WSH),
+        // ========================================================================
+    ];
+
+    #[test]
+    fn known_version_roundtrip() {
+        for (known, version) in CASES {
+            assert_eq!(known.into_version(), *version);
+            assert_eq!(version.into_known_version(), Some(*known));
+            assert_eq!(KnownVersion::from_raw(version.as_u32()), Some(*known));
         }
-        None
     }
 
-    /// Returns the known version descriptor for this version, if any.
-    pub fn from_version(version: Version) -> Option<Self> {
-        version.known()
-    }
-}
-
-impl From<KnownVersion> for Version {
-    fn from(value: KnownVersion) -> Self {
-        value.version()
+    #[test]
+    fn from_raw_unknown_returns_none() {
+        assert_eq!(KnownVersion::from_raw(0xDEAD_BEEF), None);
     }
 }
-
-const KNOWN_VERSIONS: &[(KnownVersion, Version)] = &[
-    // ========================================================================
-    // https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki
-    // https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki
-    // https://github.com/bitcoin/bips/blob/master/bip-0086.mediawiki
-    // ========================================================================
-    (KnownVersion::Xpub, Version::XPUB),
-    (KnownVersion::Xprv, Version::XPRV),
-    (KnownVersion::Tpub, Version::TPUB),
-    (KnownVersion::Tprv, Version::TPRV),
-    // ========================================================================
-
-    // ========================================================================
-    // https://github.com/bitcoin/bips/blob/master/bip-0049.mediawiki
-    // ========================================================================
-    (KnownVersion::Ypub, Version::YPUB),
-    (KnownVersion::Yprv, Version::YPRV),
-    (KnownVersion::YpubShWsh, Version::YPUB_SHWSH),
-    (KnownVersion::YprvShWsh, Version::YPRV_SHWSH),
-    (KnownVersion::Upub, Version::UPUB),
-    (KnownVersion::Uprv, Version::UPRV),
-    (KnownVersion::UpubShWsh, Version::UPUB_SHWSH),
-    (KnownVersion::UprvShWsh, Version::UPRV_SHWSH),
-    // ========================================================================
-
-    // ========================================================================
-    // https://github.com/bitcoin/bips/blob/master/bip-0084.mediawiki
-    // ========================================================================
-    (KnownVersion::Zpub, Version::ZPUB),
-    (KnownVersion::Zprv, Version::ZPRV),
-    (KnownVersion::ZpubWsh, Version::ZPUB_WSH),
-    (KnownVersion::ZprvWsh, Version::ZPRV_WSH),
-    (KnownVersion::Vpub, Version::VPUB),
-    (KnownVersion::Vprv, Version::VPRV),
-    (KnownVersion::VpubWsh, Version::VPUB_WSH),
-    (KnownVersion::VprvWsh, Version::VPRV_WSH),
-    // ========================================================================
-];
