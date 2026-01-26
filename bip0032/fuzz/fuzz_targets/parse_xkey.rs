@@ -73,7 +73,7 @@ fn pick_version(selector: u8, want_private: bool) -> Version {
     ];
 
     let idx = (selector as usize) % PUB.len();
-    if want_private { PRV[idx].version() } else { PUB[idx].version() }
+    if want_private { PRV[idx].into_version() } else { PUB[idx].into_version() }
 }
 
 fn mutate_payload_bytes(payload: &mut [u8], bytes: &[u8], ops: usize) {

@@ -46,19 +46,19 @@ fn build_path(bytes: &[u8], max_children: usize) -> (DerivationPath, bool) {
 type Secp256k1 = Secp256k1Curve<K256Backend>;
 
 fn roundtrip_xprv(key: &ExtendedPrivateKey<Secp256k1>) -> String {
-    let encoded = key.encode_with(KnownVersion::Xprv.version()).unwrap().to_string();
+    let encoded = key.encode_with(KnownVersion::Xprv.into_version()).unwrap().to_string();
     let payload = encoded.parse::<ExtendedKeyPayload>().unwrap();
     let decoded = ExtendedPrivateKey::<Secp256k1>::try_from(payload).unwrap();
-    let encoded2 = decoded.encode_with(KnownVersion::Xprv.version()).unwrap().to_string();
+    let encoded2 = decoded.encode_with(KnownVersion::Xprv.into_version()).unwrap().to_string();
     assert_eq!(encoded2, encoded);
     encoded
 }
 
 fn roundtrip_xpub(key: &ExtendedPublicKey<Secp256k1>) -> String {
-    let encoded = key.encode_with(KnownVersion::Xpub.version()).unwrap().to_string();
+    let encoded = key.encode_with(KnownVersion::Xpub.into_version()).unwrap().to_string();
     let payload = encoded.parse::<ExtendedKeyPayload>().unwrap();
     let decoded = ExtendedPublicKey::<Secp256k1>::try_from(payload).unwrap();
-    let encoded2 = decoded.encode_with(KnownVersion::Xpub.version()).unwrap().to_string();
+    let encoded2 = decoded.encode_with(KnownVersion::Xpub.into_version()).unwrap().to_string();
     assert_eq!(encoded2, encoded);
     encoded
 }

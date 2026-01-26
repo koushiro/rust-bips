@@ -21,11 +21,11 @@ fn run_case<B: Secp256k1Backend>(case: &Case) {
 
     let xpub = derived
         .public_key()
-        .encode_with(KnownVersion::Xpub.version())
+        .encode_with(KnownVersion::Xpub.into_version())
         .unwrap()
         .to_string();
     assert_eq!(xpub, case.xpub);
-    let xprv = derived.encode_with(KnownVersion::Xprv.version()).unwrap().to_string();
+    let xprv = derived.encode_with(KnownVersion::Xprv.into_version()).unwrap().to_string();
     assert_eq!(xprv, case.xprv);
 }
 
