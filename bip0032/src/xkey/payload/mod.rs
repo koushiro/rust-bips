@@ -72,6 +72,12 @@ impl core::str::FromStr for ExtendedKeyPayload {
     type Err = Error;
 
     fn from_str(encoded: &str) -> Result<Self> {
+        if encoded.len() > Self::MAX_KEY_PAYLOAD_STRING_LENGTH {
+            return Err(Error::new(ErrorKind::InvalidPayload, "invalid base58check length")
+                .with_context("encoded_len", encoded.len())
+                .with_context("max_len", Self::MAX_KEY_PAYLOAD_STRING_LENGTH));
+        }
+
         let mut data = Zeroizing::new([0u8; Self::KEY_PAYLOAD_WITH_CHECKSUM_LENGTH]);
         let len = bs58::decode(encoded).with_check(None).onto(&mut data[..]).map_err(|err| {
             Error::new(ErrorKind::InvalidPayload, "invalid base58check encoding")
