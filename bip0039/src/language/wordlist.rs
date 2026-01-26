@@ -15,7 +15,7 @@
 /// internal representation choices (e.g. `phf`, integer widths, etc).
 pub(crate) struct Wordlist {
     /// Index => word (BIP-0039 order).
-    pub(crate) words: &'static [&'static str],
+    pub(crate) words: &'static [&'static str; 2048],
     /// Word => index (BIP-0039 order).
     ///
     /// Stored as a reference so generated code can safely refer to a `static INDEX`
