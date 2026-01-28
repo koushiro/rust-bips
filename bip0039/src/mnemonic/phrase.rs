@@ -37,7 +37,7 @@ pub struct DecodedPhrase {
     pub normalized_phrase: Option<String>,
 }
 
-/// Decode a phrase into entropy and (optionally) a normalized phrase.
+/// Decode a phrase into entropy and (optionally) a normalized phrase using `Language` generic type.
 ///
 /// Note:
 /// - This function assumes the input has already been normalized to UTF-8 NFKD by the caller.
@@ -45,8 +45,7 @@ pub fn decode_phrase<L: Language>(phrase: &str, mode: DecodeMode) -> Result<Deco
     decode_phrase_with(AnyLanguage::of::<L>(), phrase, mode)
 }
 
-/// Decode a phrase into entropy and (optionally) a normalized phrase using a runtime-selected
-/// language.
+/// Decode a phrase into entropy and (optionally) a normalized phrase using `AnyLanguage` type.
 ///
 /// Note:
 /// - This function assumes the input has already been normalized to UTF-8 NFKD by the caller.

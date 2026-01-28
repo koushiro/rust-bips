@@ -24,7 +24,7 @@ use crate::{
     language::{AnyLanguage, Language},
 };
 
-/// Encode entropy into a mnemonic phrase.
+/// Encode entropy into a mnemonic phrase using `Language` generic type.
 ///
 /// Note:
 /// - This function assumes entropy bytes are already in the intended form.
@@ -33,7 +33,7 @@ pub fn encode_entropy<L: Language>(entropy: &[u8]) -> Result<String, Error> {
     encode_entropy_with(AnyLanguage::of::<L>(), entropy)
 }
 
-/// Encode entropy into a mnemonic phrase using a runtime-selected language.
+/// Encode entropy into a mnemonic phrase using `AnyLanguage` type.
 ///
 /// Note:
 /// - This function assumes entropy bytes are already in the intended form.
