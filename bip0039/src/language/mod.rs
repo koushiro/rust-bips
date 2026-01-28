@@ -60,225 +60,141 @@ impl<T: WordlistProvider> Language for T {
     }
 }
 
-/// The `English` language.
-///
-/// The `English` language is always available; other languages are enabled via
-/// compilation features.
-#[derive(Copy, Clone, Debug, Ord, PartialOrd, Eq, PartialEq, Hash)]
-pub struct English;
+macro_rules! define_builtin_language {
+    (
+        $(doc = $doc:literal,)+
+        name = $name:ident,
+        wordlist = $wordlist:ident $(,)?
+    ) => {
+        $(#[doc = $doc])*
+        #[derive(Copy, Clone, Debug, Ord, PartialOrd, Eq, PartialEq, Hash)]
+        pub struct $name;
 
-impl WordlistProvider for English {
-    #[inline]
-    fn wordlist() -> &'static Wordlist {
-        &wordlists::english::WORDLIST
-    }
+        impl WordlistProvider for $name {
+            #[inline]
+            fn wordlist() -> &'static Wordlist {
+                &wordlists::$wordlist::WORDLIST
+            }
+        }
+
+        impl $name {
+            #[doc = concat!(
+                "Returns the full BIP-0039 `",
+                stringify!($name),
+                "` word list (2048 words) in BIP-0039 order."
+            )]
+            #[inline]
+            pub fn words() -> &'static [&'static str; 2048] {
+                &wordlists::$wordlist::WORDS
+            }
+        }
+    };
+    (
+        $(doc = $doc:literal,)+
+        name = $name:ident,
+        wordlist = $wordlist:ident,
+        feature = $feature:literal,
+        $(,)?
+    ) => {
+        $(#[doc = $doc])*
+        #[cfg(feature = $feature)]
+        #[derive(Copy, Clone, Debug, Ord, PartialOrd, Eq, PartialEq, Hash)]
+        pub struct $name;
+
+        #[cfg(feature = $feature)]
+        impl WordlistProvider for $name {
+            #[inline]
+            fn wordlist() -> &'static Wordlist {
+                &wordlists::$wordlist::WORDLIST
+            }
+        }
+
+        #[cfg(feature = $feature)]
+        impl $name {
+            #[doc = concat!(
+                "Returns the full BIP-0039 `",
+                stringify!($name),
+                "` word list (2048 words) in BIP-0039 order."
+            )]
+            #[inline]
+            pub fn words() -> &'static [&'static str; 2048] {
+                &wordlists::$wordlist::WORDS
+            }
+        }
+    };
 }
 
-impl English {
-    /// Returns the full BIP-0039 English word list (2048 words) in BIP-0039 order.
-    #[inline]
-    pub fn words() -> &'static [&'static str; 2048] {
-        &wordlists::english::WORDS
-    }
-}
+define_builtin_language!(
+    doc = r#"The `English` language.
 
-/// The `Simplified Chinese` language.
-#[cfg(feature = "chinese-simplified")]
-#[derive(Copy, Clone, Debug, Ord, PartialOrd, Eq, PartialEq, Hash)]
-pub struct ChineseSimplified;
+The `English` language is always available; other languages are enabled via
+compilation features."#,
+    name = English,
+    wordlist = english,
+);
 
-#[cfg(feature = "chinese-simplified")]
-impl WordlistProvider for ChineseSimplified {
-    #[inline]
-    fn wordlist() -> &'static Wordlist {
-        &wordlists::chinese_simplified::WORDLIST
-    }
-}
+define_builtin_language!(
+    doc = "The `Simplified Chinese` language.",
+    name = ChineseSimplified,
+    wordlist = chinese_simplified,
+    feature = "chinese-simplified",
+);
 
-#[cfg(feature = "chinese-simplified")]
-impl ChineseSimplified {
-    /// Returns the full BIP-0039 Simplified Chinese word list (2048 words) in BIP-0039 order.
-    #[inline]
-    pub fn words() -> &'static [&'static str; 2048] {
-        &wordlists::chinese_simplified::WORDS
-    }
-}
+define_builtin_language!(
+    doc = "The `Traditional Chinese` language.",
+    name = ChineseTraditional,
+    wordlist = chinese_traditional,
+    feature = "chinese-traditional",
+);
 
-/// The `Traditional Chinese` language.
-#[cfg(feature = "chinese-traditional")]
-#[derive(Copy, Clone, Debug, Ord, PartialOrd, Eq, PartialEq, Hash)]
-pub struct ChineseTraditional;
+define_builtin_language!(
+    doc = "The `Czech` language.",
+    name = Czech,
+    wordlist = czech,
+    feature = "czech",
+);
 
-#[cfg(feature = "chinese-traditional")]
-impl WordlistProvider for ChineseTraditional {
-    #[inline]
-    fn wordlist() -> &'static Wordlist {
-        &wordlists::chinese_traditional::WORDLIST
-    }
-}
+define_builtin_language!(
+    doc = "The `French` language.",
+    name = French,
+    wordlist = french,
+    feature = "french",
+);
 
-#[cfg(feature = "chinese-traditional")]
-impl ChineseTraditional {
-    /// Returns the full BIP-0039 Traditional Chinese word list (2048 words) in BIP-0039 order.
-    #[inline]
-    pub fn words() -> &'static [&'static str; 2048] {
-        &wordlists::chinese_traditional::WORDS
-    }
-}
+define_builtin_language!(
+    doc = "The `Italian` language.",
+    name = Italian,
+    wordlist = italian,
+    feature = "italian",
+);
 
-/// The `Czech` language.
-#[cfg(feature = "czech")]
-#[derive(Copy, Clone, Debug, Ord, PartialOrd, Eq, PartialEq, Hash)]
-pub struct Czech;
+define_builtin_language!(
+    doc = "The `Japanese` language.",
+    name = Japanese,
+    wordlist = japanese,
+    feature = "japanese",
+);
 
-#[cfg(feature = "czech")]
-impl WordlistProvider for Czech {
-    #[inline]
-    fn wordlist() -> &'static Wordlist {
-        &wordlists::czech::WORDLIST
-    }
-}
+define_builtin_language!(
+    doc = "The `Korean` language.",
+    name = Korean,
+    wordlist = korean,
+    feature = "korean",
+);
 
-#[cfg(feature = "czech")]
-impl Czech {
-    /// Returns the full BIP-0039 Czech word list (2048 words) in BIP-0039 order.
-    #[inline]
-    pub fn words() -> &'static [&'static str; 2048] {
-        &wordlists::czech::WORDS
-    }
-}
+define_builtin_language!(
+    doc = "The `Portuguese` language.",
+    name = Portuguese,
+    wordlist = portuguese,
+    feature = "portuguese",
+);
 
-/// The `French` language.
-#[cfg(feature = "french")]
-#[derive(Copy, Clone, Debug, Ord, PartialOrd, Eq, PartialEq, Hash)]
-pub struct French;
-
-#[cfg(feature = "french")]
-impl WordlistProvider for French {
-    #[inline]
-    fn wordlist() -> &'static Wordlist {
-        &wordlists::french::WORDLIST
-    }
-}
-
-#[cfg(feature = "french")]
-impl French {
-    /// Returns the full BIP-0039 French word list (2048 words) in BIP-0039 order.
-    #[inline]
-    pub fn words() -> &'static [&'static str; 2048] {
-        &wordlists::french::WORDS
-    }
-}
-
-/// The `Italian` language.
-#[cfg(feature = "italian")]
-#[derive(Copy, Clone, Debug, Ord, PartialOrd, Eq, PartialEq, Hash)]
-pub struct Italian;
-
-#[cfg(feature = "italian")]
-impl WordlistProvider for Italian {
-    #[inline]
-    fn wordlist() -> &'static Wordlist {
-        &wordlists::italian::WORDLIST
-    }
-}
-
-#[cfg(feature = "italian")]
-impl Italian {
-    /// Returns the full BIP-0039 Italian word list (2048 words) in BIP-0039 order.
-    #[inline]
-    pub fn words() -> &'static [&'static str; 2048] {
-        &wordlists::italian::WORDS
-    }
-}
-
-/// The `Japanese` language.
-#[cfg(feature = "japanese")]
-#[derive(Copy, Clone, Debug, Ord, PartialOrd, Eq, PartialEq, Hash)]
-pub struct Japanese;
-
-#[cfg(feature = "japanese")]
-impl WordlistProvider for Japanese {
-    #[inline]
-    fn wordlist() -> &'static Wordlist {
-        &wordlists::japanese::WORDLIST
-    }
-}
-
-#[cfg(feature = "japanese")]
-impl Japanese {
-    /// Returns the full BIP-0039 Japanese word list (2048 words) in BIP-0039 order.
-    #[inline]
-    pub fn words() -> &'static [&'static str; 2048] {
-        &wordlists::japanese::WORDS
-    }
-}
-
-/// The `Korean` language.
-#[cfg(feature = "korean")]
-#[derive(Copy, Clone, Debug, Ord, PartialOrd, Eq, PartialEq, Hash)]
-pub struct Korean;
-
-#[cfg(feature = "korean")]
-impl WordlistProvider for Korean {
-    #[inline]
-    fn wordlist() -> &'static Wordlist {
-        &wordlists::korean::WORDLIST
-    }
-}
-
-#[cfg(feature = "korean")]
-impl Korean {
-    /// Returns the full BIP-0039 Korean word list (2048 words) in BIP-0039 order.
-    #[inline]
-    pub fn words() -> &'static [&'static str; 2048] {
-        &wordlists::korean::WORDS
-    }
-}
-
-/// The `Portuguese` language.
-#[cfg(feature = "portuguese")]
-#[derive(Copy, Clone, Debug, Ord, PartialOrd, Eq, PartialEq, Hash)]
-pub struct Portuguese;
-
-#[cfg(feature = "portuguese")]
-impl WordlistProvider for Portuguese {
-    #[inline]
-    fn wordlist() -> &'static Wordlist {
-        &wordlists::portuguese::WORDLIST
-    }
-}
-
-#[cfg(feature = "portuguese")]
-impl Portuguese {
-    /// Returns the full BIP-0039 Portuguese word list (2048 words) in BIP-0039 order.
-    #[inline]
-    pub fn words() -> &'static [&'static str; 2048] {
-        &wordlists::portuguese::WORDS
-    }
-}
-
-/// The `Spanish` language.
-#[cfg(feature = "spanish")]
-#[derive(Copy, Clone, Debug, Ord, PartialOrd, Eq, PartialEq, Hash)]
-pub struct Spanish;
-
-#[cfg(feature = "spanish")]
-impl WordlistProvider for Spanish {
-    #[inline]
-    fn wordlist() -> &'static Wordlist {
-        &wordlists::spanish::WORDLIST
-    }
-}
-
-#[cfg(feature = "spanish")]
-impl Spanish {
-    /// Returns the full BIP-0039 Spanish word list (2048 words) in BIP-0039 order.
-    #[inline]
-    pub fn words() -> &'static [&'static str; 2048] {
-        &wordlists::spanish::WORDS
-    }
-}
+define_builtin_language!(
+    doc = "The `Spanish` language.",
+    name = Spanish,
+    wordlist = spanish,
+    feature = "spanish",
+);
 
 #[cfg(test)]
 mod tests {
