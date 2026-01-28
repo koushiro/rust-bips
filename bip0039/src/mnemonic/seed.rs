@@ -5,10 +5,11 @@
 
 #[cfg(not(feature = "std"))]
 use alloc::{borrow::Cow, format};
-use hmac::Hmac;
-use sha2::Sha512;
 #[cfg(feature = "std")]
 use std::borrow::Cow;
+
+use hmac::Hmac;
+use sha2::Sha512;
 
 use super::normalize_utf8;
 
