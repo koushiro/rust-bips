@@ -3,11 +3,13 @@
 //! This module is the public surface for language support.
 //!
 //! - [`Language`] is the only public capability trait exposed for consumers.
+//! - [`AnyLanguage`] provides a lightweight runtime handle to a `Language` implementation.
 //! - Built-in languages are enabled via Cargo features and backed by crate-private generated
 //!   wordlists.
 
-mod wordlist;
+use core::{fmt, ptr};
 
+mod wordlist;
 use self::wordlist::*;
 
 /// Language to be used for the mnemonic phrase.
@@ -57,6 +59,135 @@ impl<T: WordlistProvider> Language for T {
     #[inline]
     fn index_of(word: &str) -> Option<usize> {
         <T as WordlistProvider>::wordlist().index.get(word).copied().map(|i| i as usize)
+    }
+}
+
+/// A runtime handle to a [`Language`] implementation.
+///
+/// `Mnemonic<L>` selects the language at compile-time via a type parameter, which is great for
+/// monomorphization and `no_std` environments, but can be awkward when you want to select a
+/// language at runtime (e.g. from user configuration).
+///
+/// `AnyLanguage` is a lightweight, `Copy` handle backed by function pointers that allows selecting
+/// a language at runtime without changing the existing `Language` trait or the generic `Mnemonic`
+/// API.
+#[derive(Copy, Clone)]
+pub struct AnyLanguage {
+    word_of: fn(usize) -> &'static str,
+    index_of: fn(&str) -> Option<usize>,
+}
+
+impl fmt::Debug for AnyLanguage {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("AnyLanguage").finish_non_exhaustive()
+    }
+}
+
+impl PartialEq for AnyLanguage {
+    fn eq(&self, other: &Self) -> bool {
+        ptr::fn_addr_eq(self.word_of, other.word_of)
+            && ptr::fn_addr_eq(self.index_of, other.index_of)
+    }
+}
+
+impl Eq for AnyLanguage {}
+
+impl AnyLanguage {
+    /// Creates an [`AnyLanguage`] from the given wordlist lookup functions.
+    pub(crate) const fn new(
+        word_of: fn(usize) -> &'static str,
+        index_of: fn(&str) -> Option<usize>,
+    ) -> Self {
+        Self { word_of, index_of }
+    }
+
+    /// Creates an [`AnyLanguage`] from a [`Language`] implementation.
+    #[inline]
+    pub const fn of<L: Language>() -> Self {
+        Self::new(L::word_of, L::index_of)
+    }
+
+    /// Returns the word at `index` (BIP-0039 order).
+    #[inline]
+    pub(crate) fn word_of(self, index: usize) -> &'static str {
+        (self.word_of)(index)
+    }
+
+    /// Returns the index of `word` in the word list (BIP-0039 order).
+    #[inline]
+    pub(crate) fn index_of(self, word: &str) -> Option<usize> {
+        (self.index_of)(word)
+    }
+}
+
+/// Built-in BIP-0039 languages enabled in this build.
+///
+/// Variants are gated by Cargo features (English is always available).
+#[derive(Copy, Clone, Debug, Ord, PartialOrd, Eq, PartialEq, Hash)]
+#[non_exhaustive]
+pub enum BuiltInLanguage {
+    /// English (always available).
+    English,
+    /// Simplified Chinese.
+    #[cfg(feature = "chinese-simplified")]
+    ChineseSimplified,
+    /// Traditional Chinese.
+    #[cfg(feature = "chinese-traditional")]
+    ChineseTraditional,
+    /// Czech.
+    #[cfg(feature = "czech")]
+    Czech,
+    /// French.
+    #[cfg(feature = "french")]
+    French,
+    /// Italian.
+    #[cfg(feature = "italian")]
+    Italian,
+    /// Japanese.
+    #[cfg(feature = "japanese")]
+    Japanese,
+    /// Korean.
+    #[cfg(feature = "korean")]
+    Korean,
+    /// Portuguese.
+    #[cfg(feature = "portuguese")]
+    Portuguese,
+    /// Spanish.
+    #[cfg(feature = "spanish")]
+    Spanish,
+}
+
+impl BuiltInLanguage {
+    /// Returns an [`AnyLanguage`] for this built-in language.
+    pub const fn as_any_language(self) -> AnyLanguage {
+        match self {
+            Self::English => AnyLanguage::of::<English>(),
+            #[cfg(feature = "chinese-simplified")]
+            Self::ChineseSimplified => AnyLanguage::of::<ChineseSimplified>(),
+            #[cfg(feature = "chinese-traditional")]
+            Self::ChineseTraditional => AnyLanguage::of::<ChineseTraditional>(),
+            #[cfg(feature = "czech")]
+            Self::Czech => AnyLanguage::of::<Czech>(),
+            #[cfg(feature = "french")]
+            Self::French => AnyLanguage::of::<French>(),
+            #[cfg(feature = "italian")]
+            Self::Italian => AnyLanguage::of::<Italian>(),
+            #[cfg(feature = "japanese")]
+            Self::Japanese => AnyLanguage::of::<Japanese>(),
+            #[cfg(feature = "korean")]
+            Self::Korean => AnyLanguage::of::<Korean>(),
+            #[cfg(feature = "portuguese")]
+            Self::Portuguese => AnyLanguage::of::<Portuguese>(),
+            #[cfg(feature = "spanish")]
+            Self::Spanish => AnyLanguage::of::<Spanish>(),
+        }
+    }
+}
+
+impl From<BuiltInLanguage> for AnyLanguage {
+    #[inline]
+    fn from(value: BuiltInLanguage) -> Self {
+        value.as_any_language()
     }
 }
 
@@ -433,5 +564,46 @@ mod tests {
                 case.name
             );
         }
+    }
+
+    #[test]
+    fn test_builtin_language_match() {
+        macro_rules! assert_builtin {
+            ($enum:expr, $ty:ty) => {{
+                let from_enum = $enum.as_any_language();
+                let from_type = AnyLanguage::of::<$ty>();
+                assert_eq!(from_enum, from_type);
+                assert_eq!(AnyLanguage::from($enum), from_type);
+            }};
+        }
+
+        assert_builtin!(BuiltInLanguage::English, English);
+
+        #[cfg(feature = "chinese-simplified")]
+        assert_builtin!(BuiltInLanguage::ChineseSimplified, ChineseSimplified);
+
+        #[cfg(feature = "chinese-traditional")]
+        assert_builtin!(BuiltInLanguage::ChineseTraditional, ChineseTraditional);
+
+        #[cfg(feature = "czech")]
+        assert_builtin!(BuiltInLanguage::Czech, Czech);
+
+        #[cfg(feature = "french")]
+        assert_builtin!(BuiltInLanguage::French, French);
+
+        #[cfg(feature = "italian")]
+        assert_builtin!(BuiltInLanguage::Italian, Italian);
+
+        #[cfg(feature = "japanese")]
+        assert_builtin!(BuiltInLanguage::Japanese, Japanese);
+
+        #[cfg(feature = "korean")]
+        assert_builtin!(BuiltInLanguage::Korean, Korean);
+
+        #[cfg(feature = "portuguese")]
+        assert_builtin!(BuiltInLanguage::Portuguese, Portuguese);
+
+        #[cfg(feature = "spanish")]
+        assert_builtin!(BuiltInLanguage::Spanish, Spanish);
     }
 }

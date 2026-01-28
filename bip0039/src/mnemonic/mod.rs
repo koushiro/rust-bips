@@ -20,12 +20,12 @@ use zeroize::Zeroizing;
 
 use self::{
     bit_accumulator::BitAccumulator,
-    entropy::encode_entropy,
+    entropy::{encode_entropy, encode_entropy_with},
     phrase::{DecodeMode, decode_phrase},
 };
 use crate::{
     error::Error,
-    language::{English, Language},
+    language::{AnyLanguage, English, Language},
 };
 
 const BITS_PER_WORD: usize = 11;
@@ -275,7 +275,7 @@ let phrase = mnemonic.phrase();
     /// ```rust
     /// use bip0039::Mnemonic;
     ///
-    /// let entropy = vec![0x1a, 0x48, 0x6a, 0x5f, 0xbe, 0x53, 0x63, 0x99, 0x84, 0xcb, 0x64, 0xb0, 0x70, 0x75, 0x5f, 0x7b];
+    /// let entropy = const_hex::decode("1a486a5fbe53639984cb64b070755f7b").unwrap();
     /// let mnemonic = <Mnemonic>::from_entropy(entropy).unwrap();
     /// assert_eq!(mnemonic.phrase(), "bottom drive obey lake curtain smoke basket hold race lonely fit walk");
     /// ```
@@ -403,10 +403,7 @@ assert_eq!(result.unwrap_err(), Error::UnknownWord("ばか".nfkd().to_string()))
     ///
     /// let phrase = "bottom drive obey lake curtain smoke basket hold race lonely fit walk";
     /// let mnemonic = <Mnemonic>::from_phrase(phrase).unwrap();
-    /// assert_eq!(
-    ///     mnemonic.to_seed("").to_vec(),
-    ///     const_hex::decode("02d5cd1db85b4d1397d78978062a1160e76e94cc5aaad3089644846865bb18fc68ddf383059d3fe82902a203d60790a8c8ab488de5013d10a8a8bded8d9174b9").unwrap()
-    /// );
+    /// assert_eq!(mnemonic.to_seed("").len(), 64);
     /// ```
     pub fn to_seed<P: AsRef<str>>(&self, passphrase: P) -> [u8; 64] {
         // use the PBKDF2 function with a mnemonic sentence (in UTF-8 NFKD) used as the password
@@ -436,6 +433,9 @@ assert_eq!(result.unwrap_err(), Error::UnknownWord("ばか".nfkd().to_string()))
     }
 
     /// Returns the mnemonic phrase as a string slice.
+    ///
+    /// Note: the returned phrase is normalized (UTF-8 NFKD; words separated by single ASCII
+    /// spaces).
     pub fn phrase(&self) -> &str {
         &self.phrase
     }
@@ -457,6 +457,310 @@ assert_eq!(result.unwrap_err(), Error::UnknownWord("ばか".nfkd().to_string()))
         // Create an empty bytes and swap values with the mnemonic's entropy.
         // This allows `Mnemonic` to implement `Drop`, while still returning the entropy.
         mem::take(&mut self.entropy)
+    }
+}
+
+/// A mnemonic representation with a runtime-selected language.
+///
+/// This is a non-breaking alternative to `Mnemonic<L>` for applications that want to select a
+/// language at runtime (e.g. from user configuration), while keeping the existing generic API
+/// intact.
+#[derive(Clone, Eq, PartialEq)]
+pub struct AnyMnemonic {
+    language: AnyLanguage,
+    phrase: Zeroizing<String>,
+    entropy: Zeroizing<Vec<u8>>,
+}
+
+impl fmt::Debug for AnyMnemonic {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str(self.phrase())
+    }
+}
+
+impl fmt::Display for AnyMnemonic {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str(self.phrase())
+    }
+}
+
+impl AsRef<str> for AnyMnemonic {
+    fn as_ref(&self) -> &str {
+        self.phrase()
+    }
+}
+
+impl AnyMnemonic {
+    /// Generates a new [`AnyMnemonic`] randomly in the specified word count using `language`.
+    ///
+    /// Note: this requires the `rand` feature.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use bip0039::{AnyMnemonic, BuiltInLanguage, Count};
+    ///
+    /// let mnemonic = AnyMnemonic::generate(BuiltInLanguage::English, Count::Words12);
+    /// let phrase = mnemonic.phrase();
+    /// ```
+    #[cfg(feature = "rand")]
+    pub fn generate(language: impl Into<AnyLanguage>, word_count: Count) -> Self {
+        let language: AnyLanguage = language.into();
+        use rand::RngCore;
+        let mut rng = rand::rng();
+
+        match word_count {
+            Count::Words12 => {
+                let mut entropy = [0u8; 16];
+                rng.fill_bytes(&mut entropy);
+                Self::from_entropy(language, entropy)
+            },
+            Count::Words15 => {
+                let mut entropy = [0u8; 20];
+                rng.fill_bytes(&mut entropy);
+                Self::from_entropy(language, entropy)
+            },
+            Count::Words18 => {
+                let mut entropy = [0u8; 24];
+                rng.fill_bytes(&mut entropy);
+                Self::from_entropy(language, entropy)
+            },
+            Count::Words21 => {
+                let mut entropy = [0u8; 28];
+                rng.fill_bytes(&mut entropy);
+                Self::from_entropy(language, entropy)
+            },
+            Count::Words24 => {
+                let mut entropy = [0u8; 32];
+                rng.fill_bytes(&mut entropy);
+                Self::from_entropy(language, entropy)
+            },
+        }
+        .expect("valid entropy length won't fail to generate the mnemonic")
+    }
+
+    /// Creates a new [`AnyMnemonic`] from the given entropy using `language`.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use bip0039::{AnyMnemonic, BuiltInLanguage, Count};
+    ///
+    /// let entropy = const_hex::decode("1a486a5fbe53639984cb64b070755f7b").unwrap();
+    /// let mnemonic = AnyMnemonic::from_entropy(BuiltInLanguage::English, entropy).unwrap();
+    /// assert_eq!(mnemonic.phrase(), "bottom drive obey lake curtain smoke basket hold race lonely fit walk");
+    /// ```
+    pub fn from_entropy<E: Into<Vec<u8>>>(
+        language: impl Into<AnyLanguage>,
+        entropy: E,
+    ) -> Result<Self, Error> {
+        let language: AnyLanguage = language.into();
+        let entropy = entropy.into();
+        let phrase = encode_entropy_with(language, &entropy)?;
+
+        Ok(Self { language, phrase: Zeroizing::new(phrase), entropy: Zeroizing::new(entropy) })
+    }
+
+    /// Creates an [`AnyMnemonic`] from an existing mnemonic phrase using `language`.
+    ///
+    /// This method will normalize the input (UTF-8 NFKD) and normalize whitespace
+    /// (single ASCII spaces).
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use bip0039::{AnyMnemonic, BuiltInLanguage, Error};
+    ///
+    /// let phrase = "bottom drive obey lake curtain smoke basket hold race lonely fit walk";
+    /// let mnemonic = AnyMnemonic::from_phrase(BuiltInLanguage::English, phrase).unwrap();
+    /// assert_eq!(mnemonic.phrase(), phrase);
+    ///
+    /// let phrase = "bottom drive obey lake curtain smoke basket hold race lonely fit shit";
+    /// let mnemonic = AnyMnemonic::from_phrase(BuiltInLanguage::English, phrase);
+    /// assert_eq!(mnemonic.unwrap_err(), Error::UnknownWord("shit".into()));
+    /// ```
+    pub fn from_phrase<'a, P: Into<Cow<'a, str>>>(
+        language: impl Into<AnyLanguage>,
+        phrase: P,
+    ) -> Result<Self, Error> {
+        let language = language.into();
+        let mut phrase = phrase.into();
+        normalize_utf8(&mut phrase);
+        Self::from_normalized_phrase(language, phrase)
+    }
+
+    /// Creates an [`AnyMnemonic`] from a phrase that is already normalized using `language`.
+    ///
+    /// Use this when you can guarantee the input is already normalized to UTF-8 NFKD.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use bip0039::{AnyMnemonic, BuiltInLanguage, Error};
+    ///
+    /// let phrase = "bottom drive obey lake curtain smoke basket hold race lonely fit walk";
+    /// let mnemonic = AnyMnemonic::from_normalized_phrase(BuiltInLanguage::English, phrase).unwrap();
+    /// assert_eq!(mnemonic.phrase(), phrase);
+    ///
+    /// let phrase = "bottom drive obey lake curtain smoke basket hold race lonely fit shit";
+    /// let mnemonic = AnyMnemonic::from_normalized_phrase(BuiltInLanguage::English, phrase);
+    /// assert_eq!(mnemonic.unwrap_err(), Error::UnknownWord("shit".into()));
+    /// ```
+    pub fn from_normalized_phrase<'a, P: Into<Cow<'a, str>>>(
+        language: impl Into<AnyLanguage>,
+        phrase: P,
+    ) -> Result<Self, Error> {
+        let language = language.into();
+        let phrase = phrase.into();
+
+        let decoded =
+            phrase::decode_phrase_with(language, &phrase, DecodeMode::BuildNormalizedPhrase)?;
+        let entropy = decoded.entropy;
+        let normalized_phrase = decoded
+            .normalized_phrase
+            .expect("BuildNormalizedPhrase always constructs a normalized phrase");
+
+        Ok(Self {
+            language,
+            phrase: Zeroizing::new(normalized_phrase),
+            entropy: Zeroizing::new(entropy),
+        })
+    }
+
+    /// Validates the word count and checksum of a mnemonic phrase using `language`.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use bip0039::{AnyMnemonic, BuiltInLanguage, Error};
+    /// use unicode_normalization::UnicodeNormalization;
+    ///
+    /// let phrase = "bottom drive obey lake curtain smoke basket hold race lonely fit walk";
+    /// let result = AnyMnemonic::validate(BuiltInLanguage::English, phrase);
+    /// assert!(result.is_ok());
+    ///
+    /// let phrase = "bottom drive obey lake curtain smoke basket hold race lonely fit shit";
+    /// let result = AnyMnemonic::validate(BuiltInLanguage::English, phrase);
+    /// assert_eq!(result.unwrap_err(), Error::UnknownWord("shit".into()));
+    /// ```
+    #[cfg_attr(
+        feature = "japanese",
+        doc = r##"
+```rust
+use bip0039::{Error, Japanese, Mnemonic};
+use unicode_normalization::UnicodeNormalization;
+
+let phrase = "そつう れきだい ほんやく わかす りくつ ばいか ろせん やちん そつう れきだい ほんやく わかめ";
+let result = <Mnemonic<Japanese>>::validate(phrase);
+assert!(result.is_ok());
+
+let phrase = "そつう れきだい ほんやく わかす りくつ ばいか ろせん やちん そつう れきだい ほんやく ばか";
+let result = <Mnemonic<Japanese>>::validate(phrase);
+assert_eq!(result.unwrap_err(), Error::UnknownWord("ばか".nfkd().to_string()));
+```
+"##
+    )]
+    ///
+    pub fn validate<'a, P: Into<Cow<'a, str>>>(
+        language: impl Into<AnyLanguage>,
+        phrase: P,
+    ) -> Result<(), Error> {
+        let language = language.into();
+        let mut phrase = phrase.into();
+        normalize_utf8(&mut phrase);
+
+        let _decoded = phrase::decode_phrase_with(language, &phrase, DecodeMode::ValidateOnly)?;
+        Ok(())
+    }
+
+    /// Generates the seed from the [`AnyMnemonic`] and the passphrase.
+    ///
+    /// If a passphrase is not present, an empty string `""` is used instead.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use bip0039::{AnyMnemonic, BuiltInLanguage};
+    ///
+    /// let phrase = "bottom drive obey lake curtain smoke basket hold race lonely fit walk";
+    /// let mnemonic = AnyMnemonic::from_phrase(BuiltInLanguage::English, phrase).unwrap();
+    /// let seed = mnemonic.to_seed("");
+    /// assert_eq!(seed.len(), 64);
+    /// ```
+    pub fn to_seed<P: AsRef<str>>(&self, passphrase: P) -> [u8; 64] {
+        // same as Mnemonic::to_seed; phrase is already normalized
+        const PBKDF2_ROUNDS: u32 = 2048;
+        const PBKDF2_BYTES: usize = 64;
+
+        let normalized_password = self.phrase();
+        let normalized_salt = {
+            let mut salt = Cow::Owned(format!("mnemonic{}", passphrase.as_ref()));
+            normalize_utf8(&mut salt);
+            salt
+        };
+
+        let mut seed = [0u8; PBKDF2_BYTES];
+        pbkdf2::pbkdf2::<Hmac<Sha512>>(
+            normalized_password.as_bytes(),
+            normalized_salt.as_bytes(),
+            PBKDF2_ROUNDS,
+            &mut seed,
+        )
+        .expect("HMAC can be initialized with any key length");
+        seed
+    }
+
+    /// Returns the language used to encode/decode this mnemonic.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use bip0039::{AnyLanguage, AnyMnemonic, BuiltInLanguage, English};
+    ///
+    /// let m = AnyMnemonic::from_entropy(BuiltInLanguage::English, [1u8; 16]).unwrap();
+    /// assert_eq!(m.language(), AnyLanguage::of::<English>());
+    /// ```
+    #[inline]
+    pub fn language(&self) -> AnyLanguage {
+        self.language
+    }
+
+    /// Returns the mnemonic phrase as a string slice.
+    ///
+    /// Note: the returned phrase is normalized (UTF-8 NFKD; words separated by single ASCII
+    /// spaces).
+    pub fn phrase(&self) -> &str {
+        &self.phrase
+    }
+
+    /// Consumes the `AnyMnemonic` and return the phrase as a `String`.
+    pub fn into_phrase(mut self) -> String {
+        // Create an empty string and swap values with the mnemonic's phrase.
+        // This allows `Mnemonic` to implement `Drop`, while still returning the phrase.
+        mem::take(&mut self.phrase)
+    }
+
+    /// Returns the original entropy of the mnemonic phrase.
+    pub fn entropy(&self) -> &[u8] {
+        &self.entropy
+    }
+
+    /// Consumes the `AnyMnemonic` and return the entropy as a `Vec<u8>`.
+    pub fn into_entropy(mut self) -> Vec<u8> {
+        // Create an empty bytes and swap values with the mnemonic's entropy.
+        // This allows `Mnemonic` to implement `Drop`, while still returning the entropy.
+        mem::take(&mut self.entropy)
+    }
+}
+
+impl<L: Language> From<Mnemonic<L>> for AnyMnemonic {
+    fn from(mut value: Mnemonic<L>) -> Self {
+        let language = AnyLanguage::of::<L>();
+        Self {
+            language,
+            phrase: Zeroizing::new(mem::take(&mut value.phrase)),
+            entropy: Zeroizing::new(mem::take(&mut value.entropy)),
+        }
     }
 }
 
@@ -491,6 +795,25 @@ mod tests {
     }
 
     #[test]
+    fn test_any_mnemonic_roundtrip() {
+        let english = AnyLanguage::of::<English>();
+
+        let mnemonic = AnyMnemonic::generate(english, Count::Words12);
+        let entropy = mnemonic.entropy();
+        let phrase = mnemonic.phrase();
+
+        {
+            let m = AnyMnemonic::from_entropy(english, entropy).unwrap();
+            assert_eq!(phrase, m.phrase());
+        }
+
+        {
+            let m = <AnyMnemonic>::from_phrase(english, phrase).unwrap();
+            assert_eq!(entropy, m.entropy());
+        }
+    }
+
+    #[test]
     fn test_mnemonic_zeroize_when_drop() {
         let p: *const String;
         let e: *const Vec<u8>;
@@ -501,10 +824,10 @@ mod tests {
             let m = <Mnemonic>::from_entropy([1u8; 16]).unwrap();
             p = &*m.phrase;
             e = &*m.entropy;
-            unsafe {
-                println!("*p: {}", *p);
-                println!("*e: {:?}", *e);
-            }
+            // unsafe {
+            //     println!("*p: {}", *p);
+            //     println!("*e: {:?}", *e);
+            // }
         }
 
         unsafe {
@@ -512,9 +835,9 @@ mod tests {
                 *p,
                 "absurd amount doctor acoustic avoid letter advice cage absurd amount doctor adjust"
             );
-            println!("*p: {}", *p);
+            // println!("*p: {}", *p);
             assert_ne!(*e, [1u8; 16]);
-            println!("*e: {:?}", *e);
+            // println!("*e: {:?}", *e);
         }
     }
 

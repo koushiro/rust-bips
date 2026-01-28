@@ -17,7 +17,10 @@ use alloc::{
 use sha2::{Digest, Sha256};
 
 use super::{BITS_PER_BYTE, BITS_PER_WORD, BitAccumulator, Count};
-use crate::{error::Error, language::Language};
+use crate::{
+    error::Error,
+    language::{AnyLanguage, Language},
+};
 
 /// Controls whether decoding also constructs a normalized phrase (single ASCII spaces).
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
@@ -39,6 +42,19 @@ pub struct DecodedPhrase {
 /// Note:
 /// - This function assumes the input has already been normalized to UTF-8 NFKD by the caller.
 pub fn decode_phrase<L: Language>(phrase: &str, mode: DecodeMode) -> Result<DecodedPhrase, Error> {
+    decode_phrase_with(AnyLanguage::of::<L>(), phrase, mode)
+}
+
+/// Decode a phrase into entropy and (optionally) a normalized phrase using a runtime-selected
+/// language.
+///
+/// Note:
+/// - This function assumes the input has already been normalized to UTF-8 NFKD by the caller.
+pub fn decode_phrase_with(
+    language: AnyLanguage,
+    phrase: &str,
+    mode: DecodeMode,
+) -> Result<DecodedPhrase, Error> {
     let params = parse_params_from_phrase(phrase)?;
 
     let mut normalized_phrase = match mode {
@@ -61,7 +77,7 @@ pub fn decode_phrase<L: Language>(phrase: &str, mode: DecodeMode) -> Result<Deco
             out.push_str(word);
         }
 
-        let index = match L::index_of(word) {
+        let index = match language.index_of(word) {
             Some(i) => i as u64,
             None => return Err(Error::UnknownWord(word.to_string())),
         };
