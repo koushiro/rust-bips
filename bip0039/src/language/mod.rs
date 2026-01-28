@@ -368,8 +368,7 @@ mod tests {
             name: &'static str,
             expected_hex_checksum: &'static str,
             words: fn() -> &'static [&'static str; 2048],
-            word_of: fn(usize) -> &'static str,
-            index_of: fn(&str) -> Option<usize>,
+            lang: AnyLanguage,
         }
 
         let mut cases: Vec<Case> = Vec::new();
@@ -378,8 +377,7 @@ mod tests {
             name: "english",
             expected_hex_checksum: "2f5eed53a4727b4bf8880d8f3f199efc90e58503646d9ff8eff3a2ed3b24dbda",
             words: English::words,
-            word_of: <English as Language>::word_of,
-            index_of: <English as Language>::index_of,
+            lang: AnyLanguage::of::<English>(),
         });
 
         #[cfg(feature = "chinese-simplified")]
@@ -387,8 +385,7 @@ mod tests {
             name: "chinese-simplified",
             expected_hex_checksum: "5c5942792bd8340cb8b27cd592f1015edf56a8c5b26276ee18a482428e7c5726",
             words: ChineseSimplified::words,
-            word_of: <ChineseSimplified as Language>::word_of,
-            index_of: <ChineseSimplified as Language>::index_of,
+            lang: AnyLanguage::of::<ChineseSimplified>(),
         });
 
         #[cfg(feature = "chinese-traditional")]
@@ -396,8 +393,7 @@ mod tests {
             name: "chinese-traditional",
             expected_hex_checksum: "417b26b3d8500a4ae3d59717d7011952db6fc2fb84b807f3f94ac734e89c1b5f",
             words: ChineseTraditional::words,
-            word_of: <ChineseTraditional as Language>::word_of,
-            index_of: <ChineseTraditional as Language>::index_of,
+            lang: AnyLanguage::of::<ChineseTraditional>(),
         });
 
         #[cfg(feature = "czech")]
@@ -405,8 +401,7 @@ mod tests {
             name: "czech",
             expected_hex_checksum: "7e80e161c3e93d9554c2efb78d4e3cebf8fc727e9c52e03b83b94406bdcc95fc",
             words: Czech::words,
-            word_of: <Czech as Language>::word_of,
-            index_of: <Czech as Language>::index_of,
+            lang: AnyLanguage::of::<Czech>(),
         });
 
         #[cfg(feature = "french")]
@@ -414,8 +409,7 @@ mod tests {
             name: "french",
             expected_hex_checksum: "ebc3959ab7801a1df6bac4fa7d970652f1df76b683cd2f4003c941c63d517e59",
             words: French::words,
-            word_of: <French as Language>::word_of,
-            index_of: <French as Language>::index_of,
+            lang: AnyLanguage::of::<French>(),
         });
 
         #[cfg(feature = "italian")]
@@ -423,8 +417,7 @@ mod tests {
             name: "italian",
             expected_hex_checksum: "d392c49fdb700a24cd1fceb237c1f65dcc128f6b34a8aacb58b59384b5c648c2",
             words: Italian::words,
-            word_of: <Italian as Language>::word_of,
-            index_of: <Italian as Language>::index_of,
+            lang: AnyLanguage::of::<Italian>(),
         });
 
         #[cfg(feature = "japanese")]
@@ -432,8 +425,7 @@ mod tests {
             name: "japanese",
             expected_hex_checksum: "2eed0aef492291e061633d7ad8117f1a2b03eb80a29d0e4e3117ac2528d05ffd",
             words: Japanese::words,
-            word_of: <Japanese as Language>::word_of,
-            index_of: <Japanese as Language>::index_of,
+            lang: AnyLanguage::of::<Japanese>(),
         });
 
         #[cfg(feature = "korean")]
@@ -441,8 +433,7 @@ mod tests {
             name: "korean",
             expected_hex_checksum: "9e95f86c167de88f450f0aaf89e87f6624a57f973c67b516e338e8e8b8897f60",
             words: Korean::words,
-            word_of: <Korean as Language>::word_of,
-            index_of: <Korean as Language>::index_of,
+            lang: AnyLanguage::of::<Korean>(),
         });
 
         #[cfg(feature = "portuguese")]
@@ -450,8 +441,7 @@ mod tests {
             name: "portuguese",
             expected_hex_checksum: "2685e9c194c82ae67e10ba59d9ea5345a23dc093e92276fc5361f6667d79cd3f",
             words: Portuguese::words,
-            word_of: <Portuguese as Language>::word_of,
-            index_of: <Portuguese as Language>::index_of,
+            lang: AnyLanguage::of::<Portuguese>(),
         });
 
         #[cfg(feature = "spanish")]
@@ -459,8 +449,7 @@ mod tests {
             name: "spanish",
             expected_hex_checksum: "46846a5a0139d1e3cb77293e521c2865f7bcdb82c44e8d0a06a2cd0ecba48c0b",
             words: Spanish::words,
-            word_of: <Spanish as Language>::word_of,
-            index_of: <Spanish as Language>::index_of,
+            lang: AnyLanguage::of::<Spanish>(),
         });
 
         for case in cases {
@@ -470,8 +459,8 @@ mod tests {
             let actual_hex_checksum = calculate_checksum(case.name, words);
 
             for (i, &word) in words.iter().enumerate() {
-                assert_eq!((case.word_of)(i), word);
-                assert_eq!((case.index_of)(word), Some(i));
+                assert_eq!(case.lang.word_of(i), word);
+                assert_eq!(case.lang.index_of(word), Some(i));
             }
 
             assert_eq!(
