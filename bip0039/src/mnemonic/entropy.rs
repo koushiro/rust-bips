@@ -19,14 +19,26 @@ use alloc::string::String;
 use sha2::{Digest, Sha256};
 
 use super::{BITS_PER_BYTE, BITS_PER_WORD, BitAccumulator, Count};
-use crate::{error::Error, language::Language};
+use crate::{
+    error::Error,
+    language::{AnyLanguage, Language},
+};
 
-/// Encode entropy into a mnemonic phrase.
+/// Encode entropy into a mnemonic phrase using `Language` generic type.
 ///
 /// Note:
 /// - This function assumes entropy bytes are already in the intended form.
 /// - Entropy length is validated against BIP-0039 allowed sizes.
 pub fn encode_entropy<L: Language>(entropy: &[u8]) -> Result<String, Error> {
+    encode_entropy_with(AnyLanguage::of::<L>(), entropy)
+}
+
+/// Encode entropy into a mnemonic phrase using `AnyLanguage` type.
+///
+/// Note:
+/// - This function assumes entropy bytes are already in the intended form.
+/// - Entropy length is validated against BIP-0039 allowed sizes.
+pub fn encode_entropy_with(language: AnyLanguage, entropy: &[u8]) -> Result<String, Error> {
     let count = Count::from_key_size(entropy.len() * BITS_PER_BYTE)?;
 
     // An initial entropy of ENT bits is given.
@@ -49,7 +61,7 @@ pub fn encode_entropy<L: Language>(entropy: &[u8]) -> Result<String, Error> {
         if !phrase.is_empty() {
             phrase.push(' ');
         }
-        phrase.push_str(L::word_of(idx));
+        phrase.push_str(language.word_of(idx));
     };
 
     // Feed entropy bits (byte-aligned, MSB-first).

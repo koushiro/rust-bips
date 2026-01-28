@@ -16,19 +16,37 @@ Another Rust implementation of [BIP-0039](https://github.com/bitcoin/bips/blob/m
 
 ## Usage
 
-Generate a random BIP-0039 mnemonic in English.
+### Compile-time language selection
 
 ```rust
 use bip0039::{Count, English, Mnemonic};
 
-// Generates an English mnemonic with 12 words randomly
+// Generate an English mnemonic with 12 words randomly
 let mnemonic = <Mnemonic<English>>::generate(Count::Words12);
-// Or use the default generic type (English) of struct Mnemonic.
+// Or use the default generic type (English).
 let mnemonic = <Mnemonic>::generate(Count::Words12);
-// Gets the phrase
-let phrase = mnemonic.phrase();
-// Generates the HD wallet seed from the mnemonic and the passphrase.
+println!("phrase: {}", mnemonic.phrase());
+
+// Generate the HD wallet seed from the mnemonic and the passphrase.
 let seed = mnemonic.to_seed("");
+assert_eq!(seed.len(), 64);
+println!("seed: {}", const_hex::encode(seed));
+```
+
+### Runtime language selection
+
+```rust
+use bip0039::{AnyLanguage, AnyMnemonic, BuiltInLanguage, Count, English};
+
+// Generate an English mnemonic with 12 words randomly
+let mnemonic = AnyMnemonic::generate(BuiltInLanguage::English, Count::Words12);
+assert_eq!(mnemonic.language(), AnyLanguage::of::<English>());
+println!("phrase: {}", mnemonic.phrase());
+
+// Generate the HD wallet seed from the mnemonic and the passphrase.
+let seed = mnemonic.to_seed("");
+assert_eq!(seed.len(), 64);
+println!("seed: {}", const_hex::encode(seed));
 ```
 
 ## Documentation

@@ -3,11 +3,13 @@
 //! This module is the public surface for language support.
 //!
 //! - [`Language`] is the only public capability trait exposed for consumers.
+//! - [`AnyLanguage`] provides a lightweight runtime handle to a `Language` implementation.
 //! - Built-in languages are enabled via Cargo features and backed by crate-private generated
 //!   wordlists.
 
-mod wordlist;
+use core::{fmt, ptr};
 
+mod wordlist;
 use self::wordlist::*;
 
 /// Language to be used for the mnemonic phrase.
@@ -57,6 +59,135 @@ impl<T: WordlistProvider> Language for T {
     #[inline]
     fn index_of(word: &str) -> Option<usize> {
         <T as WordlistProvider>::wordlist().index.get(word).copied().map(|i| i as usize)
+    }
+}
+
+/// A runtime handle to a [`Language`] implementation.
+///
+/// `Mnemonic<L>` selects the language at compile-time via a type parameter, which is great for
+/// monomorphization and `no_std` environments, but can be awkward when you want to select a
+/// language at runtime (e.g. from user configuration).
+///
+/// `AnyLanguage` is a lightweight, `Copy` handle backed by function pointers that allows selecting
+/// a language at runtime without changing the existing `Language` trait or the generic `Mnemonic`
+/// API.
+#[derive(Copy, Clone)]
+pub struct AnyLanguage {
+    word_of: fn(usize) -> &'static str,
+    index_of: fn(&str) -> Option<usize>,
+}
+
+impl fmt::Debug for AnyLanguage {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("AnyLanguage").finish_non_exhaustive()
+    }
+}
+
+impl PartialEq for AnyLanguage {
+    fn eq(&self, other: &Self) -> bool {
+        ptr::fn_addr_eq(self.word_of, other.word_of)
+            && ptr::fn_addr_eq(self.index_of, other.index_of)
+    }
+}
+
+impl Eq for AnyLanguage {}
+
+impl AnyLanguage {
+    /// Creates an [`AnyLanguage`] from the given wordlist lookup functions.
+    pub(crate) const fn new(
+        word_of: fn(usize) -> &'static str,
+        index_of: fn(&str) -> Option<usize>,
+    ) -> Self {
+        Self { word_of, index_of }
+    }
+
+    /// Creates an [`AnyLanguage`] from a [`Language`] implementation.
+    #[inline]
+    pub const fn of<L: Language>() -> Self {
+        Self::new(L::word_of, L::index_of)
+    }
+
+    /// Returns the word at `index` (BIP-0039 order).
+    #[inline]
+    pub(crate) fn word_of(self, index: usize) -> &'static str {
+        (self.word_of)(index)
+    }
+
+    /// Returns the index of `word` in the word list (BIP-0039 order).
+    #[inline]
+    pub(crate) fn index_of(self, word: &str) -> Option<usize> {
+        (self.index_of)(word)
+    }
+}
+
+/// Built-in BIP-0039 languages enabled in this build.
+///
+/// Variants are gated by Cargo features (English is always available).
+#[derive(Copy, Clone, Debug, Ord, PartialOrd, Eq, PartialEq, Hash)]
+#[non_exhaustive]
+pub enum BuiltInLanguage {
+    /// English (always available).
+    English,
+    /// Simplified Chinese.
+    #[cfg(feature = "chinese-simplified")]
+    ChineseSimplified,
+    /// Traditional Chinese.
+    #[cfg(feature = "chinese-traditional")]
+    ChineseTraditional,
+    /// Czech.
+    #[cfg(feature = "czech")]
+    Czech,
+    /// French.
+    #[cfg(feature = "french")]
+    French,
+    /// Italian.
+    #[cfg(feature = "italian")]
+    Italian,
+    /// Japanese.
+    #[cfg(feature = "japanese")]
+    Japanese,
+    /// Korean.
+    #[cfg(feature = "korean")]
+    Korean,
+    /// Portuguese.
+    #[cfg(feature = "portuguese")]
+    Portuguese,
+    /// Spanish.
+    #[cfg(feature = "spanish")]
+    Spanish,
+}
+
+impl BuiltInLanguage {
+    /// Returns an [`AnyLanguage`] for this built-in language.
+    pub const fn as_any_language(self) -> AnyLanguage {
+        match self {
+            Self::English => AnyLanguage::of::<English>(),
+            #[cfg(feature = "chinese-simplified")]
+            Self::ChineseSimplified => AnyLanguage::of::<ChineseSimplified>(),
+            #[cfg(feature = "chinese-traditional")]
+            Self::ChineseTraditional => AnyLanguage::of::<ChineseTraditional>(),
+            #[cfg(feature = "czech")]
+            Self::Czech => AnyLanguage::of::<Czech>(),
+            #[cfg(feature = "french")]
+            Self::French => AnyLanguage::of::<French>(),
+            #[cfg(feature = "italian")]
+            Self::Italian => AnyLanguage::of::<Italian>(),
+            #[cfg(feature = "japanese")]
+            Self::Japanese => AnyLanguage::of::<Japanese>(),
+            #[cfg(feature = "korean")]
+            Self::Korean => AnyLanguage::of::<Korean>(),
+            #[cfg(feature = "portuguese")]
+            Self::Portuguese => AnyLanguage::of::<Portuguese>(),
+            #[cfg(feature = "spanish")]
+            Self::Spanish => AnyLanguage::of::<Spanish>(),
+        }
+    }
+}
+
+impl From<BuiltInLanguage> for AnyLanguage {
+    #[inline]
+    fn from(value: BuiltInLanguage) -> Self {
+        value.as_any_language()
     }
 }
 
@@ -237,8 +368,7 @@ mod tests {
             name: &'static str,
             expected_hex_checksum: &'static str,
             words: fn() -> &'static [&'static str; 2048],
-            word_of: fn(usize) -> &'static str,
-            index_of: fn(&str) -> Option<usize>,
+            lang: AnyLanguage,
         }
 
         let mut cases: Vec<Case> = Vec::new();
@@ -247,8 +377,7 @@ mod tests {
             name: "english",
             expected_hex_checksum: "2f5eed53a4727b4bf8880d8f3f199efc90e58503646d9ff8eff3a2ed3b24dbda",
             words: English::words,
-            word_of: <English as Language>::word_of,
-            index_of: <English as Language>::index_of,
+            lang: AnyLanguage::of::<English>(),
         });
 
         #[cfg(feature = "chinese-simplified")]
@@ -256,8 +385,7 @@ mod tests {
             name: "chinese-simplified",
             expected_hex_checksum: "5c5942792bd8340cb8b27cd592f1015edf56a8c5b26276ee18a482428e7c5726",
             words: ChineseSimplified::words,
-            word_of: <ChineseSimplified as Language>::word_of,
-            index_of: <ChineseSimplified as Language>::index_of,
+            lang: AnyLanguage::of::<ChineseSimplified>(),
         });
 
         #[cfg(feature = "chinese-traditional")]
@@ -265,8 +393,7 @@ mod tests {
             name: "chinese-traditional",
             expected_hex_checksum: "417b26b3d8500a4ae3d59717d7011952db6fc2fb84b807f3f94ac734e89c1b5f",
             words: ChineseTraditional::words,
-            word_of: <ChineseTraditional as Language>::word_of,
-            index_of: <ChineseTraditional as Language>::index_of,
+            lang: AnyLanguage::of::<ChineseTraditional>(),
         });
 
         #[cfg(feature = "czech")]
@@ -274,8 +401,7 @@ mod tests {
             name: "czech",
             expected_hex_checksum: "7e80e161c3e93d9554c2efb78d4e3cebf8fc727e9c52e03b83b94406bdcc95fc",
             words: Czech::words,
-            word_of: <Czech as Language>::word_of,
-            index_of: <Czech as Language>::index_of,
+            lang: AnyLanguage::of::<Czech>(),
         });
 
         #[cfg(feature = "french")]
@@ -283,8 +409,7 @@ mod tests {
             name: "french",
             expected_hex_checksum: "ebc3959ab7801a1df6bac4fa7d970652f1df76b683cd2f4003c941c63d517e59",
             words: French::words,
-            word_of: <French as Language>::word_of,
-            index_of: <French as Language>::index_of,
+            lang: AnyLanguage::of::<French>(),
         });
 
         #[cfg(feature = "italian")]
@@ -292,8 +417,7 @@ mod tests {
             name: "italian",
             expected_hex_checksum: "d392c49fdb700a24cd1fceb237c1f65dcc128f6b34a8aacb58b59384b5c648c2",
             words: Italian::words,
-            word_of: <Italian as Language>::word_of,
-            index_of: <Italian as Language>::index_of,
+            lang: AnyLanguage::of::<Italian>(),
         });
 
         #[cfg(feature = "japanese")]
@@ -301,8 +425,7 @@ mod tests {
             name: "japanese",
             expected_hex_checksum: "2eed0aef492291e061633d7ad8117f1a2b03eb80a29d0e4e3117ac2528d05ffd",
             words: Japanese::words,
-            word_of: <Japanese as Language>::word_of,
-            index_of: <Japanese as Language>::index_of,
+            lang: AnyLanguage::of::<Japanese>(),
         });
 
         #[cfg(feature = "korean")]
@@ -310,8 +433,7 @@ mod tests {
             name: "korean",
             expected_hex_checksum: "9e95f86c167de88f450f0aaf89e87f6624a57f973c67b516e338e8e8b8897f60",
             words: Korean::words,
-            word_of: <Korean as Language>::word_of,
-            index_of: <Korean as Language>::index_of,
+            lang: AnyLanguage::of::<Korean>(),
         });
 
         #[cfg(feature = "portuguese")]
@@ -319,8 +441,7 @@ mod tests {
             name: "portuguese",
             expected_hex_checksum: "2685e9c194c82ae67e10ba59d9ea5345a23dc093e92276fc5361f6667d79cd3f",
             words: Portuguese::words,
-            word_of: <Portuguese as Language>::word_of,
-            index_of: <Portuguese as Language>::index_of,
+            lang: AnyLanguage::of::<Portuguese>(),
         });
 
         #[cfg(feature = "spanish")]
@@ -328,8 +449,7 @@ mod tests {
             name: "spanish",
             expected_hex_checksum: "46846a5a0139d1e3cb77293e521c2865f7bcdb82c44e8d0a06a2cd0ecba48c0b",
             words: Spanish::words,
-            word_of: <Spanish as Language>::word_of,
-            index_of: <Spanish as Language>::index_of,
+            lang: AnyLanguage::of::<Spanish>(),
         });
 
         for case in cases {
@@ -339,8 +459,8 @@ mod tests {
             let actual_hex_checksum = calculate_checksum(case.name, words);
 
             for (i, &word) in words.iter().enumerate() {
-                assert_eq!((case.word_of)(i), word);
-                assert_eq!((case.index_of)(word), Some(i));
+                assert_eq!(case.lang.word_of(i), word);
+                assert_eq!(case.lang.index_of(word), Some(i));
             }
 
             assert_eq!(
@@ -349,5 +469,46 @@ mod tests {
                 case.name
             );
         }
+    }
+
+    #[test]
+    fn test_builtin_language_match() {
+        macro_rules! assert_builtin {
+            ($enum:expr, $ty:ty) => {{
+                let from_enum = $enum.as_any_language();
+                let from_type = AnyLanguage::of::<$ty>();
+                assert_eq!(from_enum, from_type);
+                assert_eq!(AnyLanguage::from($enum), from_type);
+            }};
+        }
+
+        assert_builtin!(BuiltInLanguage::English, English);
+
+        #[cfg(feature = "chinese-simplified")]
+        assert_builtin!(BuiltInLanguage::ChineseSimplified, ChineseSimplified);
+
+        #[cfg(feature = "chinese-traditional")]
+        assert_builtin!(BuiltInLanguage::ChineseTraditional, ChineseTraditional);
+
+        #[cfg(feature = "czech")]
+        assert_builtin!(BuiltInLanguage::Czech, Czech);
+
+        #[cfg(feature = "french")]
+        assert_builtin!(BuiltInLanguage::French, French);
+
+        #[cfg(feature = "italian")]
+        assert_builtin!(BuiltInLanguage::Italian, Italian);
+
+        #[cfg(feature = "japanese")]
+        assert_builtin!(BuiltInLanguage::Japanese, Japanese);
+
+        #[cfg(feature = "korean")]
+        assert_builtin!(BuiltInLanguage::Korean, Korean);
+
+        #[cfg(feature = "portuguese")]
+        assert_builtin!(BuiltInLanguage::Portuguese, Portuguese);
+
+        #[cfg(feature = "spanish")]
+        assert_builtin!(BuiltInLanguage::Spanish, Spanish);
     }
 }
