@@ -1,11 +1,11 @@
 mod bit_accumulator;
 mod entropy;
 mod phrase;
+mod seed;
 
 #[cfg(not(feature = "std"))]
 use alloc::{
     borrow::Cow,
-    format,
     string::{String, ToString},
     vec::Vec,
 };
@@ -13,8 +13,6 @@ use core::{fmt, marker::PhantomData, mem, str};
 #[cfg(feature = "std")]
 use std::borrow::Cow;
 
-use hmac::Hmac;
-use sha2::Sha512;
 use unicode_normalization::{IsNormalized, UnicodeNormalization, is_nfkd_quick};
 use zeroize::Zeroizing;
 
@@ -22,6 +20,7 @@ use self::{
     bit_accumulator::BitAccumulator,
     entropy::{encode_entropy, encode_entropy_with},
     phrase::{DecodeMode, decode_phrase},
+    seed::to_seed,
 };
 use crate::{
     error::Error,
@@ -406,30 +405,8 @@ assert_eq!(result.unwrap_err(), Error::UnknownWord("ばか".nfkd().to_string()))
     /// assert_eq!(mnemonic.to_seed("").len(), 64);
     /// ```
     pub fn to_seed<P: AsRef<str>>(&self, passphrase: P) -> [u8; 64] {
-        // use the PBKDF2 function with a mnemonic sentence (in UTF-8 NFKD) used as the password
-        // and the string "mnemonic" + passphrase (again in UTF-8 NFKD) used as the salt.
-        // The iteration count is set to 2048 and HMAC-SHA512 is used as the pseudo-random function.
-        // The length of the derived key is 512 bits (= 64 bytes).
-        const PBKDF2_ROUNDS: u32 = 2048;
-        const PBKDF2_BYTES: usize = 64;
-
         // the phrase has been normalized
-        let normalized_password = self.phrase();
-        let normalized_salt = {
-            let mut salt = Cow::Owned(format!("mnemonic{}", passphrase.as_ref()));
-            normalize_utf8(&mut salt);
-            salt
-        };
-
-        let mut seed = [0u8; PBKDF2_BYTES];
-        pbkdf2::pbkdf2::<Hmac<Sha512>>(
-            normalized_password.as_bytes(),
-            normalized_salt.as_bytes(),
-            PBKDF2_ROUNDS,
-            &mut seed,
-        )
-        .expect("HMAC can be initialized with any key length");
-        seed
+        to_seed(self.phrase(), passphrase.as_ref())
     }
 
     /// Returns the mnemonic phrase as a string slice.
@@ -688,26 +665,8 @@ assert_eq!(result.unwrap_err(), Error::UnknownWord("ばか".nfkd().to_string()))
     /// assert_eq!(seed.len(), 64);
     /// ```
     pub fn to_seed<P: AsRef<str>>(&self, passphrase: P) -> [u8; 64] {
-        // same as Mnemonic::to_seed; phrase is already normalized
-        const PBKDF2_ROUNDS: u32 = 2048;
-        const PBKDF2_BYTES: usize = 64;
-
-        let normalized_password = self.phrase();
-        let normalized_salt = {
-            let mut salt = Cow::Owned(format!("mnemonic{}", passphrase.as_ref()));
-            normalize_utf8(&mut salt);
-            salt
-        };
-
-        let mut seed = [0u8; PBKDF2_BYTES];
-        pbkdf2::pbkdf2::<Hmac<Sha512>>(
-            normalized_password.as_bytes(),
-            normalized_salt.as_bytes(),
-            PBKDF2_ROUNDS,
-            &mut seed,
-        )
-        .expect("HMAC can be initialized with any key length");
-        seed
+        // phrase is already normalized
+        to_seed(self.phrase(), passphrase.as_ref())
     }
 
     /// Returns the language used to encode/decode this mnemonic.
