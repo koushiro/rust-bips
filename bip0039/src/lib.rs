@@ -40,26 +40,8 @@ mod error;
 pub mod language;
 mod mnemonic;
 
-#[cfg(feature = "chinese-simplified")]
-pub use self::language::ChineseSimplified;
-#[cfg(feature = "chinese-traditional")]
-pub use self::language::ChineseTraditional;
-#[cfg(feature = "czech")]
-pub use self::language::Czech;
-#[cfg(feature = "french")]
-pub use self::language::French;
-#[cfg(feature = "italian")]
-pub use self::language::Italian;
-#[cfg(feature = "japanese")]
-pub use self::language::Japanese;
-#[cfg(feature = "korean")]
-pub use self::language::Korean;
-#[cfg(feature = "portuguese")]
-pub use self::language::Portuguese;
-#[cfg(feature = "spanish")]
-pub use self::language::Spanish;
+pub use self::language::*;
 pub use self::{
     error::Error,
-    language::{English, Language},
     mnemonic::{Count, Mnemonic},
 };
