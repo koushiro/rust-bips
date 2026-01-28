@@ -43,6 +43,5 @@ mod mnemonic;
 pub use self::language::*;
 pub use self::{
     error::Error,
-    language::{English, Language},
     mnemonic::{Count, Mnemonic},
 };
