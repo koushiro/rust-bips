@@ -43,6 +43,7 @@
 ## Feature Flags & Backends
 
 - `std` enables standard library support; `k256` is the default secp256k1 backend.
+- Optional backends: `k256` and `secp256k1`.
 - SLIP-0010 features: `slip10` (core), `k256`|`secp256k1` (secp256k1), `p256` (nist256p1), `ed25519-dalek` (ed25519).
 - When modifying backend code, validate the affected feature set with explicit `--features` flags.
 
