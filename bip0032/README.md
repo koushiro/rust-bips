@@ -16,9 +16,9 @@ Another Rust implementation of [BIP-0032](https://github.com/bitcoin/bips/blob/m
 
 ## Support curves and features
 
-| Curve     | Feature                                 | Backends                      | Hardened | Non-hardened (private) | Non-hardened (public) | Serialization |
-| --------- | --------------------------------------- | ----------------------------- | -------- | ---------------------- | --------------------- | ------------- |
-| secp256k1 | `k256` \| `secp256k1` \| `libsecp256k1` | k256, secp256k1, libsecp256k1 | yes      | yes                    | yes                   | yes           |
+| Curve     | Feature               | Backends        | Hardened | Non-hardened (private) | Non-hardened (public) | Serialization |
+| --------- | --------------------- | --------------- | -------- | ---------------------- | --------------------- | ------------- |
+| secp256k1 | `k256` \| `secp256k1` | k256, secp256k1 | yes      | yes                    | yes                   | yes           |
 
 ## Usage
 
@@ -96,7 +96,6 @@ See documentation and examples at https://docs.rs/bip0032.
 - [x] Multiple secp256k1 backends
   - [`k256`](https://github.com/RustCrypto/elliptic-curves/tree/master/k256) (by default)
   - [`secp256k1`](https://github.com/rust-bitcoin/rust-secp256k1)
-  - [`libsecp256k1`](https://github.com/paritytech/libsecp256k1)
 - [x] Optional SLIP-0010 support
   - secp256k1 ([compatible with BIP32](https://github.com/satoshilabs/slips/blob/master/slip-0010.md#compatibility-with-bip-0032))
   - NIST P-256 (a.k.a. secp256r1, prime256v1) ([`p256`](https://github.com/RustCrypto/elliptic-curves/tree/master/p256))
