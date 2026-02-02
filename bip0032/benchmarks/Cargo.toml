@@ -8,7 +8,7 @@ license.workspace = true
 publish = false
 
 [dev-dependencies]
-bip0032 = { path = "..", features = ["k256", "secp256k1", "libsecp256k1"] }
+bip0032 = { path = "..", features = ["k256", "secp256k1"] }
 bip32 = "0.5"
 bitcoin = "0.32"
 coins-bip32 = "0.13"

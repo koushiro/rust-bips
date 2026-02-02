@@ -21,8 +21,6 @@ keygen/bip32 (k256::ecdsa)
 keygen/bip0032 (k256)   time:   [1.0072 µs 1.0092 µs 1.0114 µs]
 keygen/bip0032 (secp256k1)
                         time:   [1.0158 µs 1.0178 µs 1.0201 µs]
-keygen/bip0032 (libsecp256k1)
-                        time:   [1.0726 µs 1.0743 µs 1.0762 µs]
 ```
 
 ## Derivation
@@ -43,8 +41,6 @@ derive/bip32 (k256::ecdsa)
 derive/bip0032 (k256)   time:   [216.79 µs 217.39 µs 218.06 µs]
 derive/bip0032 (secp256k1)
                         time:   [76.699 µs 80.643 µs 87.096 µs]
-derive/bip0032 (libsecp256k1)
-                        time:   [168.01 µs 168.48 µs 169.08 µs]
 ```
 
 ## Serialization
@@ -69,8 +65,6 @@ xprv_decode/bip0032 (k256)
                         time:   [5.4610 µs 5.4995 µs 5.5431 µs]
 xprv_decode/bip0032 (secp256k1)
                         time:   [5.4711 µs 5.6594 µs 5.9702 µs]
-xprv_decode/bip0032 (libsecp256k1)
-                        time:   [5.5412 µs 5.5559 µs 5.5717 µs]
 ```
 
 ### xprv encode
@@ -93,8 +87,6 @@ xprv_encode/bip0032 (k256)
                         time:   [9.8094 µs 9.8699 µs 9.9398 µs]
 xprv_encode/bip0032 (secp256k1)
                         time:   [9.7993 µs 9.8549 µs 9.9156 µs]
-xprv_encode/bip0032 (libsecp256k1)
-                        time:   [9.7966 µs 10.016 µs 10.350 µs]
 ```
 
 ### xpub decode
@@ -117,8 +109,6 @@ xpub_decode/bip0032 (k256)
                         time:   [10.942 µs 11.079 µs 11.248 µs]
 xpub_decode/bip0032 (secp256k1)
                         time:   [9.8025 µs 9.9168 µs 10.056 µs]
-xpub_decode/bip0032 (libsecp256k1)
-                        time:   [13.306 µs 14.191 µs 16.104 µs]
 ```
 
 ### xpub encode
@@ -141,6 +131,4 @@ xpub_encode/bip0032 (k256)
                         time:   [9.6266 µs 9.7398 µs 9.9000 µs]
 xpub_encode/bip0032 (secp256k1)
                         time:   [9.5780 µs 9.6362 µs 9.7008 µs]
-xpub_encode/bip0032 (libsecp256k1)
-                        time:   [9.6415 µs 9.7524 µs 9.8780 µs]
 ```

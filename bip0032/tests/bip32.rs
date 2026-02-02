@@ -40,8 +40,6 @@ fn run_cases_for_all_backends(cases: &[Case]) {
     run_cases::<K256Backend>(cases);
     #[cfg(feature = "secp256k1")]
     run_cases::<Secp256k1FfiBackend>(cases);
-    #[cfg(feature = "libsecp256k1")]
-    run_cases::<Libsecp256k1Backend>(cases);
 }
 
 #[test]
@@ -210,11 +208,6 @@ fn assert_invalid_case_for_all_backends(xpub_keys: &[&str], xprv_keys: &[&str]) 
     {
         assert_invalid_xpub::<Secp256k1FfiBackend>(xpub_keys);
         assert_invalid_xprv::<Secp256k1FfiBackend>(xprv_keys);
-    }
-    #[cfg(feature = "libsecp256k1")]
-    {
-        assert_invalid_xpub::<Libsecp256k1Backend>(xpub_keys);
-        assert_invalid_xprv::<Libsecp256k1Backend>(xprv_keys);
     }
 }
 

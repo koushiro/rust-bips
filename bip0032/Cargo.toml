@@ -40,7 +40,6 @@ std = [
     "zeroize/std",
     "k256?/std",
     "secp256k1?/std",
-    "libsecp256k1?/std",
     "p256?/std",
     "ed25519-dalek?/std",
 ]
@@ -48,7 +47,6 @@ std = [
 # BIP-0032 (secp256k1)
 k256 = ["k256/arithmetic"]
 secp256k1 = ["dep:secp256k1"]
-libsecp256k1 = ["dep:libsecp256k1"]
 
 # Optional SLIP-0010 extension (support secp256k1/nist256p1/ed25519 curve)
 slip10 = []
@@ -70,9 +68,6 @@ zeroize = { version = "1.8", default-features = false }
 k256 = { version = "0.13", default-features = false, features = ["alloc"], optional = true }
 # https://github.com/bitcoin-core/secp256k1
 secp256k1 = { version = "0.31", default-features = false, features = ["alloc"], optional = true }
-# https://github.com/paritytech/libsecp256k1
-# NOTE: libsecp256k1 crate is no longer maintained
-libsecp256k1 = { version = "0.7", default-features = false, features = ["static-context"], optional = true }
 
 ###############################################################################
 # nist256p1 libraries (SLIP-0010 extension)
