@@ -18,7 +18,7 @@
 //!
 //! | Curve | Feature | Backends | Hardened | Non-hardened (private) | Non-hardened (public) | Serialization |
 //! | --- | --- | --- | --- | --- | --- | --- |
-//! | secp256k1 | `k256` \| `secp256k1` \| `libsecp256k1` | k256, secp256k1, libsecp256k1 | yes | yes | yes | yes |
+//! | secp256k1 | `k256` \| `secp256k1` | k256, secp256k1 | yes | yes | yes | yes |
 //!
 //! ## Usage
 //!

@@ -5,7 +5,7 @@
 - `src/lib.rs` is the crate entry and re-exports the public API.
 - `src/path/` defines derivation paths and child numbers.
 - `src/xkey/` contains extended key types and payload/version handling.
-- `src/curve/secp256k1/` holds backend-specific secp256k1 implementations (k256, secp256k1, libsecp256k1).
+- `src/curve/secp256k1/` holds backend-specific secp256k1 implementations (k256, secp256k1).
 - `src/curve/nist256p1/` holds the NIST P-256 (p256) backend implementation for SLIP-0010.
 - `src/curve/ed25519/` holds the ed25519 backend implementation for SLIP-0010.
 - `src/curve/slip10.rs` contains SLIP-0010 marker traits.
@@ -43,8 +43,8 @@
 ## Feature Flags & Backends
 
 - `std` enables standard library support; `k256` is the default secp256k1 backend.
-- Optional backends: `secp256k1` and `libsecp256k1` (note: libsecp256k1 is unmaintained).
-- SLIP-0010 features: `slip10` (core), `k256`|`secp256k1`|`libsecp256k1` (secp256k1), `p256` (nist256p1), `ed25519-dalek` (ed25519).
+- Optional backends: `k256` and `secp256k1`.
+- SLIP-0010 features: `slip10` (core), `k256`|`secp256k1` (secp256k1), `p256` (nist256p1), `ed25519-dalek` (ed25519).
 - When modifying backend code, validate the affected feature set with explicit `--features` flags.
 
 ## Commit & Pull Request Guidelines
