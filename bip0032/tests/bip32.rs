@@ -40,8 +40,6 @@ fn run_cases_for_all_backends(cases: &[Case]) {
     run_cases::<K256Backend>(cases);
     #[cfg(feature = "secp256k1")]
     run_cases::<Secp256k1FfiBackend>(cases);
-    #[cfg(feature = "libsecp256k1")]
-    run_cases::<Libsecp256k1Backend>(cases);
 }
 
 #[test]
