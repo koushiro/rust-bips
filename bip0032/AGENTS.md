@@ -63,6 +63,7 @@
 
 Generate GitHub Release notes that cover these sections:
 
-- Breaking Changes
-- New Features
+- Breaking Changes.
+- Bug Fixes.
+- New Features.
 - Performance & Behavior Improvements.
