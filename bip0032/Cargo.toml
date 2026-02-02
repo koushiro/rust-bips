@@ -11,7 +11,7 @@ repository = "https://github.com/koushiro/rust-bips"
 
 [package]
 name = "bip0032"
-version = "0.0.4"
+version = "0.1.0"
 authors = ["koushiro <koushiro.cqx@gmail.com>"]
 edition.workspace = true
 rust-version.workspace = true
