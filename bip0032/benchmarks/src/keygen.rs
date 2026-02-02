@@ -73,7 +73,6 @@ fn bench_keygen_bip0032(group: &mut BenchmarkGroup<'_>) {
 
     bench_impl::<K256Backend>(group, "bip0032 (k256)");
     bench_impl::<Secp256k1FfiBackend>(group, "bip0032 (secp256k1)");
-    bench_impl::<Libsecp256k1Backend>(group, "bip0032 (libsecp256k1)");
 }
 
 fn bench_keygen(c: &mut Criterion) {
