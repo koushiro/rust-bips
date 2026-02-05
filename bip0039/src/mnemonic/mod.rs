@@ -856,7 +856,7 @@ mod tests {
             }
         }
 
-        // Consuming the phrase/entropy should still ensure the entropy is zeroized
+        // Consuming the phrase/entropy should still ensure the entropy/phrase is zeroized
         // when the mnemonic is dropped.
         struct ConsumeMnemonic {
             phrase: Zeroizing<DropCheckString>,
