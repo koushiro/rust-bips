@@ -773,65 +773,127 @@ mod tests {
     }
 
     #[test]
-    fn test_mnemonic_zeroize_when_drop() {
-        let p: *const String;
-        let e: *const Vec<u8>;
+    fn test_mnemonic_zeroize_on_drop_mechanism() {
+        // There is no sound, deterministic way to verify heap memory is wiped *after* drop
+        // without instrumentation (e.g. allocator hooks). Reading freed memory is UB.
+        //
+        // Instead, we:
+        // 1) Assert `Mnemonic` stores secrets in `Zeroizing<...>` fields.
+        // 2) Assert `Zeroizing` actually calls `Zeroize` on drop, using a drop-checking type.
 
-        // phrase = "absurd amount doctor acoustic avoid letter advice cage absurd amount doctor
-        // adjust" entropy = [1u8; 16]
-        {
-            let m = <Mnemonic>::from_entropy([1u8; 16]).unwrap();
-            p = &*m.phrase;
-            e = &*m.entropy;
-            // unsafe {
-            //     println!("*p: {}", *p);
-            //     println!("*e: {:?}", *e);
-            // }
+        let m = <Mnemonic>::from_entropy([1u8; 16]).unwrap();
+
+        fn assert_phrase(_: &Zeroizing<String>) {}
+        fn assert_entropy(_: &Zeroizing<Vec<u8>>) {}
+
+        assert_phrase(&m.phrase);
+        assert_entropy(&m.entropy);
+        drop(m);
+
+        #[derive(Clone, Debug, PartialEq)]
+        struct PanicOnNonZeroDrop(u8);
+
+        impl zeroize::Zeroize for PanicOnNonZeroDrop {
+            fn zeroize(&mut self) {
+                self.0 = 0;
+            }
         }
 
-        unsafe {
-            assert_ne!(
-                *p,
-                "absurd amount doctor acoustic avoid letter advice cage absurd amount doctor adjust"
-            );
-            // println!("*p: {}", *p);
-            assert_ne!(*e, [1u8; 16]);
-            // println!("*e: {:?}", *e);
+        impl Drop for PanicOnNonZeroDrop {
+            fn drop(&mut self) {
+                assert_eq!(self.0, 0, "dropped non-zeroized data");
+            }
         }
+
+        let wrapped = Zeroizing::new(vec![PanicOnNonZeroDrop(42); 16]);
+        drop(wrapped);
     }
 
     #[test]
     fn test_mnemonic_consume() {
-        let p: *const String;
-        {
-            let m = <Mnemonic>::from_entropy([1u8; 16]).unwrap();
-            p = &*m.phrase;
-            unsafe {
-                println!("*p: {} ({:p})", *p, p);
-            }
-            let phrase = m.into_phrase();
-            assert_ne!(p, &phrase);
-            println!("phrase: {} ({:p})", phrase, &phrase);
-        }
-        // error
-        // unsafe {
-        //     println!("*p: {} ({:p})", (*p), p);
-        // }
+        // Validate the "consume one field, then drop zeroizes the other field" pattern in a
+        // non-UB way, using drop-checking types (inspired by `zeroize`'s own tests).
+        #[derive(Clone, Debug, PartialEq)]
+        struct DropCheckVec(Vec<u8>);
 
-        let e: *const Vec<u8>;
-        {
-            let m = <Mnemonic>::from_entropy([1u8; 16]).unwrap();
-            e = &*m.entropy;
-            unsafe {
-                println!("*e: {:?} ({:p})", *e, e);
+        impl zeroize::Zeroize for DropCheckVec {
+            fn zeroize(&mut self) {
+                for byte in &mut self.0 {
+                    *byte = 0;
+                }
             }
-            let entropy = m.into_entropy();
-            assert_ne!(e, &entropy);
-            println!("entropy: {:?} ({:p})", entropy, &entropy);
         }
-        // error
-        // unsafe {
-        //     println!("*e: {:?} ({:p})", (*e), e);
-        // }
+
+        impl Drop for DropCheckVec {
+            fn drop(&mut self) {
+                assert!(self.0.iter().all(|&b| b == 0), "dropped non-zeroized data");
+            }
+        }
+
+        #[derive(Clone, Debug, PartialEq)]
+        struct DropCheckString {
+            s: String,
+            was_zeroized: bool,
+        }
+
+        impl DropCheckString {
+            fn new(s: impl Into<String>) -> Self {
+                DropCheckString { s: s.into(), was_zeroized: false }
+            }
+        }
+
+        impl zeroize::Zeroize for DropCheckString {
+            fn zeroize(&mut self) {
+                self.s.zeroize();
+                self.was_zeroized = true;
+            }
+        }
+
+        impl Drop for DropCheckString {
+            fn drop(&mut self) {
+                assert!(self.was_zeroized, "string was not zeroized before drop");
+                assert!(self.s.is_empty(), "zeroized string should be empty");
+            }
+        }
+
+        // Consuming the phrase/entropy should still ensure the entropy is zeroized
+        // when the mnemonic is dropped.
+        struct ConsumeMnemonic {
+            phrase: Zeroizing<DropCheckString>,
+            entropy: Zeroizing<DropCheckVec>,
+        }
+
+        impl ConsumeMnemonic {
+            fn into_phrase(mut self) -> String {
+                mem::take(&mut self.phrase.s)
+            }
+
+            fn into_entropy(mut self) -> Vec<u8> {
+                mem::take(&mut self.entropy.0)
+            }
+        }
+
+        let expected_entropy = vec![1u8; 16];
+        let expected_phrase =
+            "absurd amount doctor acoustic avoid letter advice cage absurd amount doctor adjust";
+
+        let phrase = {
+            ConsumeMnemonic {
+                phrase: Zeroizing::new(DropCheckString::new(expected_phrase)),
+                entropy: Zeroizing::new(DropCheckVec(expected_entropy.clone())),
+            }
+            .into_phrase()
+        };
+        assert_eq!(phrase, expected_phrase);
+
+        let entropy = {
+            ConsumeMnemonic {
+                phrase: Zeroizing::new(DropCheckString::new(expected_phrase)),
+                entropy: Zeroizing::new(DropCheckVec(expected_entropy.clone())),
+            }
+            .into_entropy()
+        };
+
+        assert_eq!(entropy, expected_entropy);
     }
 }
