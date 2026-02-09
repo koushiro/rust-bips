@@ -12,7 +12,8 @@ bip0039 = { path = ".." }
 bip39 = { version = "2.2", features = ["rand"] }
 coins-bip39 = "0.13"
 criterion = "0.8"
-rand = "0.9"
+rand09 = { package = "rand", version = "0.9" }
+rand = "0.10"
 tiny_bip39 = { package = "tiny-bip39", version = "2.0", features = ["rand"] }
 
 [[bench]]

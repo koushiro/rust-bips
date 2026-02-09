@@ -234,7 +234,7 @@ let phrase = mnemonic.phrase();
     )]
     #[cfg(feature = "rand")]
     pub fn generate(word_count: Count) -> Self {
-        use rand::RngCore;
+        use rand::Rng;
         let mut rng = rand::rng();
 
         match word_count {
@@ -483,7 +483,7 @@ impl AnyMnemonic {
     #[cfg(feature = "rand")]
     pub fn generate(language: impl Into<AnyLanguage>, word_count: Count) -> Self {
         let language: AnyLanguage = language.into();
-        use rand::RngCore;
+        use rand::Rng;
         let mut rng = rand::rng();
 
         match word_count {

@@ -46,7 +46,7 @@ fn bench_to_seed(c: &mut Criterion) {
 
             b.iter_batched(
                 || {
-                    let mut rng = rand::rng();
+                    let mut rng = rand09::rng();
                     <Mnemonic<English>>::from_rng_with_count(&mut rng, words).unwrap()
                 },
                 |mnemonic| {

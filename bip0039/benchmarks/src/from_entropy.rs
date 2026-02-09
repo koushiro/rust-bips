@@ -1,7 +1,7 @@
 use std::hint::black_box;
 
 use criterion::{BatchSize, Criterion, criterion_group, criterion_main};
-use rand::RngCore;
+use rand::Rng;
 
 const WORDS: [usize; 4] = [12, 15, 18, 24];
 
@@ -61,7 +61,7 @@ fn bench_from_entropy(c: &mut Criterion) {
 
             b.iter_batched(
                 || {
-                    let mut rng = rand::rng();
+                    let mut rng = rand09::rng();
                     Entropy::from_rng(entropy_bytes(words), &mut rng).unwrap()
                 },
                 |entropy| {
