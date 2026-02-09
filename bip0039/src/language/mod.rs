@@ -15,6 +15,7 @@ use self::wordlist::*;
 /// Language to be used for the mnemonic phrase.
 ///
 /// Consumers may implement this trait for their own language types by providing:
+/// - [`Language::words`]
 /// - [`Language::word_of`]
 /// - [`Language::index_of`]
 ///
@@ -22,38 +23,28 @@ use self::wordlist::*;
 /// get this trait via the blanket impl below.
 ///
 /// # Requirements
-///
-/// - `word_of(index)` must return a valid word for all indices `0..2048`.
+/// - `words()` must return the full underlying word list for this language (2048 words) in BIP-0039 order,
+///   not just a view of a specific mnemonic, and must be NFKD-normalized and unique.
+/// - `word_of(index)` must return a valid word for all indices [0..2048).
 /// - `index_of(word)` must return the correct index (BIP-0039 order) for all words in the language
 ///   wordlist; return `None` for unknown words.
 pub trait Language: Sized {
-    // NOTE (planned breaking change): we intend to add the following method in the next
-    // minor release (e.g. `0.14.0`), and treat it as a breaking change for external
-    // `Language` implementations:
-    //
-    // /// Returns the full BIP-0039 word list for this language (2048 words) in BIP-0039 order.
-    // ///
-    // /// Notes:
-    // /// - This returns the full underlying word list, not just a view of a specific mnemonic.
-    // /// - The returned words must be NFKD-normalized and unique.
-    // fn words() -> &'static [&'static str; 2048];
+    /// Returns the full BIP-0039 word list for this language (2048 words) in BIP-0039 order.
+    fn words() -> &'static [&'static str; 2048];
 
     /// Returns the word at `index` (BIP-0039 order).
-    fn word_of(index: usize) -> &'static str;
+    fn word_of(index: usize) -> &'static str {
+        debug_assert!(index < 2048, "Invalid wordlist index");
+        Self::words()[index]
+    }
 
     /// Returns the index of `word` in the word list (BIP-0039 order).
     fn index_of(word: &str) -> Option<usize>;
 }
 
 impl<T: WordlistProvider> Language for T {
-    // fn words() -> &'static [&'static str; 2048] {
-    //     <T as WordlistProvider>::wordlist().words
-    // }
-
-    #[inline]
-    fn word_of(index: usize) -> &'static str {
-        debug_assert!(index < 2048, "Invalid wordlist index");
-        <T as WordlistProvider>::wordlist().words[index]
+    fn words() -> &'static [&'static str; 2048] {
+        <T as WordlistProvider>::wordlist().words
     }
 
     #[inline]
