@@ -14,7 +14,7 @@ bitcoin = "0.32"
 coins-bip32 = "0.13"
 const-hex = "1.12.0"
 criterion = "0.8"
-rand = "0.9"
+rand = "0.10"
 
 [[bench]]
 name = "keygen"
