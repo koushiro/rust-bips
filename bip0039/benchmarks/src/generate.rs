@@ -41,7 +41,7 @@ fn bench_generate(c: &mut Criterion) {
 
             b.iter(|| {
                 let _phrase = black_box({
-                    let mut rng = rand::rng();
+                    let mut rng = rand09::rng();
                     let mnemonic =
                         <Mnemonic<English>>::from_rng_with_count(&mut rng, words).unwrap();
                     mnemonic.to_phrase()

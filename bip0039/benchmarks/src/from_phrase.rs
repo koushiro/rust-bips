@@ -53,7 +53,7 @@ fn bench_from_phrase(c: &mut Criterion) {
 
             b.iter_batched(
                 || {
-                    let mut rng = rand::rng();
+                    let mut rng = rand09::rng();
                     let m = <Mnemonic<English>>::from_rng_with_count(&mut rng, words).unwrap();
                     m.to_phrase()
                 },
