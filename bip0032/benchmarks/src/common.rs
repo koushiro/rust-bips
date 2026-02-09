@@ -1,4 +1,4 @@
-use rand::{Rng, RngCore};
+use rand::{Rng, RngExt};
 
 pub type BenchmarkGroup<'a> = criterion::BenchmarkGroup<'a, criterion::measurement::WallTime>;
 
