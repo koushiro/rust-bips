@@ -23,8 +23,8 @@ use self::wordlist::*;
 /// get this trait via the blanket impl below.
 ///
 /// # Requirements
-/// - `words()` must return the full underlying word list for this language (2048 words) in BIP-0039 order,
-///   not just a view of a specific mnemonic, and must be NFKD-normalized and unique.
+/// - `words()` must return the full underlying word list for this language (2048 words) in BIP-0039
+///   order, not just a view of a specific mnemonic, and must be NFKD-normalized and unique.
 /// - `word_of(index)` must return a valid word for all indices [0..2048).
 /// - `index_of(word)` must return the correct index (BIP-0039 order) for all words in the language
 ///   wordlist; return `None` for unknown words.
@@ -43,6 +43,7 @@ pub trait Language: Sized {
 }
 
 impl<T: WordlistProvider> Language for T {
+    #[inline]
     fn words() -> &'static [&'static str; 2048] {
         <T as WordlistProvider>::wordlist().words
     }
