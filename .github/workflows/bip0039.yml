@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - main
+    paths:
+      - .github/workflows/bip0039.yml
+      - bip0039/**
   pull_request:
     paths:
       - .github/workflows/bip0039.yml
