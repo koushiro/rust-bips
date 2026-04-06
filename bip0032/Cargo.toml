@@ -57,7 +57,7 @@ ed25519-dalek = ["slip10", "dep:ed25519-dalek"]
 anyhow = { version = "1.0", default-features = false }
 bs58 = { version = "0.5", default-features = false, features = ["alloc", "check"] }
 hmac = { version = "0.12", default-features = false }
-ripemd = { version = "0.1", default-features = false }
+ripemd = { version = "0.2", default-features = false }
 sha2 = { version = "0.10", default-features = false }
 zeroize = { version = "1.8", default-features = false }
 
