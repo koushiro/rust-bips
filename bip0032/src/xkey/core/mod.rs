@@ -1,6 +1,6 @@
 //! Shared extended key functionality.
 
-use hmac::{Hmac, Mac};
+use hmac::{Hmac, KeyInit, Mac};
 use sha2::Sha512;
 use zeroize::Zeroize;
 
