@@ -1,7 +1,7 @@
 # Benchmarks
 
 - Hardware: Apple M1 Pro
-- Toolchain: rustc 1.92.0 (ded5c06cf 2025-12-08)
+- Toolchain: rustc 1.95.0 (59807616e 2026-04-14)
 
 ## generate
 
@@ -12,40 +12,40 @@ cargo bench --bench generate -- --quiet
 
 ```text
 generate/tiny-bip39 (12 words)
-                        time:   [510.34 ns 511.44 ns 512.60 ns]
+                        time:   [502.53 ns 503.30 ns 504.31 ns]
 generate/bip39 (12 words)
-                        time:   [585.92 ns 587.70 ns 589.44 ns]
+                        time:   [585.60 ns 586.52 ns 587.73 ns]
 generate/coins-bip39 (12 words)
-                        time:   [679.68 ns 681.18 ns 682.70 ns]
+                        time:   [655.83 ns 656.67 ns 657.54 ns]
 generate/bip0039 (12 words)
-                        time:   [494.18 ns 495.15 ns 496.27 ns]
+                        time:   [311.02 ns 311.59 ns 312.35 ns]
 
 generate/tiny-bip39 (15 words)
-                        time:   [589.61 ns 591.39 ns 592.99 ns]
+                        time:   [588.04 ns 588.88 ns 589.72 ns]
 generate/bip39 (15 words)
-                        time:   [633.80 ns 657.68 ns 710.30 ns]
+                        time:   [643.20 ns 643.93 ns 644.74 ns]
 generate/coins-bip39 (15 words)
-                        time:   [754.56 ns 755.94 ns 757.53 ns]
+                        time:   [728.49 ns 731.57 ns 736.21 ns]
 generate/bip0039 (15 words)
-                        time:   [565.11 ns 566.52 ns 567.96 ns]
+                        time:   [384.97 ns 385.44 ns 385.97 ns]
 
 generate/tiny-bip39 (18 words)
-                        time:   [658.73 ns 660.51 ns 662.73 ns]
+                        time:   [659.10 ns 659.89 ns 660.72 ns]
 generate/bip39 (18 words)
-                        time:   [686.83 ns 688.94 ns 691.04 ns]
+                        time:   [689.01 ns 689.99 ns 691.27 ns]
 generate/coins-bip39 (18 words)
-                        time:   [848.04 ns 851.16 ns 854.73 ns]
+                        time:   [816.87 ns 818.65 ns 820.70 ns]
 generate/bip0039 (18 words)
-                        time:   [631.66 ns 633.12 ns 634.48 ns]
+                        time:   [448.15 ns 450.73 ns 453.81 ns]
 
 generate/tiny-bip39 (24 words)
-                        time:   [796.19 ns 797.70 ns 799.28 ns]
+                        time:   [794.98 ns 796.06 ns 797.56 ns]
 generate/bip39 (24 words)
-                        time:   [841.13 ns 843.60 ns 846.30 ns]
+                        time:   [848.14 ns 849.00 ns 849.92 ns]
 generate/coins-bip39 (24 words)
-                        time:   [1.0055 µs 1.0122 µs 1.0239 µs]
+                        time:   [980.40 ns 981.73 ns 983.37 ns]
 generate/bip0039 (24 words)
-                        time:   [765.61 ns 771.53 ns 778.24 ns]
+                        time:   [569.09 ns 569.74 ns 570.48 ns]
 ```
 
 ## from_entropy
@@ -57,40 +57,40 @@ cargo bench --bench from_entropy -- --quiet
 
 ```text
 from_entropy/tiny-bip39 (12 words)
-                        time:   [496.68 ns 498.45 ns 500.22 ns]
+                        time:   [492.76 ns 493.65 ns 494.80 ns]
 from_entropy/bip39 (12 words)
-                        time:   [587.38 ns 610.53 ns 646.46 ns]
+                        time:   [560.46 ns 561.16 ns 561.84 ns]
 from_entropy/coins-bip39 (12 words)
-                        time:   [548.97 ns 551.21 ns 553.85 ns]
+                        time:   [523.66 ns 524.32 ns 525.10 ns]
 from_entropy/bip0039 (12 words)
-                        time:   [489.02 ns 491.12 ns 493.42 ns]
+                        time:   [310.03 ns 310.36 ns 310.78 ns]
 
 from_entropy/tiny-bip39 (15 words)
-                        time:   [577.92 ns 579.27 ns 580.72 ns]
+                        time:   [565.51 ns 566.12 ns 566.85 ns]
 from_entropy/bip39 (15 words)
-                        time:   [618.19 ns 619.04 ns 619.79 ns]
+                        time:   [610.56 ns 611.45 ns 612.28 ns]
 from_entropy/coins-bip39 (15 words)
-                        time:   [600.17 ns 623.76 ns 669.40 ns]
+                        time:   [574.96 ns 575.60 ns 576.33 ns]
 from_entropy/bip0039 (15 words)
-                        time:   [554.35 ns 555.49 ns 556.82 ns]
+                        time:   [379.04 ns 379.57 ns 380.08 ns]
 
 from_entropy/tiny-bip39 (18 words)
-                        time:   [658.90 ns 665.83 ns 676.43 ns]
+                        time:   [625.62 ns 626.45 ns 627.42 ns]
 from_entropy/bip39 (18 words)
-                        time:   [673.41 ns 714.33 ns 782.13 ns]
+                        time:   [657.64 ns 658.72 ns 659.73 ns]
 from_entropy/coins-bip39 (18 words)
-                        time:   [659.99 ns 666.06 ns 674.00 ns]
+                        time:   [633.82 ns 635.12 ns 636.77 ns]
 from_entropy/bip0039 (18 words)
-                        time:   [618.48 ns 620.44 ns 622.59 ns]
+                        time:   [428.85 ns 429.42 ns 430.01 ns]
 
 from_entropy/tiny-bip39 (24 words)
-                        time:   [784.05 ns 788.27 ns 793.13 ns]
+                        time:   [760.84 ns 762.06 ns 763.56 ns]
 from_entropy/bip39 (24 words)
-                        time:   [820.16 ns 901.21 ns 1.0273 µs]
+                        time:   [803.60 ns 805.54 ns 807.44 ns]
 from_entropy/coins-bip39 (24 words)
-                        time:   [774.26 ns 777.93 ns 782.24 ns]
+                        time:   [749.43 ns 755.17 ns 763.06 ns]
 from_entropy/bip0039 (24 words)
-                        time:   [742.34 ns 746.56 ns 751.98 ns]
+                        time:   [552.53 ns 553.40 ns 554.36 ns]
 ```
 
 ## from_phrase
@@ -102,60 +102,60 @@ cargo bench --bench from_phrase -- --quiet
 
 ```text
 from_phrase/tiny-bip39 (12 words)
-                        time:   [1.5477 µs 1.5554 µs 1.5663 µs]
+                        time:   [1.5368 µs 1.5392 µs 1.5413 µs]
 from_phrase/bip39 (12 words)
-                        time:   [3.2387 µs 3.2454 µs 3.2535 µs]
+                        time:   [3.2115 µs 3.2169 µs 3.2231 µs]
 from_phrase/coins-bip39 (12 words)
-                        time:   [2.8943 µs 2.9048 µs 2.9150 µs]
+                        time:   [2.8701 µs 2.8756 µs 2.8820 µs]
 from_phrase/bip0039 (12 words)
-                        time:   [928.42 ns 949.60 ns 984.64 ns]
+                        time:   [749.89 ns 750.62 ns 751.37 ns]
 
 from_phrase/tiny-bip39 (15 words)
-                        time:   [1.7950 µs 1.8542 µs 1.9560 µs]
+                        time:   [1.7845 µs 1.7960 µs 1.8101 µs]
 from_phrase/bip39 (15 words)
-                        time:   [3.9781 µs 3.9912 µs 4.0083 µs]
+                        time:   [3.9503 µs 3.9595 µs 3.9690 µs]
 from_phrase/coins-bip39 (15 words)
-                        time:   [3.4690 µs 3.4802 µs 3.4924 µs]
+                        time:   [3.4371 µs 3.4451 µs 3.4528 µs]
 from_phrase/bip0039 (15 words)
-                        time:   [1.0961 µs 1.1024 µs 1.1112 µs]
+                        time:   [924.64 ns 925.59 ns 926.49 ns]
 
 from_phrase/tiny-bip39 (18 words)
-                        time:   [2.0296 µs 2.0335 µs 2.0377 µs]
+                        time:   [2.0260 µs 2.0300 µs 2.0349 µs]
 from_phrase/bip39 (18 words)
-                        time:   [4.6921 µs 4.7046 µs 4.7184 µs]
+                        time:   [4.6605 µs 4.6681 µs 4.6755 µs]
 from_phrase/coins-bip39 (18 words)
-                        time:   [4.1568 µs 4.1710 µs 4.1869 µs]
+                        time:   [4.1174 µs 4.1465 µs 4.1856 µs]
 from_phrase/bip0039 (18 words)
-                        time:   [1.2578 µs 1.2605 µs 1.2636 µs]
+                        time:   [1.0875 µs 1.0903 µs 1.0935 µs]
 
 from_phrase/tiny-bip39 (24 words)
-                        time:   [2.6549 µs 2.7577 µs 2.9668 µs]
+                        time:   [2.6444 µs 2.6484 µs 2.6529 µs]
 from_phrase/bip39 (24 words)
-                        time:   [6.1632 µs 6.1869 µs 6.2140 µs]
+                        time:   [6.0882 µs 6.1023 µs 6.1191 µs]
 from_phrase/coins-bip39 (24 words)
-                        time:   [5.3191 µs 5.3350 µs 5.3498 µs]
+                        time:   [5.2840 µs 5.3027 µs 5.3281 µs]
 from_phrase/bip0039 (24 words)
-                        time:   [1.6057 µs 1.6088 µs 1.6125 µs]
+                        time:   [1.4256 µs 1.4278 µs 1.4303 µs]
 
 from_normalized_phrase/bip39 (12 words)
-                        time:   [1.9888 µs 1.9945 µs 2.0007 µs]
+                        time:   [1.9433 µs 1.9460 µs 1.9492 µs]
 from_normalized_phrase/bip0039 (12 words)
-                        time:   [865.45 ns 867.51 ns 869.88 ns]
+                        time:   [691.75 ns 692.74 ns 693.79 ns]
 
 from_normalized_phrase/bip39 (15 words)
-                        time:   [2.4202 µs 2.4347 µs 2.4550 µs]
+                        time:   [2.3817 µs 2.3855 µs 2.3899 µs]
 from_normalized_phrase/bip0039 (15 words)
-                        time:   [1.0248 µs 1.0262 µs 1.0277 µs]
+                        time:   [849.60 ns 850.50 ns 851.50 ns]
 
 from_normalized_phrase/bip39 (18 words)
-                        time:   [2.8493 µs 2.8549 µs 2.8616 µs]
+                        time:   [2.8021 µs 2.8040 µs 2.8063 µs]
 from_normalized_phrase/bip0039 (18 words)
-                        time:   [1.1793 µs 1.2267 µs 1.3133 µs]
+                        time:   [998.14 ns 1.0005 µs 1.0033 µs]
 
 from_normalized_phrase/bip39 (24 words)
-                        time:   [3.7213 µs 3.7300 µs 3.7398 µs]
+                        time:   [3.6450 µs 3.6490 µs 3.6534 µs]
 from_normalized_phrase/bip0039 (24 words)
-                        time:   [1.5051 µs 1.5164 µs 1.5347 µs]
+                        time:   [1.3141 µs 1.3164 µs 1.3193 µs]
 ```
 
 ## to_seed
@@ -167,38 +167,38 @@ cargo bench --bench to_seed -- --quiet
 
 ```text
 to_seed/tiny-bip39 (12 words)
-                        time:   [981.56 µs 983.98 µs 986.64 µs]
+                        time:   [973.25 µs 974.24 µs 975.21 µs]
 to_seed/bip39 (12 words)
-                        time:   [1.0847 ms 1.0863 ms 1.0884 ms]
+                        time:   [1.0909 ms 1.0960 ms 1.1018 ms]
 to_seed/coins-bip39 (12 words)
-                        time:   [980.23 µs 981.28 µs 982.43 µs]
+                        time:   [972.41 µs 973.45 µs 974.86 µs]
 to_seed/bip0039 (12 words)
-                        time:   [982.38 µs 985.13 µs 988.23 µs]
+                        time:   [412.67 µs 413.38 µs 414.53 µs]
 
 to_seed/tiny-bip39 (15 words)
-                        time:   [978.38 µs 981.72 µs 986.31 µs]
+                        time:   [971.26 µs 972.64 µs 974.46 µs]
 to_seed/bip39 (15 words)
-                        time:   [1.0914 ms 1.1414 ms 1.2388 ms]
+                        time:   [1.0882 ms 1.0899 ms 1.0919 ms]
 to_seed/coins-bip39 (15 words)
-                        time:   [979.72 µs 982.73 µs 986.73 µs]
+                        time:   [973.03 µs 973.96 µs 974.76 µs]
 to_seed/bip0039 (15 words)
-                        time:   [982.71 µs 984.91 µs 987.12 µs]
+                        time:   [412.83 µs 414.96 µs 418.27 µs]
 
 to_seed/tiny-bip39 (18 words)
-                        time:   [982.45 µs 985.87 µs 990.05 µs]
+                        time:   [972.53 µs 973.77 µs 975.36 µs]
 to_seed/bip39 (18 words)
-                        time:   [1.0884 ms 1.0901 ms 1.0923 ms]
+                        time:   [1.0881 ms 1.0896 ms 1.0912 ms]
 to_seed/coins-bip39 (18 words)
-                        time:   [980.72 µs 982.23 µs 984.03 µs]
+                        time:   [973.74 µs 975.20 µs 976.97 µs]
 to_seed/bip0039 (18 words)
-                        time:   [979.83 µs 981.50 µs 983.54 µs]
+                        time:   [411.89 µs 412.39 µs 413.00 µs]
 
 to_seed/tiny-bip39 (24 words)
-                        time:   [981.74 µs 991.87 µs 1.0111 ms]
+                        time:   [971.10 µs 972.42 µs 974.00 µs]
 to_seed/bip39 (24 words)
-                        time:   [1.0873 ms 1.0888 ms 1.0904 ms]
+                        time:   [1.0863 ms 1.0904 ms 1.0973 ms]
 to_seed/coins-bip39 (24 words)
-                        time:   [985.59 µs 1.0074 ms 1.0481 ms]
+                        time:   [971.75 µs 972.64 µs 973.82 µs]
 to_seed/bip0039 (24 words)
-                        time:   [983.85 µs 985.96 µs 988.07 µs]
+                        time:   [412.49 µs 412.82 µs 413.23 µs]
 ```
