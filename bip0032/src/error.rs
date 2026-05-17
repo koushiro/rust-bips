@@ -11,7 +11,7 @@ use core::{error, fmt};
 use std::borrow::Cow;
 
 /// Result type for bip0032 operations.
-pub type Result<T> = core::result::Result<T, Error>;
+pub type Result<T, E = Error> = core::result::Result<T, E>;
 
 /// Error categories for bip0032 operations.
 #[non_exhaustive]
