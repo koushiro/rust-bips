@@ -27,7 +27,7 @@ jobs:
   check-format:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Cache taplo-cli
         id: cache-taplo
@@ -50,7 +50,7 @@ jobs:
   check-clippy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: swatinem/rust-cache@v2
 
       - name: Run cargo clippy
@@ -59,28 +59,28 @@ jobs:
   build-default-features:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: swatinem/rust-cache@v2
       - run: cargo build -p bip0039
 
   build-no-default-features:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: swatinem/rust-cache@v2
       - run: cargo build -p bip0039 --no-default-features
 
   build-all-features:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: swatinem/rust-cache@v2
       - run: cargo build -p bip0039 --all-features
 
   check-docs:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: swatinem/rust-cache@v2
 
       - name: Generate docs
@@ -91,7 +91,7 @@ jobs:
     env:
       MSRV: 1.85.0
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Setup MSRV
         run: rustup toolchain install ${MSRV} --no-self-update
@@ -106,7 +106,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Rust Cache
         uses: swatinem/rust-cache@v2
