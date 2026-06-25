@@ -73,7 +73,7 @@ zeroize = { version = "1.8", default-features = false, features = ["alloc"] }
 
 [build-dependencies]
 anyhow = "1.0"
-phf_codegen = "0.13"
+phf_codegen = "0.14"
 
 [dev-dependencies]
 const-hex = "1.17"
