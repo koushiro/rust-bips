@@ -1,4 +1,4 @@
-//! Build script to generate BIP-0039 wordlists and PHF indices from `words/*.txt`.
+//! Build script to generate BIP-0039 wordlists and PHF macro input from `words/*.txt`.
 //!
 //! This script generates one Rust source file per language into `OUT_DIR`:
 //! - `bip0039_wordlist_<lang>.rs`
@@ -77,18 +77,6 @@ fn generate_one(out_dir: &Path, lang: &str, input_path: &Path) -> Result<()> {
         words.len()
     );
 
-    // Create PHF map (word -> index).
-    //
-    // `phf_codegen::Map::entry` stores borrowed `&str` values internally while we build it.
-    // So we must ensure backing strings live long enough and are not moved/reallocated
-    // during insertion. We do that by precomputing all value strings first, then inserting.
-    let index_values: Vec<String> = (0..words.len()).map(|i| format!("{i}u16")).collect();
-
-    let mut index_map = phf_codegen::Map::new();
-    for (w, v) in words.iter().zip(index_values.iter()) {
-        index_map.entry(w, v.as_str());
-    }
-
     let out_name = format!("bip0039_wordlist_{lang}.rs");
     let out_path = out_dir.join(&out_name);
 
@@ -113,8 +101,12 @@ fn generate_one(out_dir: &Path, lang: &str, input_path: &Path) -> Result<()> {
     writeln!(f, "];\n").context("failed writing WORDS footer")?;
 
     // INDEX
-    writeln!(f, "pub static INDEX: ::phf::Map<&'static str, u16> = {};\n", index_map.build())
-        .context("failed writing INDEX")?;
+    writeln!(f, "pub static INDEX: ::phf::Map<&'static str, u16> = ::phf::phf_map! {{")
+        .context("failed writing INDEX header")?;
+    for (i, w) in words.iter().enumerate() {
+        writeln!(f, "    {:?} => {i}u16,", w).context("failed writing an INDEX entry")?;
+    }
+    writeln!(f, "}};\n").context("failed writing INDEX footer")?;
 
     // WORDLIST
     writeln!(
