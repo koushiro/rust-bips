@@ -65,7 +65,7 @@ spanish = []
 [dependencies]
 hmac = { version = "0.13", default-features = false }
 pbkdf2 = { version = "0.13", default-features = false }
-phf = { version = "0.13", default-features = false, features = ["macros"] }
+phf = { version = "0.14", default-features = false, features = ["macros"] }
 rand = { version = "0.10", optional = true }
 sha2 = { version = "0.11", default-features = false }
 unicode-normalization = { version = "0.1", default-features = false }
