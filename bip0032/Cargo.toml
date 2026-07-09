@@ -70,7 +70,7 @@ secp256k1 = { version = "0.31", default-features = false, features = ["alloc"], 
 # nist256p1 libraries (SLIP-0010 extension)
 ###############################################################################
 # https://github.com/RustCrypto/elliptic-curves/tree/master/p256
-p256 = { version = "0.13", default-features = false, features = ["alloc"], optional = true }
+p256 = { version = "0.14", default-features = false, features = ["alloc"], optional = true }
 
 ###############################################################################
 # ed25519 libraries (SLIP-0010 extension)
