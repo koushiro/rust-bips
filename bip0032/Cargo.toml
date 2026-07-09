@@ -76,7 +76,7 @@ p256 = { version = "0.13", default-features = false, features = ["alloc"], optio
 # ed25519 libraries (SLIP-0010 extension)
 ###############################################################################
 # https://github.com/dalek-cryptography/curve25519-dalek/tree/main/ed25519-dalek
-ed25519-dalek = { version = "2.2.0", default-features = false, features = ["alloc"], optional = true }
+ed25519-dalek = { version = "3.0.0", default-features = false, features = ["alloc"], optional = true }
 
 [dev-dependencies]
 const-hex = "1.12.0"
