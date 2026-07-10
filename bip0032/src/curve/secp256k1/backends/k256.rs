@@ -1,5 +1,5 @@
 use k256::{
-    NonZeroScalar, ProjectivePoint, PublicKey, SecretKey, elliptic_curve::sec1::ToEncodedPoint,
+    NonZeroScalar, ProjectivePoint, PublicKey, SecretKey, elliptic_curve::sec1::ToSec1Point,
 };
 use zeroize::Zeroizing;
 
@@ -19,7 +19,7 @@ impl CurvePublicKey for PublicKey {
     }
 
     fn to_bytes(&self) -> Self::Bytes {
-        let encoded = self.to_encoded_point(true);
+        let encoded = self.to_sec1_point(true);
         let mut out = [0u8; 33];
         out.copy_from_slice(encoded.as_bytes());
         out

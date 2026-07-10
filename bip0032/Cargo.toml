@@ -61,7 +61,7 @@ zeroize = { version = "1.8", default-features = false }
 # secp256k1 libraries
 ###############################################################################
 # https://github.com/RustCrypto/elliptic-curves/tree/master/k256
-k256 = { version = "0.13", default-features = false, features = ["alloc"], optional = true }
+k256 = { version = "0.14", default-features = false, features = ["alloc"], optional = true }
 # https://github.com/bitcoin-core/secp256k1
 secp256k1 = { version = "0.31", default-features = false, features = ["alloc"], optional = true }
 
