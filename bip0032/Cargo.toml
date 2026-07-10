@@ -38,7 +38,6 @@ std = [
     "k256?/std",
     "secp256k1?/std",
     "p256?/std",
-    "ed25519-dalek?/std",
 ]
 
 # BIP-0032 (secp256k1)
