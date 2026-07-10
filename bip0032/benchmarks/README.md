@@ -1,7 +1,7 @@
 # Benchmarks
 
 - Hardware: Apple M1 Pro
-- Toolchain: rustc 1.92.0 (ded5c06cf 2025-12-08)
+- Toolchain: rustc 1.96.1 (31fca3adb 2026-06-26)
 
 ## Master key generation
 
@@ -12,15 +12,15 @@ cargo bench --bench keygen -- --quiet
 
 ```text
 keygen/bitcoin (secp256k1)
-                        time:   [1.0607 µs 1.0862 µs 1.1374 µs]
+                        time:   [1.0769 µs 1.0838 µs 1.0929 µs]
 keygen/coins-bip32 (k256::ecdsa)
-                        time:   [42.825 µs 42.925 µs 43.034 µs]
-keygen/bip32 (k256)     time:   [992.64 ns 994.86 ns 997.24 ns]
+                        time:   [43.364 µs 43.645 µs 43.990 µs]
+keygen/bip32 (k256)     time:   [1.0012 µs 1.0105 µs 1.0220 µs]
 keygen/bip32 (k256::ecdsa)
-                        time:   [42.851 µs 42.956 µs 43.072 µs]
-keygen/bip0032 (k256)   time:   [1.0072 µs 1.0092 µs 1.0114 µs]
+                        time:   [43.052 µs 43.153 µs 43.273 µs]
+keygen/bip0032 (k256)   time:   [431.68 ns 439.12 ns 450.34 ns]
 keygen/bip0032 (secp256k1)
-                        time:   [1.0158 µs 1.0178 µs 1.0201 µs]
+                        time:   [438.02 ns 447.83 ns 467.70 ns]
 ```
 
 ## Derivation
@@ -32,15 +32,15 @@ cargo bench --bench derive -- --quiet
 
 ```text
 derive/bitcoin (secp256k1)
-                        time:   [137.57 µs 138.00 µs 138.51 µs]
+                        time:   [144.49 µs 147.53 µs 151.71 µs]
 derive/coins-bip32 (k256::ecdsa)
-                        time:   [259.93 µs 260.55 µs 261.26 µs]
-derive/bip32 (k256)     time:   [342.67 µs 343.38 µs 344.13 µs]
+                        time:   [265.27 µs 271.19 µs 280.64 µs]
+derive/bip32 (k256)     time:   [348.96 µs 352.74 µs 357.92 µs]
 derive/bip32 (k256::ecdsa)
-                        time:   [217.50 µs 217.97 µs 218.46 µs]
-derive/bip0032 (k256)   time:   [216.79 µs 217.39 µs 218.06 µs]
+                        time:   [221.79 µs 229.41 µs 240.10 µs]
+derive/bip0032 (k256)   time:   [206.97 µs 214.89 µs 224.22 µs]
 derive/bip0032 (secp256k1)
-                        time:   [76.699 µs 80.643 µs 87.096 µs]
+                        time:   [78.433 µs 80.177 µs 82.276 µs]
 ```
 
 ## Serialization
@@ -54,17 +54,17 @@ cargo bench --bench xprv_decode -- --quiet
 
 ```text
 xprv_decode/bitcoin (secp256k1)
-                        time:   [10.076 µs 10.096 µs 10.119 µs]
+                        time:   [10.119 µs 10.292 µs 10.620 µs]
 xprv_decode/coins-bip32 (k256::ecdsa)
-                        time:   [47.536 µs 47.741 µs 47.994 µs]
+                        time:   [48.613 µs 49.799 µs 51.206 µs]
 xprv_decode/bip32 (k256)
-                        time:   [5.4388 µs 5.4676 µs 5.5003 µs]
+                        time:   [5.3985 µs 5.4366 µs 5.4924 µs]
 xprv_decode/bip32 (k256::ecdsa)
-                        time:   [47.416 µs 47.600 µs 47.822 µs]
+                        time:   [47.657 µs 48.294 µs 49.526 µs]
 xprv_decode/bip0032 (k256)
-                        time:   [5.4610 µs 5.4995 µs 5.5431 µs]
+                        time:   [5.4222 µs 5.5168 µs 5.6636 µs]
 xprv_decode/bip0032 (secp256k1)
-                        time:   [5.4711 µs 5.6594 µs 5.9702 µs]
+                        time:   [5.5842 µs 5.8271 µs 6.1521 µs]
 ```
 
 ### xprv encode
@@ -76,17 +76,17 @@ cargo bench --bench xprv_encode -- --quiet
 
 ```text
 xprv_encode/bitcoin (secp256k1)
-                        time:   [9.9890 µs 10.022 µs 10.060 µs]
+                        time:   [10.066 µs 10.293 µs 10.593 µs]
 xprv_encode/coins-bip32 (k256::ecdsa)
-                        time:   [9.6526 µs 9.7873 µs 9.9959 µs]
+                        time:   [10.001 µs 10.210 µs 10.458 µs]
 xprv_encode/bip32 (k256)
-                        time:   [9.7661 µs 9.7950 µs 9.8252 µs]
+                        time:   [9.4213 µs 9.5580 µs 9.8152 µs]
 xprv_encode/bip32 (k256::ecdsa)
-                        time:   [9.9763 µs 10.105 µs 10.241 µs]
+                        time:   [9.5011 µs 9.5584 µs 9.6250 µs]
 xprv_encode/bip0032 (k256)
-                        time:   [9.8094 µs 9.8699 µs 9.9398 µs]
+                        time:   [9.4665 µs 9.6579 µs 9.8936 µs]
 xprv_encode/bip0032 (secp256k1)
-                        time:   [9.7993 µs 9.8549 µs 9.9156 µs]
+                        time:   [9.5851 µs 9.8317 µs 10.162 µs]
 ```
 
 ### xpub decode
@@ -98,17 +98,17 @@ cargo bench --bench xpub_decode -- --quiet
 
 ```text
 xpub_decode/bitcoin (secp256k1)
-                        time:   [14.389 µs 14.502 µs 14.637 µs]
+                        time:   [14.017 µs 14.157 µs 14.387 µs]
 xpub_decode/coins-bip32 (k256::ecdsa)
-                        time:   [10.941 µs 10.999 µs 11.057 µs]
+                        time:   [10.747 µs 10.966 µs 11.328 µs]
 xpub_decode/bip32 (k256)
-                        time:   [10.845 µs 10.908 µs 10.988 µs]
+                        time:   [10.684 µs 10.848 µs 11.042 µs]
 xpub_decode/bip32 (k256::ecdsa)
-                        time:   [10.954 µs 11.987 µs 14.156 µs]
+                        time:   [10.594 µs 10.649 µs 10.727 µs]
 xpub_decode/bip0032 (k256)
-                        time:   [10.942 µs 11.079 µs 11.248 µs]
+                        time:   [10.587 µs 10.720 µs 10.921 µs]
 xpub_decode/bip0032 (secp256k1)
-                        time:   [9.8025 µs 9.9168 µs 10.056 µs]
+                        time:   [9.3394 µs 9.4212 µs 9.5349 µs]
 ```
 
 ### xpub encode
@@ -120,15 +120,15 @@ cargo bench --bench xpub_encode -- --quiet
 
 ```text
 xpub_encode/bitcoin (secp256k1)
-                        time:   [10.145 µs 10.240 µs 10.356 µs]
+                        time:   [9.7441 µs 9.8197 µs 9.9193 µs]
 xpub_encode/coins-bip32 (k256::ecdsa)
-                        time:   [10.185 µs 10.272 µs 10.368 µs]
+                        time:   [10.053 µs 10.242 µs 10.490 µs]
 xpub_encode/bip32 (k256)
-                        time:   [9.5383 µs 9.6208 µs 9.7104 µs]
+                        time:   [9.2920 µs 9.3930 µs 9.5319 µs]
 xpub_encode/bip32 (k256::ecdsa)
-                        time:   [9.5187 µs 9.5900 µs 9.6686 µs]
+                        time:   [9.6393 µs 10.481 µs 12.008 µs]
 xpub_encode/bip0032 (k256)
-                        time:   [9.6266 µs 9.7398 µs 9.9000 µs]
+                        time:   [9.4464 µs 9.7275 µs 10.134 µs]
 xpub_encode/bip0032 (secp256k1)
-                        time:   [9.5780 µs 9.6362 µs 9.7008 µs]
+                        time:   [9.3078 µs 9.4452 µs 9.6146 µs]
 ```
