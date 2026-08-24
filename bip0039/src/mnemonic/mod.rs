@@ -818,9 +818,7 @@ mod tests {
 
         impl zeroize::Zeroize for DropCheckVec {
             fn zeroize(&mut self) {
-                for byte in &mut self.0 {
-                    *byte = 0;
-                }
+                self.0.fill(0);
             }
         }
 
