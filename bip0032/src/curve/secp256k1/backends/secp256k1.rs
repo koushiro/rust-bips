@@ -1,4 +1,4 @@
-use secp256k1::{PublicKey, Scalar, Secp256k1, SecretKey, SignOnly, VerifyOnly};
+use secp256k1::{PublicKey, Scalar, SecretKey};
 use zeroize::Zeroizing;
 
 use crate::curve::{
@@ -30,45 +30,6 @@ impl Drop for ScalarGuard {
     }
 }
 
-#[inline]
-fn with_signing_context<R>(f: impl FnOnce(&Secp256k1<SignOnly>) -> R) -> R {
-    #[cfg(not(feature = "std"))]
-    {
-        let secp = Secp256k1::signing_only();
-        f(&secp)
-    }
-
-    #[cfg(feature = "std")]
-    {
-        fn signing_context() -> &'static Secp256k1<SignOnly> {
-            use std::sync::OnceLock;
-
-            static CONTEXT: OnceLock<Secp256k1<SignOnly>> = OnceLock::new();
-            CONTEXT.get_or_init(Secp256k1::signing_only)
-        }
-        f(signing_context())
-    }
-}
-
-#[inline]
-fn with_verification_context<R>(f: impl FnOnce(&Secp256k1<VerifyOnly>) -> R) -> R {
-    #[cfg(not(feature = "std"))]
-    {
-        let secp = Secp256k1::verification_only();
-        f(&secp)
-    }
-    #[cfg(feature = "std")]
-    {
-        fn verification_context() -> &'static Secp256k1<VerifyOnly> {
-            use std::sync::OnceLock;
-
-            static CONTEXT: OnceLock<Secp256k1<VerifyOnly>> = OnceLock::new();
-            CONTEXT.get_or_init(Secp256k1::verification_only)
-        }
-        f(verification_context())
-    }
-}
-
 impl CurvePublicKey for PublicKey {
     type Error = CurveError;
     type Bytes = [u8; 33];
@@ -88,9 +49,7 @@ impl TweakableKey for PublicKey {
     fn add_tweak(&self, tweak: &[u8; 32]) -> Result<Self, Self::Error> {
         let scalar = ScalarGuard::from_bytes(tweak)?;
 
-        with_verification_context(|secp| {
-            (*self).add_exp_tweak(secp, scalar.as_ref()).map_err(CurveError::new)
-        })
+        (*self).add_exp_tweak(scalar.as_ref()).map_err(CurveError::new)
     }
 }
 
@@ -100,15 +59,15 @@ impl CurvePrivateKey for SecretKey {
     type Bytes = [u8; 32];
 
     fn from_bytes(bytes: &Self::Bytes) -> Result<Self, Self::Error> {
-        SecretKey::from_byte_array(*bytes).map_err(CurveError::new)
+        SecretKey::from_secret_bytes(*bytes).map_err(CurveError::new)
     }
 
     fn to_bytes(&self) -> Self::Bytes {
-        self.secret_bytes()
+        self.to_secret_bytes()
     }
 
     fn to_public(&self) -> Self::PublicKey {
-        with_signing_context(|secp| PublicKey::from_secret_key(secp, self))
+        PublicKey::from_secret_key(self)
     }
 
     fn zeroize(&mut self) {
