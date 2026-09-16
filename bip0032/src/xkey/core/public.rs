@@ -28,6 +28,16 @@ impl<C: Curve> Clone for ExtendedPublicKey<C> {
 }
 
 impl<C: Curve> ExtendedPublicKey<C> {
+    /// Returns the number of derivation steps from the master key.
+    pub const fn depth(&self) -> u8 {
+        self.meta.depth
+    }
+
+    /// Returns the child number used to derive this key (zero for the master key).
+    pub const fn child_number(&self) -> ChildNumber {
+        ChildNumber::from_bytes(self.meta.child_number.to_be_bytes())
+    }
+
     /// Returns the fingerprint of the parent's key.
     pub fn parent_fingerprint(&self) -> [u8; 4] {
         self.meta.parent_fingerprint

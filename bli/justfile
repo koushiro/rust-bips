@@ -1,0 +1,4 @@
+# bli specific justfile
+
+# Import shared recipes from root
+import "../justfile"

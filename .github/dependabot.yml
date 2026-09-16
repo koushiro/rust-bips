@@ -17,3 +17,9 @@ updates:
     open-pull-requests-limit: 3
     schedule:
       interval: "weekly"
+
+  - package-ecosystem: "cargo"
+    directory: "/bli"
+    open-pull-requests-limit: 3
+    schedule:
+      interval: "weekly"
