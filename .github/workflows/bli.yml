@@ -6,7 +6,7 @@ on:
       - main
   pull_request:
     paths:
-      - .github/workflows/cli.yml
+      - .github/workflows/bli.yml
       - rust-toolchain.toml
       - rustfmt.toml
       - taplo.toml
