@@ -63,7 +63,7 @@ zeroize = { version = "1.8", default-features = false }
 # https://github.com/RustCrypto/elliptic-curves/tree/master/k256
 k256 = { version = "0.14", default-features = false, features = ["alloc"], optional = true }
 # https://github.com/bitcoin-core/secp256k1
-secp256k1 = { version = "0.31", default-features = false, features = ["alloc"], optional = true }
+secp256k1 = { version = "0.33", default-features = false, features = ["alloc"], optional = true }
 
 ###############################################################################
 # nist256p1 libraries (SLIP-0010 extension)
