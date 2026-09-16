@@ -19,6 +19,16 @@ fn run_case<B: Secp256k1Backend>(case: &Case) {
     let path = case.path.parse::<DerivationPath>().unwrap();
     let derived = master.derive_path(&path).unwrap();
 
+    let expected_child = path.children().last().copied().map(u32::from).unwrap_or(0);
+    assert_eq!(usize::from(derived.depth()), path.children().len());
+    assert_eq!(u32::from(derived.child_number()), expected_child);
+    let public = derived.public_key();
+    assert_eq!(public.depth(), derived.depth());
+    assert_eq!(public.child_number(), derived.child_number());
+    let decoded = case.xpub.parse::<ExtendedPublicKey<Curve<B>>>().unwrap();
+    assert_eq!(decoded.depth(), derived.depth());
+    assert_eq!(decoded.child_number(), derived.child_number());
+
     let xpub = derived
         .public_key()
         .encode_with(KnownVersion::Xpub.into_version())

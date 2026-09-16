@@ -1,6 +1,6 @@
 # bip0032
 
-[![](https://github.com/koushiro/rust-bips/actions/workflows/bip0032.yml/badge.svg)][actions]
+[![](https://github.com/koushiro/rust-bips/actions/workflows/bip0032.yml/badge.svg?branch=main)][actions]
 [![](https://img.shields.io/docsrs/bip0032)][docs.rs]
 [![](https://img.shields.io/crates/v/bip0032)][crates.io]
 [![](https://img.shields.io/crates/l/bip0032)][crates.io]

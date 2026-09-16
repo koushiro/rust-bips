@@ -7,6 +7,9 @@ on:
   pull_request:
     paths:
       - .github/workflows/bip0039.yml
+      - rust-toolchain.toml
+      - rustfmt.toml
+      - taplo.toml
       - bip0039/**
 
 defaults:
@@ -52,6 +55,8 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - uses: swatinem/rust-cache@v2
+        with:
+          workspaces: bip0039 -> target
 
       - name: Run cargo clippy
         run: cargo clippy --workspace --all-targets --all-features -- -D warnings
@@ -61,6 +66,8 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - uses: swatinem/rust-cache@v2
+        with:
+          workspaces: bip0039 -> target
       - run: cargo build -p bip0039
 
   build-no-default-features:
@@ -68,6 +75,8 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - uses: swatinem/rust-cache@v2
+        with:
+          workspaces: bip0039 -> target
       - run: cargo build -p bip0039 --no-default-features
 
   build-all-features:
@@ -75,6 +84,8 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - uses: swatinem/rust-cache@v2
+        with:
+          workspaces: bip0039 -> target
       - run: cargo build -p bip0039 --all-features
 
   check-docs:
@@ -82,6 +93,8 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - uses: swatinem/rust-cache@v2
+        with:
+          workspaces: bip0039 -> target
 
       - name: Generate docs
         run: cargo doc --no-deps -p bip0039 --lib --all-features
@@ -112,6 +125,7 @@ jobs:
         uses: swatinem/rust-cache@v2
         with:
           shared-key: ${{ matrix.os }}
+          workspaces: bip0039 -> target
 
       - name: Run tests
         run: cargo test --workspace --all-features

@@ -1,0 +1,33 @@
+[package]
+name = "bli"
+version = "0.0.1"
+authors = ["koushiro <koushiro.cqx@gmail.com>"]
+edition = "2024"
+rust-version = "1.85.0"
+license = "Apache-2.0"
+homepage = "https://github.com/koushiro/rust-bips"
+repository = "https://github.com/koushiro/rust-bips"
+
+description = "A CLI for BIP-0032 keys and BIP-0039 mnemonics."
+readme = "README.md"
+documentation = "https://docs.rs/bli"
+keywords = ["bip32", "bip39", "bitcoin", "cli"]
+categories = ["command-line-utilities", "cryptography"]
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
+[dependencies]
+anyhow = "1.0"
+bip0032 = { version = "0.2", path = "../bip0032" }
+bip0039 = { version = "0.14", path = "../bip0039", features = ["all-languages"] }
+clap = { version = "4.5", features = ["derive"] }
+const-hex = "1.17"
+rpassword = "7.4"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+zeroize = "1.8"
+
+[dev-dependencies]
+assert_cmd = "2.2"
