@@ -60,7 +60,7 @@ jobs:
         with:
           workspaces: bli -> target
       - name: Run cargo clippy
-        run: cargo clippy --all-targets --locked -- -D warnings
+        run: cargo clippy --all-targets -- -D warnings
 
   check-msrv:
     runs-on: ubuntu-latest
@@ -71,7 +71,7 @@ jobs:
       - name: Setup MSRV
         run: rustup toolchain install ${MSRV} --no-self-update
       - name: Check code
-        run: cargo +${MSRV} check --all-targets --locked
+        run: cargo +${MSRV} check --all-targets
 
   run-tests:
     runs-on: ${{ matrix.os }}
@@ -85,6 +85,6 @@ jobs:
         with:
           workspaces: bli -> target
       - name: Run tests
-        run: cargo test --locked
+        run: cargo test
         env:
           RUST_BACKTRACE: 1
