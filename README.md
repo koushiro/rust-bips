@@ -12,7 +12,7 @@ A collection of [`BIPs`](https://github.com/bitcoin/bips) crates implemented by 
 | ------------------------------ | ------------------ | ------------------------------------------- | --------------------------------------- |
 | [`bip0032`](bip0032/README.md) | ![bip0032-gha-svg] | [![bip0032-crates-svg]][bip0032-crates-url] | [![bip0032-docs-svg]][bip0032-docs-url] |
 | [`bip0039`](bip0039/README.md) | ![bip0039-gha-svg] | [![bip0039-crates-svg]][bip0039-crates-url] | [![bip0039-docs-svg]][bip0039-docs-url] |
-| [`bli`](bli/README.md)         | ![bli-gha-svg]     | [![bli-crates-svg]][bli-crates-url]         | [![bli-docs-svg]][bli-docs-url]         |
+| [`bli`](bli/README.md)         | ![bli-gha-svg]     | [![bli-crates-svg]][bli-crates-url]         | -                                       |
 
 <!-- bip0032 -->
 
@@ -35,8 +35,6 @@ A collection of [`BIPs`](https://github.com/bitcoin/bips) crates implemented by 
 [bli-gha-svg]: https://github.com/koushiro/rust-bips/actions/workflows/bli.yml/badge.svg?branch=main
 [bli-crates-svg]: https://img.shields.io/crates/v/bli
 [bli-crates-url]: https://crates.io/crates/bli
-[bli-docs-svg]: https://docs.rs/bli/badge.svg
-[bli-docs-url]: https://docs.rs/bli
 
 ## License
 

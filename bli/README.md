@@ -1,31 +1,23 @@
 # bli
 
 [![](https://github.com/koushiro/rust-bips/actions/workflows/bli.yml/badge.svg)][actions]
-[![](https://img.shields.io/docsrs/bli)][docs.rs]
 [![](https://img.shields.io/crates/v/bli)][crates.io]
 [![](https://img.shields.io/crates/l/bli)][crates.io]
 [![](https://img.shields.io/crates/d/bli.svg)][crates.io]
 [![](https://img.shields.io/badge/MSRV-1.85.0-green?logo=rust)][whatrustisit]
 
 [actions]: https://github.com/koushiro/rust-bips/actions
-[docs.rs]: https://docs.rs/bli
 [crates.io]: https://crates.io/crates/bli
 [whatrustisit]: https://www.whatrustisit.com
 
 A CLI for BIP-0032 keys and BIP-0039 mnemonics, backed by the sibling
 [`bip0032`](https://docs.rs/bip0032) and [`bip0039`](https://docs.rs/bip0039) libraries.
 
-## Install from this repository
+## Install
 
 ```sh
-cargo install --path bli --locked
+cargo install bli --locked
 bli --help
-```
-
-Alternatively, run without installing:
-
-```sh
-cargo run --manifest-path bli/Cargo.toml --locked -- --help
 ```
 
 ## Commands
