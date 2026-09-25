@@ -26,11 +26,19 @@ fn bench_generate(c: &mut Criterion) {
         });
 
         group.bench_function(format!("bip39 ({} words)", words), |b| {
-            use bip39::Mnemonic;
+            use bip39::{Mnemonic, WordCount};
+
+            let count = match words {
+                12 => WordCount::Words12,
+                15 => WordCount::Words15,
+                18 => WordCount::Words18,
+                24 => WordCount::Words24,
+                _ => unreachable!("unsupported word count"),
+            };
 
             b.iter(|| {
                 let _phrase = black_box({
-                    let mnemonic = Mnemonic::generate(words).unwrap();
+                    let mnemonic = Mnemonic::generate(count).unwrap();
                     mnemonic.to_string()
                 });
             });

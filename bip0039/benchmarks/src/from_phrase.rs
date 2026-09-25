@@ -32,11 +32,18 @@ fn bench_from_phrase(c: &mut Criterion) {
         });
 
         group.bench_function(format!("bip39 ({} words)", words), |b| {
-            use bip39::{Language, Mnemonic};
+            use bip39::{Language, Mnemonic, WordCount};
 
             b.iter_batched(
                 || {
-                    let m = Mnemonic::generate(words).unwrap();
+                    let count = match words {
+                        12 => WordCount::Words12,
+                        15 => WordCount::Words15,
+                        18 => WordCount::Words18,
+                        24 => WordCount::Words24,
+                        _ => unreachable!("unsupported word count"),
+                    };
+                    let m = Mnemonic::generate(count).unwrap();
                     m.to_string()
                 },
                 |phrase| {
@@ -96,11 +103,18 @@ fn bench_from_normalized_phrase(c: &mut Criterion) {
         let mut group = c.benchmark_group("from_normalized_phrase");
 
         group.bench_function(format!("bip39 ({} words)", words), |b| {
-            use bip39::{Language, Mnemonic};
+            use bip39::{Language, Mnemonic, WordCount};
 
             b.iter_batched(
                 || {
-                    let m = Mnemonic::generate(words).unwrap();
+                    let count = match words {
+                        12 => WordCount::Words12,
+                        15 => WordCount::Words15,
+                        18 => WordCount::Words18,
+                        24 => WordCount::Words24,
+                        _ => unreachable!("unsupported word count"),
+                    };
+                    let m = Mnemonic::generate(count).unwrap();
                     m.to_string()
                 },
                 |phrase| {
