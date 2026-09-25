@@ -30,10 +30,19 @@ fn bench_to_seed(c: &mut Criterion) {
         });
 
         group.bench_function(format!("bip39 ({} words)", words), |b| {
-            use bip39::Mnemonic;
+            use bip39::{Mnemonic, WordCount};
 
             b.iter_batched(
-                || Mnemonic::generate(words).unwrap(),
+                || {
+                    let count = match words {
+                        12 => WordCount::Words12,
+                        15 => WordCount::Words15,
+                        18 => WordCount::Words18,
+                        24 => WordCount::Words24,
+                        _ => unreachable!("unsupported word count"),
+                    };
+                    Mnemonic::generate(count).unwrap()
+                },
                 |mnemonic| {
                     let _seed = black_box(mnemonic.to_seed(""));
                 },
