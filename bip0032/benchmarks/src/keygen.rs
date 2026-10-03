@@ -43,7 +43,7 @@ fn bench_keygen_bip32(group: &mut BenchmarkGroup<'_>) {
             b.iter_batched(
                 random_seed,
                 |seed| {
-                    let xprv = <ExtendedPrivateKey<P>>::new(seed).unwrap();
+                    let xprv = <ExtendedPrivateKey<P>>::new(&seed).unwrap();
                     black_box(xprv);
                 },
                 BatchSize::SmallInput,
