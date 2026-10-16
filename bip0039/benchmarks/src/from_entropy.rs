@@ -57,12 +57,19 @@ fn bench_from_entropy(c: &mut Criterion) {
         });
 
         group.bench_function(format!("coins-bip39 ({} words)", words), |b| {
-            use coins_bip39::{English, Entropy, Mnemonic};
+            use coins_bip39::{English, Entropy, Mnemonic, WordCount};
 
             b.iter_batched(
                 || {
-                    let mut rng = rand09::rng();
-                    Entropy::from_rng(entropy_bytes(words), &mut rng).unwrap()
+                    let count = match words {
+                        12 => WordCount::Twelve,
+                        15 => WordCount::Fifteen,
+                        18 => WordCount::Eighteen,
+                        24 => WordCount::TwentyFour,
+                        _ => unreachable!("unsupported word count"),
+                    };
+                    let mut rng = rand::rng();
+                    Entropy::random(count, &mut rng)
                 },
                 |entropy| {
                     let _phrase = black_box({
