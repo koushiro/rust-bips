@@ -56,12 +56,19 @@ fn bench_from_phrase(c: &mut Criterion) {
         });
 
         group.bench_function(format!("coins-bip39 ({} words)", words), |b| {
-            use coins_bip39::{English, Mnemonic};
+            use coins_bip39::{English, Mnemonic, WordCount};
 
             b.iter_batched(
                 || {
-                    let mut rng = rand09::rng();
-                    let m = <Mnemonic<English>>::from_rng_with_count(&mut rng, words).unwrap();
+                    let count = match words {
+                        12 => WordCount::Twelve,
+                        15 => WordCount::Fifteen,
+                        18 => WordCount::Eighteen,
+                        24 => WordCount::TwentyFour,
+                        _ => unreachable!("unsupported word count"),
+                    };
+                    let mut rng = rand::rng();
+                    let m = <Mnemonic<English>>::random(count, &mut rng);
                     m.to_phrase()
                 },
                 |phrase| {
