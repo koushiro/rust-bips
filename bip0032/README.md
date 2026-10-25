@@ -39,6 +39,7 @@ The examples below assume the `seed` from above.
 ```rust
 use bip0032::{DerivationPath, ExtendedPrivateKey, Version, curve::secp256k1::*};
 
+# let seed = [0u8; 64];
 let master = ExtendedPrivateKey::<Secp256k1Curve<K256Backend>>::new(&seed).unwrap();
 let path: DerivationPath = "m/0H/1".parse().unwrap();
 let child = master.derive_path(&path).unwrap();
@@ -53,6 +54,7 @@ let xprv = child
 ```rust
 use bip0032::{DerivationPath, ExtendedPrivateKey, Version, curve::secp256k1::*};
 
+# let seed = [0u8; 64];
 let master = ExtendedPrivateKey::<Secp256k1Curve<K256Backend>>::new(&seed).unwrap();
 let path: DerivationPath = "m/0H/1".parse().unwrap();
 let child = master.derive_path(&path).unwrap();
@@ -83,11 +85,7 @@ let xpub = child
 ## SLIP-0010 (optional)
 
 [SLIP-0010](https://github.com/satoshilabs/slips/blob/master/slip-0010.md) support is available behind the `slip10` feature.
-See [SLIP-0010.md](SLIP-0010.md) for details, examples, and the feature matrix.
-
-## Documentation
-
-See documentation and examples at https://docs.rs/bip0032.
+See [SLIP-0010.md](https://github.com/koushiro/rust-bips/blob/main/bip0032/SLIP-0010.md) for details, examples, and the feature matrix.
 
 ## Features
 
@@ -114,4 +112,4 @@ See [benchmarks](https://github.com/koushiro/rust-bips/blob/main/bip0032/benchma
 
 ## License
 
-This project is licensed under the Apache License, Version 2.0 - see the [LICENSE](../LICENSE) file for details.
+Licensed under the Apache License, Version 2.0: <http://www.apache.org/licenses/LICENSE-2.0>
