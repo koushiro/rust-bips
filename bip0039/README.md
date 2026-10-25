@@ -49,10 +49,6 @@ assert_eq!(seed.len(), 64);
 println!("seed: {}", const_hex::encode(seed));
 ```
 
-## Documentation
-
-See documentation and examples at https://docs.rs/bip0039.
-
 ## Features
 
 - [x] Support all languages in the [BIP-0039 Word Lists](https://github.com/bitcoin/bips/blob/master/bip-0039/bip-0039-wordlists.md)
@@ -80,4 +76,4 @@ See [benchmarks](https://github.com/koushiro/rust-bips/blob/main/bip0039/benchma
 
 ## License
 
-This project is licensed under the Apache License, Version 2.0 - see the [LICENSE](../LICENSE) file for details.
+Licensed under the Apache License, Version 2.0: <http://www.apache.org/licenses/LICENSE-2.0>
