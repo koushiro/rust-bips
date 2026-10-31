@@ -32,7 +32,7 @@ fn bench_bitcoin(group: &mut BenchmarkGroup<'_>) {
 }
 
 fn bench_coins_bip32(group: &mut BenchmarkGroup<'_>) {
-    use coins_bip32::prelude::{Hint, MainnetEncoder, XKeyEncoder, XPriv};
+    use coins_bip32::prelude::{Hint, MAINNET, XPriv, XPub};
 
     group.bench_function("coins-bip32 (k256::ecdsa)", |b| {
         b.iter_batched(
@@ -40,10 +40,10 @@ fn bench_coins_bip32(group: &mut BenchmarkGroup<'_>) {
                 let seed = random_seed();
                 let xprv = XPriv::root_from_seed(&seed, Some(Hint::Legacy)).unwrap();
                 let xpub = xprv.verify_key();
-                MainnetEncoder::xpub_to_base58(&xpub).unwrap()
+                xpub.to_base58()
             },
             |encoded| {
-                let xpub = MainnetEncoder::xpub_from_base58(black_box(&encoded)).unwrap();
+                let xpub = XPub::from_base58_with(black_box(&encoded), &[&MAINNET]).unwrap();
                 black_box(xpub);
             },
             BatchSize::SmallInput,
