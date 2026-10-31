@@ -101,7 +101,7 @@ jobs:
   check-msrv:
     runs-on: ubuntu-latest
     env:
-      MSRV: 1.85.0
+      MSRV: 1.87.0
     steps:
       - uses: actions/checkout@v7
 

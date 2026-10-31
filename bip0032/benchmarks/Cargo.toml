@@ -11,7 +11,7 @@ publish = false
 bip0032 = { path = "..", features = ["k256", "secp256k1"] }
 bip32 = { version = "0.6", features = ["alloc"] }
 bitcoin = "0.32"
-coins-bip32 = "0.16"
+coins-bip32 = "0.17"
 const-hex = "1.12.0"
 criterion = "0.8"
 rand = "0.10"
