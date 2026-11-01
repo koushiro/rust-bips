@@ -22,7 +22,7 @@
 
 ## Coding Style & Naming Conventions
 
-- Rust 2024 edition, MSRV 1.85.0 (see `Cargo.toml`).
+- Rust 2024 edition, MSRV 1.87.0 (see `Cargo.toml`).
 - Use Rust naming: `snake_case` for functions/modules, `CamelCase` for types, `SCREAMING_SNAKE_CASE` for constants.
 - Preserve the crate-level `missing_docs`, `unused_imports`, and `unsafe_code` lints; document public API and keep the crate documentation current.
 - Each command declares `-o, --output <FORMAT>` using `Output`, with `text` as the default and `json` as the alternative.
