@@ -4,7 +4,7 @@
 [![](https://img.shields.io/crates/v/bli)][crates.io]
 [![](https://img.shields.io/crates/l/bli)][crates.io]
 [![](https://img.shields.io/crates/d/bli.svg)][crates.io]
-[![](https://img.shields.io/badge/MSRV-1.85.0-green?logo=rust)][whatrustisit]
+[![](https://img.shields.io/badge/MSRV-1.87.0-green?logo=rust)][whatrustisit]
 
 [actions]: https://github.com/koushiro/rust-bips/actions
 [crates.io]: https://crates.io/crates/bli

@@ -20,8 +20,11 @@
 
 ## Coding Style & Naming Conventions
 
-- Rust 2024 edition; default `rustfmt` style (4-space indent).
+- Rust 2024 edition, MSRV 1.87.0 (see `Cargo.toml`).
+- Format with `rustfmt` defaults (4-space indentation).
 - Naming: `snake_case` for modules/functions, `CamelCase` for types, `SCREAMING_SNAKE_CASE` for constants.
+- Public items must be documented (`#![deny(missing_docs)]`), and unused imports are denied.
+- Preserve `no_std` friendliness by avoiding unnecessary `std` usage outside the `std` feature.
 - Feature flags are defined in `Cargo.toml`; keep additions grouped with existing language features.
 
 ## Testing Guidelines
